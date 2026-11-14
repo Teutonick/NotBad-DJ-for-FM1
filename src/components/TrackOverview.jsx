@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef } from "react";
 import { HOT_CUE_COLORS } from "../lib/constants";
-import { PALETTE_LEVELS, WAVE_PALETTE } from "../lib/waveColors";
+import { reduceColumn, WAVE_PALETTE } from "../lib/waveColors";
 import { fitCanvas } from "../lib/canvas";
 
 // === Resumen de la pista (la tira fina de debajo de la onda) ===
@@ -94,29 +94,17 @@ function TrackOverview({
       // grande (un relleno por entrada de paleta, no uno por píxel)
       const columnas = new Map();
       for (let x = 0; x < w; x++) {
-        const desde = Math.floor(x * porPixel);
-        const hasta = Math.min(total, Math.floor((x + 1) * porPixel));
-        let pico = 0;
-        let sumaLow = 0;
-        let sumaHigh = 0;
-        let n = 0;
-        for (let i = desde; i < hasta; i++) {
-          const a = waveData[i];
-          if (a > pico) pico = a;
-          if (colored) {
-            const ci = bandIndex[i];
-            sumaLow += (ci / PALETTE_LEVELS) | 0;
-            sumaHigh += ci % PALETTE_LEVELS;
-          }
-          n++;
-        }
-        if (!n) continue;
-        const ci = colored
-          ? Math.round(sumaLow / n) * PALETTE_LEVELS + Math.round(sumaHigh / n)
-          : 0;
-        let lista = columnas.get(ci);
-        if (!lista) columnas.set(ci, (lista = []));
-        lista.push(x, pico);
+        const col = reduceColumn(
+          waveData,
+          bandIndex,
+          Math.floor(x * porPixel),
+          Math.floor((x + 1) * porPixel),
+          colored
+        );
+        if (!col) continue;
+        let lista = columnas.get(col.ci);
+        if (!lista) columnas.set(col.ci, (lista = []));
+        lista.push(x, col.peak);
       }
       for (const [ci, lista] of columnas) {
         ctx.fillStyle = palette[ci] || palette[0];

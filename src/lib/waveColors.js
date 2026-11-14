@@ -162,3 +162,36 @@ export function bandColorIndex(lowRms, midRms, highRms) {
   }
   return Math.max(0, Math.min(max, ql)) * LEVELS + Math.max(0, Math.min(max, qh));
 }
+
+/**
+ * Una columna de la onda a partir del tramo de muestras [from, to): la altura
+ * es el PICO y el color, la MEDIA de las bandas de todo el tramo. Muestreando
+ * solo una de cada N, el color se enganchaba al patrón del bombo y la pista
+ * entera salía naranja. Lo usan la onda grande y el resumen de la pista.
+ *
+ * Devuelve { peak, ci } (ci = índice de paleta, 0 sin bandas) o null si el
+ * tramo no tiene muestras. El tramo se recorta a los datos.
+ */
+export function reduceColumn(waveData, bandIndex, from, to, colored) {
+  const desde = Math.max(0, from);
+  const hasta = Math.min(waveData.length, to);
+  let peak = 0;
+  let sumLow = 0;
+  let sumHigh = 0;
+  let n = 0;
+  for (let i = desde; i < hasta; i++) {
+    const a = waveData[i];
+    if (a > peak) peak = a;
+    if (colored) {
+      const ci = bandIndex[i];
+      sumLow += (ci / PALETTE_LEVELS) | 0;
+      sumHigh += ci % PALETTE_LEVELS;
+    }
+    n++;
+  }
+  if (!n) return null;
+  const ci = colored
+    ? Math.round(sumLow / n) * PALETTE_LEVELS + Math.round(sumHigh / n)
+    : 0;
+  return { peak, ci };
+}

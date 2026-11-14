@@ -1,10 +1,6 @@
 import { memo, useEffect, useRef } from "react";
 import { HOT_CUE_COLORS } from "../lib/constants";
-import {
-  PALETTE_LEVELS,
-  PALETTE_SIZE,
-  WAVE_PALETTE,
-} from "../lib/waveColors";
+import { PALETTE_SIZE, reduceColumn, WAVE_PALETTE } from "../lib/waveColors";
 import { createSmoothTime } from "../lib/smoothTime";
 import { fitCanvas } from "../lib/canvas";
 
@@ -119,31 +115,16 @@ function WaveformCanvas({
         }
       } else {
         // Cuando cada píxel abarca varias muestras se recorre el tramo
-        // entero: la altura es el máximo y el color, la media de las bandas.
-        // Muestreando solo una de cada N, el color se enganchaba al patrón
-        // del bombo y la pista entera salía naranja.
+        // entero (pico y media de bandas): ver reduceColumn.
         for (let x = 0; x < width; x++) {
-          const desde = Math.max(0, Math.floor(from + x * perPx));
-          const hasta = Math.min(total, Math.floor(from + (x + 1) * perPx));
-          let peakV = 0;
-          let sumLow = 0;
-          let sumHigh = 0;
-          let n = 0;
-          for (let i = desde; i < hasta; i++) {
-            const a = waveData[i];
-            if (a > peakV) peakV = a;
-            if (colored) {
-              const ci = bandIndex[i];
-              sumLow += (ci / PALETTE_LEVELS) | 0;
-              sumHigh += ci % PALETTE_LEVELS;
-            }
-            n++;
-          }
-          if (!n) continue;
-          const ci = colored
-            ? Math.round(sumLow / n) * PALETTE_LEVELS + Math.round(sumHigh / n)
-            : 0;
-          addBar(x, peakV, ci);
+          const col = reduceColumn(
+            waveData,
+            bandIndex,
+            Math.floor(from + x * perPx),
+            Math.floor(from + (x + 1) * perPx),
+            colored
+          );
+          if (col) addBar(x, col.peak, col.ci);
         }
       }
 
