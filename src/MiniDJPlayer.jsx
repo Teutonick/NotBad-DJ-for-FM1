@@ -1,19 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AudioEngine } from "./audio/engine";
-import { quickAnalyzeTrack } from "./audio/analyzeTrack";
-import { readTrackMetadata } from "./audio/metadata";
-import {
-  loadStoredTracks,
-  storeTrack,
-  removeStoredTrack,
-  mergeTrackAnalysis,
-} from "./lib/trackStore";
-import {
-  sameCueData,
-  sanitizeHotCues,
-  sanitizeLoopRegion,
-  sanitizeSavedLoops,
-} from "./lib/cuePoints";
 import { PITCH_RANGES } from "./lib/constants";
 import Deck from "./components/Deck";
 import CentralMeters from "./components/CentralMeters";
@@ -24,39 +10,20 @@ import ConfigDialog from "./components/ConfigDialog";
 import UpdateToast from "./components/UpdateToast";
 import { useI18n } from "./i18n/context";
 import { useDeckShortcuts } from "./hooks/useDeckShortcuts";
+import { useTrackLibrary } from "./hooks/useTrackLibrary";
+import {
+  withCues,
+  withDeckMeta,
+  withGrid,
+  withPlayed,
+  withStructure,
+} from "./lib/trackRules";
 import { loadConfig, resolveConfig, saveConfig } from "./lib/config";
 import { canSync, computeSyncPitch, syncTargetBpm } from "./lib/sync";
 import { buildWavePalette, resolveWaveColors } from "./lib/waveColors";
 import { resolveStructurePrefs } from "./lib/structurePrefs";
 import { sanitizeStructure } from "./audio/structure";
 import { ERRORS, logError } from "./lib/log";
-
-
-
-
-// ¿Ha cambiado algo de la estructura que merezca escribir en IndexedDB?
-// Los tramos se comparan por sus límites: son los mismos números que se
-// guardaron, no hay redondeos de por medio.
-function sameStructure(a, b) {
-  if (!a || !b) return a === b;
-  if (
-    a.phraseSize !== b.phraseSize ||
-    a.phraseOffset !== b.phraseOffset ||
-    a.detectedOffset !== b.detectedOffset ||
-    Boolean(a.manual) !== Boolean(b.manual) ||
-    Boolean(a.confident) !== Boolean(b.confident) ||
-    a.sections?.length !== b.sections?.length
-  ) {
-    return false;
-  }
-  return a.sections.every(
-    (s, i) =>
-      s.start === b.sections[i].start &&
-      s.end === b.sections[i].end &&
-      Boolean(s.kick) === Boolean(b.sections[i].kick)
-  );
-}
-
 
 export default function MiniDJMixer() {
   const { t } = useI18n();
@@ -86,8 +53,7 @@ export default function MiniDJMixer() {
 
   const [deckAutoGain, setDeckAutoGain] = useState({ A: 0, B: 0 });
 
-  // Lista de canciones (crate) y pista cargada en cada deck
-  const [tracks, setTracks] = useState([]);
+  // Pista cargada en cada deck (la lista vive en useTrackLibrary, más abajo)
   const [deckTracks, setDeckTracks] = useState({ A: null, B: null });
   const deckTracksRef = useRef(deckTracks);
   useEffect(() => {
@@ -153,11 +119,10 @@ export default function MiniDJMixer() {
 
   useEffect(() => saveConfig(config), [config]);
 
-  // Colas de análisis en segundo plano para la lista: las etiquetas van por
-  // su lado porque son casi instantáneas (no hay que decodificar el audio),
-  // mientras que BPM + tonalidad sí necesitan el decode completo.
-  const analysisBusyRef = useRef(false);
-  const metaBusyRef = useRef(false);
+  // Lista de canciones (crate): persistencia en IndexedDB y análisis de fondo
+  const { tracks, updateTrack, addTracks, removeTrack } = useTrackLibrary({
+    analysisMode: settings.analysisMode,
+  });
 
   useEffect(() => {
     engine.setMaster(master);
@@ -207,113 +172,6 @@ export default function MiniDJMixer() {
     applyDeckOutput("B", config.deckBOut, deckOutBRef);
   }, [applyDeckOutput, config.deckBOut]);
 
-  // Cargar la lista guardada (IndexedDB) al arrancar
-  useEffect(() => {
-    let cancelled = false;
-    loadStoredTracks().then((stored) => {
-      if (!cancelled && stored.length) {
-        setTracks((prev) => {
-          const known = new Set(prev.map((t) => t.id));
-          return [...prev, ...stored.filter((t) => !known.has(t.id))];
-        });
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // Analizar en segundo plano las canciones a las que les falte BPM o
-  // tonalidad: muy despacio para no laguear (espera 5s + momento de
-  // inactividad del navegador, de una en una).
-  // `analyzed` evita rehacer el trabajo en bucle cuando una pista no da
-  // tonalidad (p. ej. percusión pura), y hace que las que ya estaban
-  // guardadas de antes con BPM pero sin key se analicen una vez más.
-  useEffect(() => {
-    if (settings.analysisMode !== "auto") return;
-    if (analysisBusyRef.current) return;
-    const pending = tracks.find(
-      (t) =>
-        !t.analyzed &&
-        (t.bpm == null || t.musicalKey == null) &&
-        !t.analyzeFailed
-    );
-    if (!pending) return;
-
-    let cancelled = false;
-    const run = () => {
-      if (cancelled) return;
-      analysisBusyRef.current = true;
-      quickAnalyzeTrack(pending.file)
-        .then(({ bpm, gridAnchor, duration, musicalKey }) => {
-          setTracks((prev) =>
-            prev.map((t) => {
-              if (t.id !== pending.id) return t;
-              // Un ajuste manual de rejilla nunca lo pisa el análisis de fondo
-              const updated = mergeTrackAnalysis(t, {
-                bpm,
-                gridAnchor,
-                duration,
-                musicalKey,
-              });
-              storeTrack(updated);
-              return updated;
-            })
-          );
-        })
-        .catch((err) => {
-          logError(ERRORS.ANALYSIS_LIST, err, { track: pending.name });
-          // Solo en memoria: al recargar se reintenta
-          setTracks((prev) =>
-            prev.map((t) =>
-              t.id === pending.id ? { ...t, analyzeFailed: true } : t
-            )
-          );
-        })
-        .finally(() => {
-          analysisBusyRef.current = false;
-        });
-    };
-
-    const timerId = setTimeout(() => {
-      if (typeof window.requestIdleCallback === "function") {
-        window.requestIdleCallback(run, { timeout: 15000 });
-      } else {
-        run();
-      }
-    }, 5000);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timerId);
-    };
-  }, [tracks, settings.analysisMode]);
-
-  // Etiquetas ID3 + miniatura de carátula. Igual que el BPM, respeta el modo
-  // de análisis: en "solo al cargar en un deck" no se toca nada aquí.
-  useEffect(() => {
-    if (settings.analysisMode !== "auto") return;
-    if (metaBusyRef.current) return;
-    const pending = tracks.find((t) => !t.metaRead);
-    if (!pending) return;
-
-    metaBusyRef.current = true;
-    readTrackMetadata(pending.file)
-      .then((meta) => {
-        setTracks((prev) =>
-          prev.map((t) => {
-            if (t.id !== pending.id) return t;
-            const updated = { ...t, ...meta, metaRead: true };
-            storeTrack(updated);
-            return updated;
-          })
-        );
-      })
-      .finally(() => {
-        metaBusyRef.current = false;
-      });
-  }, [tracks, settings.analysisMode]);
-
   const onAttachEl = useCallback(
     (which, el) => {
       audioElsRef.current[which] = el;
@@ -358,29 +216,8 @@ export default function MiniDJMixer() {
     const dur = audioElsRef.current[side]?.duration;
     const anchor = Number.isFinite(grid?.anchor) ? grid.anchor : null;
     const manual = Boolean(grid?.manual);
-    setTracks((prev) =>
-      prev.map((t) => {
-        if (t.id !== loaded.id) return t;
-        if (
-          t.bpm === bpm &&
-          t.gridAnchor === anchor &&
-          Boolean(t.gridManual) === manual &&
-          t.duration != null
-        ) {
-          return t;
-        }
-        const updated = {
-          ...t,
-          bpm,
-          gridAnchor: anchor,
-          gridManual: manual,
-          duration: Number.isFinite(dur) && dur > 0 ? dur : t.duration,
-        };
-        storeTrack(updated);
-        return updated;
-      })
-    );
-  }, []);
+    updateTrack(loaded.id, (t) => withGrid(t, { bpm, anchor, manual, duration: dur }));
+  }, [updateTrack]);
 
   // Datos que llegan del deck (etiquetas al cargar, tonalidad al analizar):
   // se reflejan en la lista y se persisten para no repetir el trabajo
@@ -392,30 +229,8 @@ export default function MiniDJMixer() {
     }
     const loaded = deckTracksRef.current[side];
     if (!loaded) return;
-
-    setTracks((prev) =>
-      prev.map((t) => {
-        if (t.id !== loaded.id) return t;
-        const updated = { ...t };
-        let changed = false;
-        if (data.musicalKey && !t.musicalKey) {
-          updated.musicalKey = data.musicalKey;
-          changed = true;
-        }
-        if ("artist" in data && !t.metaRead) {
-          updated.artist = data.artist;
-          updated.title = data.title;
-          updated.album = data.album;
-          updated.artwork = data.artwork;
-          updated.metaRead = true;
-          changed = true;
-        }
-        if (!changed) return t;
-        storeTrack(updated);
-        return updated;
-      })
-    );
-  }, []);
+    updateTrack(loaded.id, (t) => withDeckMeta(t, data));
+  }, [updateTrack]);
 
   // Hot cues y loops que llegan del deck. Son del USUARIO: se guardan tal cual
   // en la fila de la pista y ningún análisis los vuelve a tocar. Solo se
@@ -423,30 +238,8 @@ export default function MiniDJMixer() {
   const onCues = useCallback((side, data) => {
     const loaded = deckTracksRef.current[side];
     if (!loaded) return;
-    setTracks((prev) =>
-      prev.map((t) => {
-        if (t.id !== loaded.id) return t;
-        const hotCues = sanitizeHotCues(data.hotCues);
-        const savedLoops = sanitizeSavedLoops(data.savedLoops);
-        // undefined = "no toques el loop guardado" (pasa durante un loop roll,
-        // que es momentáneo y no debe pisar el loop de la pista)
-        const activeLoop =
-          data.activeLoop === undefined
-            ? t.activeLoop ?? null
-            : sanitizeLoopRegion(data.activeLoop);
-        if (
-          sameCueData(t.hotCues, hotCues) &&
-          sameCueData(t.savedLoops, savedLoops) &&
-          sameCueData(t.activeLoop ?? null, activeLoop)
-        ) {
-          return t;
-        }
-        const updated = { ...t, hotCues, savedLoops, activeLoop };
-        storeTrack(updated);
-        return updated;
-      })
-    );
-  }, []);
+    updateTrack(loaded.id, (t) => withCues(t, data));
+  }, [updateTrack]);
 
   // Estructura de la pista analizada en el deck: se guarda en su fila para no
   // volver a calcularla nunca más. Lo que el usuario haya ajustado a mano
@@ -456,16 +249,8 @@ export default function MiniDJMixer() {
     if (!loaded) return;
     const clean = sanitizeStructure(structure);
     if (!clean) return;
-    setTracks((prev) =>
-      prev.map((t) => {
-        if (t.id !== loaded.id) return t;
-        if (sameStructure(t.structure, clean)) return t;
-        const updated = { ...t, structure: clean };
-        storeTrack(updated);
-        return updated;
-      })
-    );
-  }, []);
+    updateTrack(loaded.id, (t) => withStructure(t, clean));
+  }, [updateTrack]);
 
   // Tamaño de frase: el selector rápido del deck y el del diálogo ⚙ son el
   // MISMO ajuste visto desde dos sitios.
@@ -495,19 +280,8 @@ export default function MiniDJMixer() {
   const onPlayed = useCallback((side) => {
     const loaded = deckTracksRef.current[side];
     if (!loaded) return;
-    setTracks((prev) =>
-      prev.map((t) => {
-        if (t.id !== loaded.id) return t;
-        if (t.playedOn?.[side]) return t;
-        const updated = {
-          ...t,
-          playedOn: { ...(t.playedOn || {}), [side]: true },
-        };
-        storeTrack(updated);
-        return updated;
-      })
-    );
-  }, []);
+    updateTrack(loaded.id, (t) => withPlayed(t, side));
+  }, [updateTrack]);
 
   // SYNC continuo: alterna el modo sync del deck
   const onSync = useCallback((side) => {
@@ -573,40 +347,6 @@ export default function MiniDJMixer() {
     setPitchRange,
   ]);
 
-  const onAddTracks = useCallback((files) => {
-    setTracks((prev) => {
-      const next = [...prev];
-      for (const file of files) {
-        const exists = next.some(
-          (t) => t.name === file.name && t.size === file.size
-        );
-        if (!exists) {
-          const track = {
-            id: `${file.name}-${file.size}-${file.lastModified}`,
-            name: file.name,
-            size: file.size,
-            file,
-            bpm: null,
-            gridAnchor: null,
-            gridManual: false,
-            duration: null,
-            playedOn: {},
-            analyzed: false,
-            artist: null,
-            title: null,
-            album: null,
-            artwork: null,
-            metaRead: false,
-            musicalKey: null,
-          };
-          next.push(track);
-          storeTrack(track);
-        }
-      }
-      return next;
-    });
-  }, []);
-
   // Guardián de carga: con el bloqueo puesto, un deck que está sonando no
   // admite otra pista. Los botones ya salen deshabilitados, pero esto cierra
   // la puerta también a atajos y a cualquier vía futura.
@@ -620,11 +360,6 @@ export default function MiniDJMixer() {
     },
     []
   );
-
-  const onRemoveTrack = useCallback((id) => {
-    setTracks((prev) => prev.filter((t) => t.id !== id));
-    removeStoredTrack(id);
-  }, []);
 
   // === Atajos de teclado (actúan sobre el deck activo) ===
   // Con ⚙ abierto no: Espacio tiene que activar la pestaña con el foco, no
@@ -775,9 +510,9 @@ export default function MiniDJMixer() {
         <TrackList
           tracks={tracks}
           deckTracks={deckTracks}
-          onAddTracks={onAddTracks}
+          onAddTracks={addTracks}
           onLoadToDeck={onLoadToDeck}
-          onRemoveTrack={onRemoveTrack}
+          onRemoveTrack={removeTrack}
           referenceKey={referenceKey}
           showArtwork={settings.showArtwork}
           showKey={settings.showKey}
