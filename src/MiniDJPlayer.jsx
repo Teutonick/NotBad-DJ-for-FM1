@@ -14,7 +14,6 @@ import {
   sanitizeLoopRegion,
   sanitizeSavedLoops,
 } from "./lib/cuePoints";
-import { ROLL_SIZES } from "./audio/loops";
 import {
   BEND_RANGES,
   DEFAULT_BEND_RANGE,
@@ -29,6 +28,7 @@ import HeadphoneCue from "./components/HeadphoneCue";
 import ConfigDialog from "./components/ConfigDialog";
 import UpdateToast from "./components/UpdateToast";
 import { useI18n } from "./i18n/context";
+import { useDeckShortcuts } from "./hooks/useDeckShortcuts";
 import { buildWavePalette, resolveWaveColors } from "./lib/waveColors";
 import { resolveStructurePrefs } from "./lib/structurePrefs";
 import { sanitizeStructure } from "./audio/structure";
@@ -37,9 +37,6 @@ import { ERRORS, logError } from "./lib/log";
 
 const CONFIG_KEY = "mini-dj-config";
 
-// Teclas del loop roll, en el mismo orden que ROLL_SIZES (1/8 … 4 beats):
-// de izquierda a derecha, loops cada vez más largos.
-const ROLL_KEYS = ["KeyA", "KeyS", "KeyD", "KeyF", "KeyG", "KeyH"];
 
 // ¿Ha cambiado algo de la estructura que merezca escribir en IndexedDB?
 // Los tramos se comparan por sus límites: son los mismos números que se
@@ -653,125 +650,9 @@ export default function MiniDJMixer() {
   }, []);
 
   // === Atajos de teclado (actúan sobre el deck activo) ===
-  useEffect(() => {
-    const isTyping = (e) => {
-      const tag = e.target?.tagName;
-      return (
-        tag === "INPUT" ||
-        tag === "SELECT" ||
-        tag === "TEXTAREA" ||
-        e.target?.isContentEditable
-      );
-    };
-
-    const onKeyDown = (e) => {
-      if (isTyping(e)) return;
-      const api = deckRefs.current[activeDeck];
-
-      switch (e.code) {
-        case "KeyQ":
-          setActiveDeck("A");
-          return;
-        case "KeyP":
-          setActiveDeck("B");
-          return;
-        default:
-          break;
-      }
-
-      if (!api) return;
-
-      // Loop roll: suena mientras se mantiene la tecla (keyup lo suelta)
-      const roll = ROLL_KEYS.indexOf(e.code);
-      if (roll > -1) {
-        if (!e.repeat) api.rollStart(ROLL_SIZES[roll]);
-        return;
-      }
-
-      switch (e.code) {
-        case "Space":
-          e.preventDefault();
-          if (!e.repeat) api.playPause();
-          break;
-        case "KeyC":
-          if (!e.repeat) api.cueStop();
-          break;
-        case "Digit1":
-        case "Digit2":
-        case "Digit3":
-        case "Digit4":
-        case "Digit5":
-        case "Digit6":
-        case "Digit7":
-        case "Digit8": {
-          if (e.repeat) break;
-          // Shift borra, como el Shift+click en el pad
-          const n = Number(e.code.slice(-1)) - 1;
-          if (e.shiftKey) api.hotCueClear(n);
-          else api.hotCue(n);
-          break;
-        }
-        case "BracketLeft":
-          if (!e.repeat) api.loopMove(-1);
-          break;
-        case "BracketRight":
-          if (!e.repeat) api.loopMove(+1);
-          break;
-        case "Minus":
-          if (!e.repeat) api.loopResize(0.5);
-          break;
-        case "Equal":
-          if (!e.repeat) api.loopResize(2);
-          break;
-        case "KeyR":
-          if (e.repeat) break;
-          if (e.shiftKey) api.loopSavedToggle();
-          else api.loopSave();
-          break;
-        case "Comma":
-          if (!e.repeat) api.loopSavedSelect(-1);
-          break;
-        case "Period":
-          if (!e.repeat) api.loopSavedSelect(+1);
-          break;
-        case "KeyI":
-          if (!e.repeat) api.loopIn();
-          break;
-        case "KeyO":
-          if (!e.repeat) api.loopOut();
-          break;
-        case "KeyL":
-          if (!e.repeat) api.loopToggle();
-          break;
-        case "ArrowLeft":
-          e.preventDefault();
-          if (!e.repeat) api.nudgeStart(-1);
-          break;
-        case "ArrowRight":
-          e.preventDefault();
-          if (!e.repeat) api.nudgeStart(+1);
-          break;
-        default:
-          break;
-      }
-    };
-
-    const onKeyUp = (e) => {
-      const api = deckRefs.current[activeDeck];
-      if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
-        api?.nudgeEnd();
-      } else if (ROLL_KEYS.includes(e.code)) {
-        api?.rollEnd();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
-    };
-  }, [activeDeck]);
+  // Con ⚙ abierto no: Espacio tiene que activar la pestaña con el foco, no
+  // poner la pista en marcha detrás del diálogo.
+  useDeckShortcuts({ deckRefs, activeDeck, setActiveDeck, suspended: showConfig });
 
   const syncLabel = (side) =>
     masterSyncOn ? "MST" : side === "A" ? "B" : "A";
