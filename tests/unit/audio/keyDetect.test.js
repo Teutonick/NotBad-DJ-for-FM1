@@ -39,7 +39,10 @@ describe("detección de tonalidad", () => {
     expect(key.mode).toBe("min");
   });
 
-  it("acierta la tónica en cualquier transporte", () => {
+  // Cinco análisis completos: ~0,5 s solo, pero con la máquina cargada (dos
+  // suites a la vez) pasó una vez de los 5 s por defecto. Es cálculo puro:
+  // el límite propio solo evita un falso rojo, no tapa nada.
+  it("acierta la tónica en cualquier transporte", { timeout: 30000 }, () => {
     for (const semitonos of [1, 3, 6, 8, 11]) {
       const key = detect(transpose(DO_MAYOR, semitonos));
       expect({ semitonos, pc: key.pitchClass, mode: key.mode }).toEqual({
