@@ -182,3 +182,21 @@ describe('carga de pista: un solo decode y una copia por deck', () => {
     await waitFor(() => expect(onBpmDetected).toHaveBeenCalledWith('A', null, expect.anything()))
   })
 })
+
+describe('nombre de la pista en la pantalla', () => {
+  const conNombre = (name) => new File([new Uint8Array(2048)], name, { type: 'audio/mpeg' })
+
+  it('quita solo la última extensión', async () => {
+    const { getByTestId } = montarDeck('A', conNombre('mi.tema.final.mp3'))
+    await waitFor(() =>
+      expect(getByTestId('lcd').querySelector('[title="mi.tema.final"]')).not.toBeNull()
+    )
+  })
+
+  it('un archivo sin extensión enseña su nombre, no «Sin archivo»', async () => {
+    const { getByTestId } = montarDeck('A', conNombre('tema'))
+    await waitFor(() =>
+      expect(getByTestId('lcd').querySelector('[title="tema"]')).not.toBeNull()
+    )
+  })
+})

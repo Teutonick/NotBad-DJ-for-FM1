@@ -68,6 +68,7 @@ import { detectKey } from "../audio/keyDetect";
 import { keyLabel } from "../lib/camelot";
 import { readTrackMetadata } from "../audio/metadata";
 import { ERRORS, logError, logWarn } from "../lib/log";
+import { stripExtension } from "../lib/format";
 
 // Redondeo de la fila de transporte (play, stop, sync, key): uno solo para
 // los cuatro, que antes no coincidían entre ellos.
@@ -372,7 +373,7 @@ function Deck({
   };
 
   const getFilenameWithoutExtension = () => {
-    return fileName?.substring(0, fileName?.lastIndexOf(".")) || t("noFile");
+    return stripExtension(fileName) || t("noFile");
   };
 
   const calcDuration = (time) => {
@@ -1051,12 +1052,13 @@ function Deck({
     }
     loopRef.current.wraps = 0;
     setRolling(null);
-    applyLoop(
-      st.prev.in != null && st.prev.out != null
-        ? { start: st.prev.in, end: st.prev.out, beats: st.prev.beats }
-        : null,
-      st.prev.on
-    );
+    // Se deja todo como estaba, campo a campo: con applyLoop un IN puesto
+    // sin OUT (loop a medio marcar) se perdía al soltar el roll.
+    const { prev } = st;
+    setLoopIn(prev.in);
+    setLoopOut(prev.out);
+    setLoopBeats(prev.beats);
+    setLoopOn(Boolean(prev.in != null && prev.out != null && prev.on));
   };
 
   // === Loops guardados (por pista) ===

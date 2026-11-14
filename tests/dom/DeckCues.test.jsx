@@ -297,3 +297,51 @@ describe('longitud del loop', () => {
     )
   })
 })
+
+describe('loop roll', () => {
+  const conRejilla = { track: { bpm: 120, gridAnchor: 0, gridManual: true } }
+  const roll = (n) => screen.getByTitle(t('rollSizeTitle', { n }))
+
+  it('soltar un roll devuelve el loop que había, apagado o encendido como estaba', async () => {
+    const onCues = vi.fn()
+    await montar({ onCues, ...conRejilla })
+    pestaña('toolsLoops')
+
+    tiempo = 10
+    fireEvent.click(screen.getByTitle(t('loopInTitle')))
+    tiempo = 14
+    fireEvent.click(screen.getByTitle(t('loopOutTitle')))
+
+    tiempo = 20
+    await waitFor(() => expect(roll(1)).not.toBeDisabled())
+    fireEvent.pointerDown(roll(1))
+    fireEvent.pointerUp(roll(1))
+    await waitFor(() =>
+      expect(onCues.mock.calls.at(-1)[1].activeLoop).toMatchObject({ start: 10, end: 14 })
+    )
+  })
+
+  it('con el IN puesto y sin OUT, el roll no borra el IN', async () => {
+    const onCues = vi.fn()
+    await montar({ onCues, ...conRejilla })
+    pestaña('toolsLoops')
+
+    tiempo = 10
+    fireEvent.click(screen.getByTitle(t('loopInTitle')))
+    const out = screen.getByTitle(t('loopOutTitle'))
+    expect(out).not.toBeDisabled()
+
+    tiempo = 20
+    await waitFor(() => expect(roll(1)).not.toBeDisabled())
+    fireEvent.pointerDown(roll(1))
+    fireEvent.pointerUp(roll(1))
+
+    // El IN sigue ahí: se puede cerrar el loop donde se quería
+    await waitFor(() => expect(out).not.toBeDisabled())
+    tiempo = 14
+    fireEvent.click(out)
+    await waitFor(() =>
+      expect(onCues.mock.calls.at(-1)[1].activeLoop).toMatchObject({ start: 10, end: 14 })
+    )
+  })
+})
