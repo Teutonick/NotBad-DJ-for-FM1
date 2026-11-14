@@ -238,4 +238,33 @@ describe('cabecera y formato del archivo', () => {
     expect(marcas.length).toBeGreaterThan(0)
     expect(marcas[0]).toHaveTextContent('MP3')
   })
+
+  it('el CSV entrecomilla los campos con ; comillas o saltos de línea', async () => {
+    let blob = null
+    // jsdom no trae createObjectURL/revokeObjectURL
+    const antes = { crear: URL.createObjectURL, revocar: URL.revokeObjectURL }
+    URL.createObjectURL = (b) => {
+      blob = b
+      return 'blob:csv'
+    }
+    URL.revokeObjectURL = () => {}
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    try {
+      pintar({
+        tracks: [
+          pista({ name: 'raro.mp3', title: 'Song; Remix', artist: 'DJ "Pepe"\nLive', bpm: 128 }),
+        ],
+      })
+      fireEvent.click(screen.getByTitle(t('exportTitle')))
+      const texto = await blob.text()
+      // Segunda línea (tras la cabecera): el salto va DENTRO de las comillas
+      expect(texto).toContain('\n"Song; Remix";"DJ ""Pepe""\nLive";')
+      // Lo que no lo necesita sale tal cual
+      expect(texto).toContain(';128.00;')
+    } finally {
+      URL.createObjectURL = antes.crear
+      URL.revokeObjectURL = antes.revocar
+      click.mockRestore()
+    }
+  })
 })

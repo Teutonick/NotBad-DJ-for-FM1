@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../i18n/context";
 import { GLOSS, PRESS, SKIN } from "./PadButton";
+import { csvLine } from "../lib/csv";
 import {
   camelotSortIndex,
   harmonicRelation,
@@ -150,7 +151,7 @@ function TrackList({
   };
 
   const exportList = () => {
-    const header = [
+    const header = csvLine([
       t("csvName"),
       t("csvArtist"),
       t("csvDuration"),
@@ -158,10 +159,10 @@ function TrackList({
       t("csvKey"),
       t("csvSize"),
       t("csvPlayedOn"),
-    ].join(";");
+    ]);
     const rows = tracks.map((tr) => {
       const played = ["A", "B"].filter((s) => tr.playedOn?.[s]).join("+");
-      return [
+      return csvLine([
         displayTitle(tr),
         tr.artist ?? "",
         formatDuration(tr.duration),
@@ -169,7 +170,7 @@ function TrackList({
         keyLabel(tr.musicalKey?.pitchClass, tr.musicalKey?.mode) ?? "",
         formatSize(tr.size),
         played,
-      ].join(";");
+      ]);
     });
     // BOM para que Excel lo abra con acentos correctos
     const blob = new Blob(["﻿" + [header, ...rows].join("\n")], {
