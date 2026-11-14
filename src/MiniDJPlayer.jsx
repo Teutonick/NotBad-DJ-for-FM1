@@ -25,6 +25,7 @@ import UpdateToast from "./components/UpdateToast";
 import { useI18n } from "./i18n/context";
 import { useDeckShortcuts } from "./hooks/useDeckShortcuts";
 import { loadConfig, resolveConfig, saveConfig } from "./lib/config";
+import { canSync, computeSyncPitch, syncTargetBpm } from "./lib/sync";
 import { buildWavePalette, resolveWaveColors } from "./lib/waveColors";
 import { resolveStructurePrefs } from "./lib/structurePrefs";
 import { sanitizeStructure } from "./audio/structure";
@@ -534,31 +535,26 @@ export default function MiniDJMixer() {
   // Motor de sync: mientras un deck tenga SYNC, su pitch se ajusta solo al
   // objetivo (master BPM o BPM efectivo del otro deck)
   useEffect(() => {
+    const state = {
+      bpms,
+      pitch: { A: pitchPctA, B: pitchPctB },
+      masterSyncOn,
+      masterBpm,
+    };
     ["A", "B"].forEach((side) => {
       if (!syncOn[side]) return;
       const own = bpms[side];
       if (!own) return;
-
-      let targetBpm;
-      if (masterSyncOn) {
-        targetBpm = masterBpm;
-      } else {
-        const other = side === "A" ? "B" : "A";
-        if (!bpms[other]) return;
-        const otherPitch = other === "A" ? pitchPctA : pitchPctB;
-        targetBpm = bpms[other] * (1 + otherPitch / 100);
-      }
+      const targetBpm = syncTargetBpm(side, state);
       if (!targetBpm) return;
 
-      let pitch = (targetBpm / own - 1) * 100;
       const currentRange = side === "A" ? rangeA : rangeB;
-      let range = currentRange;
-      if (Math.abs(pitch) > range) {
-        range =
-          PITCH_RANGES.find((r) => r >= Math.abs(pitch)) ??
-          PITCH_RANGES[PITCH_RANGES.length - 1];
-      }
-      pitch = Math.max(-range, Math.min(range, pitch));
+      const { pitch, range } = computeSyncPitch({
+        ownBpm: own,
+        targetBpm,
+        currentRange,
+        ranges: PITCH_RANGES,
+      });
 
       const cur = side === "A" ? pitchPctA : pitchPctB;
       if (range !== currentRange) setPitchRange(side, range);
@@ -637,10 +633,7 @@ export default function MiniDJMixer() {
 
   const syncLabel = (side) =>
     masterSyncOn ? "MST" : side === "A" ? "B" : "A";
-  const canSyncFor = (side) => {
-    const other = side === "A" ? "B" : "A";
-    return Boolean(bpms[side] && (masterSyncOn || bpms[other]));
-  };
+  const canSyncFor = (side) => canSync(side, { bpms, masterSyncOn });
 
   // Tonalidad de referencia para la lista: la del deck que esté sonando (si
   // suenan los dos, la del último que arrancó)
