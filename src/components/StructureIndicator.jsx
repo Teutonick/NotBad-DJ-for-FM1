@@ -91,18 +91,25 @@ function StructureIndicator({
       // El aviso va por KICKS reales, no por la unidad elegida: los umbrales
       // de la configuración están en kicks.
       const alarm =
-        cuenta == null ? "" : cuenta <= warnRed ? "red" : cuenta <= warnAmber ? "amber" : "";
+        cuenta == null
+          ? ""
+          : cuenta <= warnRed
+            ? "red"
+            : cuenta <= warnAmber
+              ? "amber"
+              : "";
       firstNumRef.current.className = `w-7 text-right ${
         alarm === "red"
           ? "text-red-400 font-bold"
           : alarm === "amber"
-          ? "text-amber-300 font-bold"
-          : "text-neutral-200"
+            ? "text-amber-300 font-bold"
+            : "text-neutral-200"
       }`;
 
       secondSymRef.current.textContent =
         second == null ? "" : firstUp ? "▼" : "▲";
-      secondNumRef.current.textContent = second == null ? "" : num(conv(second));
+      secondNumRef.current.textContent =
+        second == null ? "" : num(conv(second));
 
       phraseRef.current.textContent =
         unit === "bars"
@@ -111,7 +118,9 @@ function StructureIndicator({
 
       // Tooltip: lo mismo pero con palabras. Siempre en kicks, con los
       // compases al lado cuando la cuenta es exacta, que es como se dice.
-      const partes = [inKick ? t("structureTipInKick") : t("structureTipInBreak")];
+      const partes = [
+        inKick ? t("structureTipInKick") : t("structureTipInBreak"),
+      ];
       if (first != null) {
         const exacto = first % 4 === 0;
         const clave = inKick
@@ -119,22 +128,23 @@ function StructureIndicator({
             ? "structureTipDropBars"
             : "structureTipDrop"
           : exacto
-          ? "structureTipRiseBars"
-          : "structureTipRise";
+            ? "structureTipRiseBars"
+            : "structureTipRise";
         partes.push(t(clave, { n: first, bars: first / 4 }));
         if (second != null) {
           partes.push(
             inKick
               ? t("structureTipRiseAfter", { n: second })
-              : t("structureTipDropAfter", { n: second })
+              : t("structureTipDropAfter", { n: second }),
           );
         }
       } else {
         partes.push(t("structureTipNoChanges"));
-        if (info.toEnd != null) partes.push(t("structureTipToEnd", { n: info.toEnd }));
+        if (info.toEnd != null)
+          partes.push(t("structureTipToEnd", { n: info.toEnd }));
       }
       partes.push(
-        t("structureTipPhrase", { pos: info.phrasePos, size: info.phraseSize })
+        t("structureTipPhrase", { pos: info.phrasePos, size: info.phraseSize }),
       );
       box.title = partes.join(" ");
     };
@@ -168,7 +178,17 @@ function StructureIndicator({
     tick();
     const timer = setInterval(tick, POLL_MS);
     return () => clearInterval(timer);
-  }, [structure, beats, audioRef, phraseSize, phraseOffset, unit, warnAmber, warnRed, t]);
+  }, [
+    structure,
+    beats,
+    audioRef,
+    phraseSize,
+    phraseOffset,
+    unit,
+    warnAmber,
+    warnRed,
+    t,
+  ]);
 
   if (!beats?.length) return null;
 
@@ -188,7 +208,10 @@ function StructureIndicator({
       {/* Símbolo y número pegados: son una sola cosa (▼32), y cada pareja
           tiene su hueco reservado para que nada baile al cambiar la cuenta */}
       <span className="flex items-center">
-        <span ref={firstSymRef} className="w-2.5 text-center text-neutral-400" />
+        <span
+          ref={firstSymRef}
+          className="w-2.5 text-center text-neutral-400"
+        />
         <span ref={firstNumRef} className="w-7 text-right text-neutral-200" />
       </span>
       <span className="flex items-center text-neutral-500">

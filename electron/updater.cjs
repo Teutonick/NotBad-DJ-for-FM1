@@ -61,7 +61,9 @@ function initAutoUpdate(getWindow) {
   let downloaded = false;
   ipcMain.handle(INSTALL_CHANNEL, () => {
     if (!downloaded) {
-      logWarn(CODES.UPDATE_STATE, null, { detail: "install requested before download" });
+      logWarn(CODES.UPDATE_STATE, null, {
+        detail: "install requested before download",
+      });
       return;
     }
     // Fuera del handler: quitAndInstall cierra la app y dejaría el IPC colgado

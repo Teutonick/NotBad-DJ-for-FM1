@@ -208,7 +208,8 @@ function drawMeter(ctx, w, h, vertical, mode, level, dpr, capas) {
     const x0 = Math.max(0, Math.min(span, Math.round(a)));
     const x1 = Math.max(0, Math.min(span, Math.round(b)));
     if (x1 <= x0) return;
-    if (vertical) ctx.drawImage(capa, 0, h - x1, w, x1 - x0, 0, h - x1, w, x1 - x0);
+    if (vertical)
+      ctx.drawImage(capa, 0, h - x1, w, x1 - x0, 0, h - x1, w, x1 - x0);
     else ctx.drawImage(capa, x0, 0, x1 - x0, h, x0, 0, x1 - x0, h);
   };
 
@@ -231,7 +232,7 @@ function drawMeter(ctx, w, h, vertical, mode, level, dpr, capas) {
     if (level.peakDb > METER_MIN_DB) {
       const i = Math.min(
         LAMPARAS - 1,
-        Math.floor((level.peakDb - METER_MIN_DB) / SEGMENT_DB)
+        Math.floor((level.peakDb - METER_MIN_DB) / SEGMENT_DB),
       );
       if (i >= encendidas) volcar(capas.on, borde(i, span), borde(i + 1, span));
     }
@@ -267,7 +268,14 @@ function drawMeter(ctx, w, h, vertical, mode, level, dpr, capas) {
     ctx.restore();
     ctx.fillStyle = "rgba(255,255,255,0.9)";
     ctx.fillRect(
-      ...rectEje(vertical, w, h, span - capLen - Math.max(1, Math.round(dpr)), span - capLen, 0)
+      ...rectEje(
+        vertical,
+        w,
+        h,
+        span - capLen - Math.max(1, Math.round(dpr)),
+        span - capLen,
+        0,
+      ),
     );
   }
 }
@@ -299,7 +307,7 @@ export default function VUBar({
       return;
     }
     const analyser = engine.getMeterAnalyser(
-      side === "A" ? "A" : side === "B" ? "B" : "master"
+      side === "A" ? "A" : side === "B" ? "B" : "master",
     );
     const read = createLevelMeter(analyser);
     const ctx = canvas.getContext("2d");
@@ -380,8 +388,8 @@ export default function VUBar({
                     f <= 0.01
                       ? "none"
                       : f >= 0.99
-                      ? "translateX(-100%)"
-                      : "translateX(-50%)",
+                        ? "translateX(-100%)"
+                        : "translateX(-50%)",
                 }}
               >
                 {db}

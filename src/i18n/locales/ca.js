@@ -7,7 +7,8 @@ export default {
   masterSync: "MASTER SYNC",
   masterSyncTitle:
     "Master sync: els decks amb SYNC segueixen aquest BPM en lloc de l'altre deck",
-  masterBpmTitle: "BPM del master sync. Prem a sobre i arrossega amunt o avall, o gira la roda, per ajustar-lo sense teclejar (amb Shift, més fi)",
+  masterBpmTitle:
+    "BPM del master sync. Prem a sobre i arrossega amunt o avall, o gira la roda, per ajustar-lo sense teclejar (amb Shift, més fi)",
   bpm: "BPM",
   language: "Idioma",
 
@@ -22,7 +23,8 @@ export default {
   noFile: "Sense fitxer",
   loadFile: "📂 Carrega fitxer",
   cue: "CUE",
-  cueTitle: "Distància fins al punt CUE, que és a {time}. Es fixa en posicionar la pista en pausa; Stop hi torna.",
+  cueTitle:
+    "Distància fins al punt CUE, que és a {time}. Es fixa en posicionar la pista en pausa; Stop hi torna.",
   bpmDisplayTitle:
     "Fes clic al ritme (TAP): reancora la graella de beats i recalcula el BPM",
   analyzingTrack: "⏳ Analitzant pista…",
@@ -46,15 +48,15 @@ export default {
   syncActiveTitle:
     "Sync fixat: segueix el BPM de {source} (el pitch s'ajusta sol)",
   keyLock: "🔒 Key",
-  keyLockTitle:
-    "Key lock: manté el to en canviar el tempo (OFF = mode vinil)",
+  keyLockTitle: "Key lock: manté el to en canviar el tempo (OFF = mode vinil)",
   rangeTitle: "Rang del fader de pitch",
   pitch: "Pitch",
   bend: "bend",
   bendMinusTitle: "Bend − (més lent mentre el mantens)",
   bendPlusTitle: "Bend + (més ràpid mentre el mantens)",
   hotCueSetTitle: "Hot cue {n}: fixar a la posició actual",
-  hotCueGoTitle: "Hot cue {n}: saltar a {time} · esborrar amb clic dret o Maj+clic · doble clic per posar-li nom",
+  hotCueGoTitle:
+    "Hot cue {n}: saltar a {time} · esborrar amb clic dret o Maj+clic · doble clic per posar-li nom",
   hotCueNameLabel: "Nom del cue {n}",
   namePlaceholder: "drop, veu…",
   nameSaveTitle: "Desa el nom (Retorn)",
@@ -71,34 +73,43 @@ export default {
   quantizeTitle:
     "Quantize: imanta hot cues, loops i salts al beat més proper de la graella",
   gridPhaseLabel: "Fase",
-  gridPhaseTitle: "Mou tota la graella cap enrere o cap endavant, sense canviar el BPM",
+  gridPhaseTitle:
+    "Mou tota la graella cap enrere o cap endavant, sense canviar el BPM",
   gridPhaseBackCoarseTitle: "Endarrereix la graella 10 ms",
   gridPhaseBackFineTitle: "Endarrereix la graella 1 ms",
   gridPhaseFwdFineTitle: "Avança la graella 1 ms",
   gridPhaseFwdCoarseTitle: "Avança la graella 10 ms",
   gridTempoLabel: "Separació",
-  gridTempoTitle: "Separa o ajunta els beats canviant el BPM base de la peça. No és el pitch: el pitch continua al fader",
+  gridTempoTitle:
+    "Separa o ajunta els beats canviant el BPM base de la peça. No és el pitch: el pitch continua al fader",
   gridTempoDownCoarseTitle: "Baixa el BPM base 0,1 (beats més separats)",
   gridTempoDownFineTitle: "Baixa el BPM base 0,01 (beats més separats)",
   gridTempoUpFineTitle: "Puja el BPM base 0,01 (beats més junts)",
   gridTempoUpCoarseTitle: "Puja el BPM base 0,1 (beats més junts)",
   gridHalveTitle: "Divideix el BPM base entre 2, mantenint l'àncora",
   gridDoubleTitle: "Multiplica el BPM base per 2, mantenint l'àncora",
-  gridRegridTitle: "Reanalitza partint del BPM i l'àncora actuals, buscant el millor encaix al seu voltant",
-  gridBaseBpmTitle: "BPM base de la peça: el que defineix la graella. El pitch no el canvia",
+  gridRegridTitle:
+    "Reanalitza partint del BPM i l'àncora actuals, buscant el millor encaix al seu voltant",
+  gridBaseBpmTitle:
+    "BPM base de la peça: el que defineix la graella. El pitch no el canvia",
   loop: "Loop",
   loopIn: "IN",
   loopInTitle: "Marca l'inici del loop a la posició actual",
   loopOut: "OUT",
   loopOutTitle: "Marca el final del loop i l'activa",
   loopAutoTitle: "Loop automàtic de {n} beats des del beat anterior",
-  loopMoveBackTitle: "Mou el loop una llargada enrere, sense canviar-ne la mida",
-  loopMoveFwdTitle: "Mou el loop una llargada endavant, sense canviar-ne la mida",
-  loopHalveTitle: "Parteix la llargada del loop per la meitat, respectant la graella",
+  loopMoveBackTitle:
+    "Mou el loop una llargada enrere, sense canviar-ne la mida",
+  loopMoveFwdTitle:
+    "Mou el loop una llargada endavant, sense canviar-ne la mida",
+  loopHalveTitle:
+    "Parteix la llargada del loop per la meitat, respectant la graella",
   loopDoubleTitle: "Dobla la llargada del loop, respectant la graella",
-  loopLengthTitle: "Llargada del loop en beats (en segons si l'IN/OUT no encaixa amb la graella)",
+  loopLengthTitle:
+    "Llargada del loop en beats (en segons si l'IN/OUT no encaixa amb la graella)",
   rollLabel: "Roll",
-  rollSizeTitle: "Loop roll de {n} beats mentre el mantens premut. En deixar-lo anar, la pista segueix on seria si el roll no hagués passat",
+  rollSizeTitle:
+    "Loop roll de {n} beats mentre el mantens premut. En deixar-lo anar, la pista segueix on seria si el roll no hagués passat",
   savedLoopsLabel: "Loops",
   savedLoopsNone: "sense loops",
   savedLoopSaveTitle: "Desa el loop actiu a la pista",
@@ -119,7 +130,8 @@ export default {
   kill: "KILL",
   eqTitle: "Banda d'EQ: clic dret = kill de la banda · doble clic = a zero",
   gainTitle: "Guany del canal · clic dret o doble clic = a zero",
-  filterTitle: "Filtre DJ: arrossega a l'esquerra = passa baix, a la dreta = passa alt · clic dret o doble clic = OFF",
+  filterTitle:
+    "Filtre DJ: arrossega a l'esquerra = passa baix, a la dreta = passa alt · clic dret o doble clic = OFF",
   crossfader: "Crossfader",
   resetHint: "clic dret = tornar a la posició inicial",
   volumeTitle: "Volum del deck {side}",
@@ -143,8 +155,7 @@ export default {
   sortDuration: "Durada",
   reverseTitle: "Invertir l'ordre",
   export: "⬇ Exporta",
-  exportTitle:
-    "Exporta la llista com a CSV (nom, durada, BPM, on s'ha punxat)",
+  exportTitle: "Exporta la llista com a CSV (nom, durada, BPM, on s'ha punxat)",
   addSongs: "+ Afegir cançons",
   emptyList: "Afegeix cançons per carregar-les als decks A o B.",
   noMatch: 'Cap cançó coincideix amb "{query}".',
@@ -171,7 +182,8 @@ export default {
   keyLegend: "Sona en {key}: en morat, les pistes harmònicament compatibles.",
   showArtwork: "Caràtules",
   showArtworkTitle: "Mostra o amaga les miniatures de caràtula",
-  showArtworkNote: "Amagar-les guanya espai a la pantalla; les caràtules es continuen desant.",
+  showArtworkNote:
+    "Amagar-les guanya espai a la pantalla; les caràtules es continuen desant.",
   listHeading: "Llista de cançons",
   csvArtist: "Artista",
   csvKey: "Tonalitat",
@@ -179,7 +191,8 @@ export default {
   // Colores de la onda
   showKey: "Tonalitat de la pista",
   wavePaletteHeading: "Colors de l'ona",
-  wavePaletteNote: "Els greus, mitjans i aguts ja estan analitzats: canviar de paleta recolora a l'instant, sense tornar a analitzar res.",
+  wavePaletteNote:
+    "Els greus, mitjans i aguts ja estan analitzats: canviar de paleta recolora a l'instant, sense tornar a analitzar res.",
   paletteMinidj: "Mini DJ (per defecte)",
   paletteMono: "Verd clàssic (un sol color)",
   paletteCustom: "Personalitzada…",
@@ -207,7 +220,8 @@ export default {
   analysisAuto: "Automàtic (en segon pla, a poc a poc)",
   analysisDeck: "Només en carregar-les a un deck",
 
-  shortcuts: "Teclat (deck actiu: Q=A, P=B o clic al deck) — Espai: play/pausa · C: cue/stop · 1-8: hot cues (Maj: esborrar) · I/O: loop in/out · L: loop on/off · A S D F G H: loop roll 1/8-4 · [ ]: moure el loop · − =: partir/doblar · R: desar loop (Maj: activar-lo) · , .: triar loop desat · ←/→: nudge",
+  shortcuts:
+    "Teclat (deck actiu: Q=A, P=B o clic al deck) — Espai: play/pausa · C: cue/stop · 1-8: hot cues (Maj: esborrar) · I/O: loop in/out · L: loop on/off · A S D F G H: loop roll 1/8-4 · [ ]: moure el loop · − =: partir/doblar · R: desar loop (Maj: activar-lo) · , .: triar loop desat · ←/→: nudge",
   // Pestanyes de configuració, bloqueig de càrrega i VU
   tabAudio: "Àudio",
   tabLibrary: "Biblioteca",
@@ -215,18 +229,24 @@ export default {
   tabSafety: "Seguretat",
   safetyHeading: "Seguretat en directe",
   lockLoadWhilePlaying: "No carregar pistes en un deck que està sonant",
-  lockLoadWhilePlayingNote: "Evita carregar-te la mescla en directe: mentre el deck reprodueix, els seus botons de càrrega surten desactivats. Desactiva-ho per tornar al comportament de sempre.",
+  lockLoadWhilePlayingNote:
+    "Evita carregar-te la mescla en directe: mentre el deck reprodueix, els seus botons de càrrega surten desactivats. Desactiva-ho per tornar al comportament de sempre.",
   loadToDeckTitle: "Carrega aquesta pista al deck {side}",
-  loadLockedTitle: "El deck {side} està sonant: no es pot carregar una altra pista. Atura'l o desactiva el bloqueig a Configuració ⚙ › Seguretat.",
+  loadLockedTitle:
+    "El deck {side} està sonant: no es pot carregar una altra pista. Atura'l o desactiva el bloqueig a Configuració ⚙ › Seguretat.",
   vuHeading: "Mesuradors de nivell (VU)",
   vuModeContinuous: "Continu (barra plena)",
   vuModeLed: "LED (segments, com una taula)",
-  vuNote: "Escala en dBFS de −42 a 0. Verd fins a −12, ambre fins a −3 i vermell arran del sostre digital; el testimoni reté el pic i el bloc vermell de dalt avisa de saturació.",
-  vuChannelTitle: "Nivell del canal en dBFS (post-EQ, pre-fader: no depèn del fader ni del crossfader)",
-  vuMasterTitle: "Nivell de la sortida màster en dBFS (mesurat després del trim i del limitador)",
+  vuNote:
+    "Escala en dBFS de −42 a 0. Verd fins a −12, ambre fins a −3 i vermell arran del sostre digital; el testimoni reté el pic i el bloc vermell de dalt avisa de saturació.",
+  vuChannelTitle:
+    "Nivell del canal en dBFS (post-EQ, pre-fader: no depèn del fader ni del crossfader)",
+  vuMasterTitle:
+    "Nivell de la sortida màster en dBFS (mesurat després del trim i del limitador)",
   tabLog: "Registre",
   logHeading: "Registre d'errors",
-  logNote: "Les errades es guarden amb un codi de la zona on han passat (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). Sempre en anglès, sense traduir, per poder cercar-les i comparar-les. Es conserven les darreres 200 entrades.",
+  logNote:
+    "Les errades es guarden amb un codi de la zona on han passat (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). Sempre en anglès, sense traduir, per poder cercar-les i comparar-les. Es conserven les darreres 200 entrades.",
   logEmpty: "Cap error registrat.",
   logCount: "{n} entrades",
   logDownload: "⬇ Baixa",
@@ -241,14 +261,18 @@ export default {
   phraseBackFineTitle: "Endarrereix la frase 1 kick",
   phraseFwdFineTitle: "Avança la frase 1 kick",
   phraseFwdCoarseTitle: "Avança la frase {n} kicks",
-  phraseSizeTitle: "Mida de la frase en kicks. És el mateix ajust que hi ha a ⚙ Configuració",
-  structureRedetectTitle: "Torna a detectar l'estructura sobre la graella actual, respectant el desplaçament de frase que hagis posat a mà",
+  phraseSizeTitle:
+    "Mida de la frase en kicks. És el mateix ajust que hi ha a ⚙ Configuració",
+  structureRedetectTitle:
+    "Torna a detectar l'estructura sobre la graella actual, respectant el desplaçament de frase que hagis posat a mà",
   phraseResetTitle: "Torna el desplaçament de frase al que va trobar l'anàlisi",
-  phraseOffsetTitle: "Desplaçament de frase actual, en kicks. En ambre quan l'has posat tu a mà",
+  phraseOffsetTitle:
+    "Desplaçament de frase actual, en kicks. En ambre quan l'has posat tu a mà",
   structureTipInKick: "Ets a la part amb ritme.",
   structureTipInBreak: "Ets en una baixada.",
   structureTipDrop: "La baixada entra d'aquí a {n} kicks.",
-  structureTipDropBars: "La baixada entra d'aquí a {n} kicks ({bars} compassos).",
+  structureTipDropBars:
+    "La baixada entra d'aquí a {n} kicks ({bars} compassos).",
   structureTipRise: "El ritme torna d'aquí a {n} kicks.",
   structureTipRiseBars: "El ritme torna d'aquí a {n} kicks ({bars} compassos).",
   structureTipRiseAfter: "El ritme torna {n} kicks després.",
@@ -258,7 +282,8 @@ export default {
   structureTipPhrase: "Vas pel kick {pos} d'una frase de {size}.",
   structureHeading: "Indicador d'estructura",
   showStructure: "Mostra l'indicador sobre l'ona",
-  structureNote: "Compta els kicks que falten perquè marxi el ritme (▼) i perquè torni (▲), i per on vas dins de la frase. S'analitza un sol cop en carregar la pista.",
+  structureNote:
+    "Compta els kicks que falten perquè marxi el ritme (▼) i perquè torni (▲), i per on vas dins de la frase. S'analitza un sol cop en carregar la pista.",
   phraseSizeLabel: "Mida de frase",
   structureUnitLabel: "Comptar en",
   unitKicks: "Kicks",
@@ -267,7 +292,8 @@ export default {
   warnRedLabel: "Avís vermell (kicks)",
   endWarnHeading: "Avís de final de pista",
   endWarnOn: "Avisa quan la pista s'està acabant",
-  endWarnNote: "La vora de l'ona parpelleja en vermell, cada cop més insistent. Només amb la pista sonant, i quieta si tens posat el moviment reduït del sistema.",
+  endWarnNote:
+    "La vora de l'ona parpelleja en vermell, cada cop més insistent. Només amb la pista sonant, i quieta si tens posat el moviment reduït del sistema.",
   endWarnModeLabel: "Avisar per",
   endWarnModeSeconds: "Segons restants",
   endWarnModePercent: "Percentatge restant",
@@ -277,7 +303,8 @@ export default {
   // Pitch (rango del fader y fuerza del bend)
   pitchHeading: "Pitch",
   bendRangeLabel: "Força del pitch bend",
-  pitchNote: "Valen per als dos decks. El rang és el de partida: si el SYNC necessita més recorregut l'eixampla ell sol, sense tocar això. La força del bend és el que estiren els botons − i + del deck.",
+  pitchNote:
+    "Valen per als dos decks. El rang és el de partida: si el SYNC necessita més recorregut l'eixampla ell sol, sense tocar això. La força del bend és el que estiren els botons − i + del deck.",
   masterBpmDownTitle: "Baixa 1 el BPM del màster",
   masterBpmUpTitle: "Puja 1 el BPM del màster",
 
@@ -291,7 +318,8 @@ export default {
   noArtworkFormatTitle: "Sense caràtula · fitxer {format}",
 
   // Resumen de la pista
-  overviewTitle: "Resum de la pista: prem o arrossega per moure't. Els trams foscos són les baixades; la línia vermella marca on marxa el ritme i la verda on torna",
+  overviewTitle:
+    "Resum de la pista: prem o arrossega per moure't. Els trams foscos són les baixades; la línia vermella marca on marxa el ritme i la verda on torna",
 
   // Pantalla LCD del deck
   lcdElapsed: "Transcorregut",
@@ -299,7 +327,8 @@ export default {
   lcdTotal: "Total",
   lcdTrackBpm: "BPM pista",
   lcdKey: "To",
-  lcdTimeTitle: "Temps de la pista. Prem per alternar entre el transcorregut i el que queda",
+  lcdTimeTitle:
+    "Temps de la pista. Prem per alternar entre el transcorregut i el que queda",
 
   // Marquesina del nombre de la pista
   marqueeSpeedLabel: "Marquesina",
@@ -307,13 +336,15 @@ export default {
   marqueeSlow: "Lenta",
   marqueeNormal: "Normal",
   marqueeFast: "Ràpida",
-  marqueeNote: "Quan el nom no cap a la pantalla del deck, passa de llarg en bucle. L'animació la fa el navegador, no costa CPU. Amb el moviment reduït del sistema es queda quieta.",
+  marqueeNote:
+    "Quan el nom no cap a la pantalla del deck, passa de llarg en bucle. L'animació la fa el navegador, no costa CPU. Amb el moviment reduït del sistema es queda quieta.",
 
   // Pantalla del deck: cifras redondeadas o de 14 segmentos
   lcdHeading: "Pantalla del deck",
   lcdFontLabel: "Xifres",
   lcdFontRounded: "Arrodonides",
-  lcdFontNote: "El títol en matriu de 5 x 7 punts i les xifres (temps, BPM, pitch…) amb el muntatge fix d'una pantalla de debò: set segments on només van nombres i catorze on cal un signe. Ocupa el mateix que amb les lletres normals: canviar no descol·loca res.",
+  lcdFontNote:
+    "El títol en matriu de 5 x 7 punts i les xifres (temps, BPM, pitch…) amb el muntatge fix d'una pantalla de debò: set segments on només van nombres i catorze on cal un signe. Ocupa el mateix que amb les lletres normals: canviar no descol·loca res.",
   titleFontLabel: "Títol",
   lcdFontLcd: "Pantalla LCD",
   lcdFontDot: "Matriu de punts",

@@ -60,7 +60,10 @@ const MAX_KICK_RATIO = 0.97;
 function percentile(arr, p) {
   if (!arr.length) return 0;
   const sorted = Array.from(arr).sort((a, b) => a - b);
-  const idx = Math.min(sorted.length - 1, Math.max(0, Math.round((sorted.length - 1) * p)));
+  const idx = Math.min(
+    sorted.length - 1,
+    Math.max(0, Math.round((sorted.length - 1) * p)),
+  );
   return sorted[idx];
 }
 
@@ -207,13 +210,19 @@ export function fitPhraseOffset(boundaries, phraseSize) {
   const size = normPhraseSize(phraseSize);
   if (!boundaries?.length) return 0;
   const marks = boundaries.map((b) =>
-    typeof b === "number" ? { beat: b, weight: 1 } : { beat: b.beat, weight: b.weight ?? 1 }
+    typeof b === "number"
+      ? { beat: b, weight: 1 }
+      : { beat: b.beat, weight: b.weight ?? 1 },
   );
 
   // Los pesos se normalizan contra su mediana y se topan: un cambio
   // brutalísimo (el bombo entrando desde el silencio de la intro) no puede
   // decidir él solo el encaje de toda la pista.
-  const median = percentile(marks.map((m) => m.weight), 0.5) || 1;
+  const median =
+    percentile(
+      marks.map((m) => m.weight),
+      0.5,
+    ) || 1;
   for (const m of marks) m.weight = Math.min(1, m.weight / median);
 
   // Puntuación por CERCANÍA, no por distancia: un cambio que no cae cerca de
@@ -267,7 +276,15 @@ export function detectStructure({
   if (!(ref > 0)) {
     // Pista sin graves con los que trabajar: un solo tramo y a callar
     return {
-      sections: [{ start: 0, end: duration, kick: true, startBeat: 0, endBeat: beats.length }],
+      sections: [
+        {
+          start: 0,
+          end: duration,
+          kick: true,
+          startBeat: 0,
+          endBeat: beats.length,
+        },
+      ],
       phraseSize,
       phraseOffset: 0,
       detectedOffset: 0,
@@ -290,7 +307,8 @@ export function detectStructure({
   // beat exacto del cambio.
   const edges = [];
   for (let i = 1; i < flags.length; i++) {
-    if (flags[i] !== flags[i - 1]) edges.push({ at: i, toKick: flags[i] === 1 });
+    if (flags[i] !== flags[i - 1])
+      edges.push({ at: i, toKick: flags[i] === 1 });
   }
   const search = Math.max(2, Math.floor(MIN_SECTION_BEATS / 2));
   const marks = [];
@@ -301,7 +319,11 @@ export function detectStructure({
     const beat = Math.max(last + 1, Math.min(flags.length - 1, r.beat));
     last = beat;
     // Un subidón cuadra la frase mucho mejor que un bajón: pesa el doble
-    marks.push({ beat, toKick: e.toKick, weight: r.weight * (e.toKick ? 2 : 1) });
+    marks.push({
+      beat,
+      toKick: e.toKick,
+      weight: r.weight * (e.toKick ? 2 : 1),
+    });
   }
 
   // Tramos, en segundos. El primero arranca en 0 (lo que haya antes del
@@ -385,7 +407,8 @@ export function alignStructure(structure, beats) {
     // El beat más cercano, no el anterior: el límite se guardó justo encima
     // de un beat y el redondeo del tiempo no debe correrlo uno hacia atrás.
     const next = i + 1;
-    if (next < beats.length && beats[next] - time < time - beats[i]) return next;
+    if (next < beats.length && beats[next] - time < time - beats[i])
+      return next;
     return i;
   };
   const sections = structure.sections.map((s, i) => ({
@@ -406,7 +429,11 @@ export function sanitizeStructure(raw) {
   if (!raw || !Array.isArray(raw.sections) || !raw.sections.length) return null;
   const sections = raw.sections
     .filter(
-      (s) => s && Number.isFinite(s.start) && Number.isFinite(s.end) && s.end > s.start
+      (s) =>
+        s &&
+        Number.isFinite(s.start) &&
+        Number.isFinite(s.end) &&
+        s.end > s.start,
     )
     .map((s) => ({
       start: Math.max(0, s.start),
@@ -465,13 +492,22 @@ export function floorBeatIndex(beats, time) {
  *
  * Devuelve null si no hay nada que enseñar.
  */
-export function structureAt({ structure, beats, time, phraseSize, phraseOffset } = {}) {
+export function structureAt({
+  structure,
+  beats,
+  time,
+  phraseSize,
+  phraseOffset,
+} = {}) {
   if (!beats?.length || !Number.isFinite(time)) return null;
   // Antes del primer beat se cuenta como si ya estuviéramos en él: al cargar
   // una pista el playhead está en 0 y el indicador tiene que decir algo.
   const beatIndex = Math.max(0, floorBeatIndex(beats, time));
 
-  const size = normPhraseSize(phraseSize, structure?.phraseSize || DEFAULT_PHRASE_SIZE);
+  const size = normPhraseSize(
+    phraseSize,
+    structure?.phraseSize || DEFAULT_PHRASE_SIZE,
+  );
   const offset = Number.isFinite(phraseOffset)
     ? phraseOffset
     : structure?.phraseOffset || 0;
@@ -482,7 +518,8 @@ export function structureAt({ structure, beats, time, phraseSize, phraseOffset }
   // no hay más cambios por delante: la mitad de las pistas se pasan el último
   // minuto (o los tres últimos) sin un solo bajón, y ahí el indicador se
   // quedaba en blanco como si estuviera roto.
-  const toEnd = beats.length - 1 - beatIndex > 0 ? beats.length - 1 - beatIndex : null;
+  const toEnd =
+    beats.length - 1 - beatIndex > 0 ? beats.length - 1 - beatIndex : null;
 
   const base = {
     beatIndex,

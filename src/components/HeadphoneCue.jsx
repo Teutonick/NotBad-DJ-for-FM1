@@ -30,7 +30,7 @@ function HeadphoneCue({ engine, cueDeviceId }) {
     const el = audioRef.current;
     if (!el || !sinkSupported) return;
     el.setSinkId(cueDeviceId || "").catch((err) =>
-      logError(ERRORS.AUDIO_SINK_CUE, err, { deviceId: cueDeviceId })
+      logError(ERRORS.AUDIO_SINK_CUE, err, { deviceId: cueDeviceId }),
     );
   }, [cueDeviceId, sinkSupported]);
 
@@ -71,7 +71,9 @@ function HeadphoneCue({ engine, cueDeviceId }) {
         ))}
       </div>
       <div className="flex items-center gap-2 flex-1 min-w-40">
-        <span className="text-[10px] text-neutral-500 shrink-0">{t("vol")}</span>
+        <span className="text-[10px] text-neutral-500 shrink-0">
+          {t("vol")}
+        </span>
         <Fader
           min={0}
           max={1}

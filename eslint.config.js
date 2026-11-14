@@ -1,58 +1,58 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import js from "@eslint/js";
+import globals from "globals";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(['dist', 'release', 'coverage']),
+  globalIgnores(["dist", "release", "coverage"]),
   // Envoltorio Electron y scripts de build: se ejecutan en Node, no en el navegador
   {
-    files: ['electron/**/*.cjs', 'scripts/**/*.mjs', '*.config.js'],
+    files: ["electron/**/*.cjs", "scripts/**/*.mjs", "*.config.js"],
     extends: [js.configs.recommended],
     languageOptions: {
       globals: globals.node,
-      parserOptions: { ecmaVersion: 'latest' },
+      parserOptions: { ecmaVersion: "latest" },
     },
   },
   {
-    files: ['src/**/*.{js,jsx}'],
+    files: ["src/**/*.{js,jsx}"],
     extends: [
       js.configs.recommended,
-      reactHooks.configs['recommended-latest'],
+      reactHooks.configs["recommended-latest"],
       reactRefresh.configs.vite,
     ],
     languageOptions: {
       ecmaVersion: 2020,
       // __APP_VERSION__ lo sustituye vite.config.js en tiempo de build
-      globals: { ...globals.browser, __APP_VERSION__: 'readonly' },
+      globals: { ...globals.browser, __APP_VERSION__: "readonly" },
       parserOptions: {
-        ecmaVersion: 'latest',
+        ecmaVersion: "latest",
         ecmaFeatures: { jsx: true },
-        sourceType: 'module',
+        sourceType: "module",
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],
     },
   },
   // Tests: Node + navegador (jsdom). Las utilidades de Vitest se importan
   // explícitamente en cada archivo, así que no hacen falta globales suyas.
   {
-    files: ['tests/**/*.{js,jsx}'],
+    files: ["tests/**/*.{js,jsx}"],
     extends: [js.configs.recommended],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
       parserOptions: {
-        ecmaVersion: 'latest',
+        ecmaVersion: "latest",
         ecmaFeatures: { jsx: true },
-        sourceType: 'module',
+        sourceType: "module",
       },
     },
     // Igual que en src: los componentes usados solo dentro de JSX no cuentan
     // como variables sin usar
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],
     },
   },
-])
+]);

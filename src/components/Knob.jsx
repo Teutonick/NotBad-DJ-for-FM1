@@ -41,12 +41,16 @@ export default function Knob({
         {/* Cara con SVG para una aguja precisa */}
         <svg viewBox="0 0 56 56" className="absolute inset-0">
           {/* fondo interno */}
-          <circle cx="28" cy="28" r="26" fill="rgb(23 23 23)" /> {/* neutral-900 */}
+          <circle cx="28" cy="28" r="26" fill="rgb(23 23 23)" />{" "}
+          {/* neutral-900 */}
           {/* aguja: anclada en el centro, rotada alrededor de (28,28) */}
           <g transform={`rotate(${deg} 28 28)`}>
             {/* línea desde el centro hacia arriba (antes de rotar) */}
             <line
-              x1="28" y1="28" x2="28" y2="8"
+              x1="28"
+              y1="28"
+              x2="28"
+              y2="8"
               stroke={killed ? "rgb(248 113 113)" : "rgb(212 212 212)"}
               strokeWidth="2"
               strokeLinecap="round"
@@ -81,7 +85,11 @@ export default function Knob({
           killed ? "text-red-400 font-bold" : "text-neutral-500"
         }`}
       >
-        {killed ? killLabel : format ? format(value) : `${value?.toFixed(1)} dB`}
+        {killed
+          ? killLabel
+          : format
+            ? format(value)
+            : `${value?.toFixed(1)} dB`}
       </span>
     </div>
   );

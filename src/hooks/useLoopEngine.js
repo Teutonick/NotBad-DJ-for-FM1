@@ -255,7 +255,7 @@ export function useLoopEngine({
           wraps: loopRef.current.wraps,
           loopLength: st.length,
           duration: duration || el.duration || 0,
-        })
+        }),
       );
     }
     loopRef.current.wraps = 0;

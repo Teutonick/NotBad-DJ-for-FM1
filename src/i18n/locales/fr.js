@@ -7,7 +7,8 @@ export default {
   masterSync: "MASTER SYNC",
   masterSyncTitle:
     "Master sync : les decks en SYNC suivent ce BPM au lieu de l'autre deck",
-  masterBpmTitle: "BPM du master sync. Clique et fais glisser vers le haut ou le bas, ou utilise la molette, pour le régler sans taper (avec Maj, plus fin)",
+  masterBpmTitle:
+    "BPM du master sync. Clique et fais glisser vers le haut ou le bas, ou utilise la molette, pour le régler sans taper (avec Maj, plus fin)",
   bpm: "BPM",
   language: "Langue",
 
@@ -22,7 +23,8 @@ export default {
   noFile: "Aucun fichier",
   loadFile: "📂 Charger un fichier",
   cue: "CUE",
-  cueTitle: "Distance jusqu'au point CUE, situé à {time}. Il se règle en positionnant le morceau en pause ; Stop y revient.",
+  cueTitle:
+    "Distance jusqu'au point CUE, situé à {time}. Il se règle en positionnant le morceau en pause ; Stop y revient.",
   bpmDisplayTitle:
     "Cliquez en rythme (TAP) : réancre la grille de beats et recalcule le BPM",
   analyzingTrack: "⏳ Analyse de la piste…",
@@ -30,7 +32,8 @@ export default {
   regridding: "⏳ Ajustement de la grille…",
   updateDownloading: "Téléchargement de la mise à jour {version}… {percent} %",
   updateReady: "Mise à jour {version} prête",
-  updateReadyHint: "Si vous ne redémarrez pas maintenant, elle s'installera à la fermeture",
+  updateReadyHint:
+    "Si vous ne redémarrez pas maintenant, elle s'installera à la fermeture",
   updateInstall: "Redémarrer et installer",
   updateLater: "Plus tard",
   updateChecking: "Recherche de mises à jour…",
@@ -54,7 +57,8 @@ export default {
   bendMinusTitle: "Bend − (plus lent tant que maintenu)",
   bendPlusTitle: "Bend + (plus rapide tant que maintenu)",
   hotCueSetTitle: "Hot cue {n} : définir à la position actuelle",
-  hotCueGoTitle: "Hot cue {n} : aller à {time} · effacer avec clic droit ou Maj+clic · double-clic pour le nommer",
+  hotCueGoTitle:
+    "Hot cue {n} : aller à {time} · effacer avec clic droit ou Maj+clic · double-clic pour le nommer",
   hotCueNameLabel: "Nom du cue {n}",
   namePlaceholder: "drop, voix…",
   nameSaveTitle: "Enregistrer le nom (Entrée)",
@@ -71,34 +75,43 @@ export default {
   quantizeTitle:
     "Quantize : aimante les hot cues, loops et sauts sur le beat le plus proche de la grille",
   gridPhaseLabel: "Phase",
-  gridPhaseTitle: "Déplace toute la grille vers l'arrière ou vers l'avant, sans changer le BPM",
+  gridPhaseTitle:
+    "Déplace toute la grille vers l'arrière ou vers l'avant, sans changer le BPM",
   gridPhaseBackCoarseTitle: "Recule la grille de 10 ms",
   gridPhaseBackFineTitle: "Recule la grille de 1 ms",
   gridPhaseFwdFineTitle: "Avance la grille de 1 ms",
   gridPhaseFwdCoarseTitle: "Avance la grille de 10 ms",
   gridTempoLabel: "Espacement",
-  gridTempoTitle: "Écarte ou resserre les temps en changeant le BPM de base du morceau. Ce n'est pas le pitch : le pitch reste sur le fader",
+  gridTempoTitle:
+    "Écarte ou resserre les temps en changeant le BPM de base du morceau. Ce n'est pas le pitch : le pitch reste sur le fader",
   gridTempoDownCoarseTitle: "Baisse le BPM de base de 0,1 (temps plus espacés)",
   gridTempoDownFineTitle: "Baisse le BPM de base de 0,01 (temps plus espacés)",
   gridTempoUpFineTitle: "Monte le BPM de base de 0,01 (temps plus rapprochés)",
   gridTempoUpCoarseTitle: "Monte le BPM de base de 0,1 (temps plus rapprochés)",
   gridHalveTitle: "Divise le BPM de base par 2, en gardant l'ancrage",
   gridDoubleTitle: "Multiplie le BPM de base par 2, en gardant l'ancrage",
-  gridRegridTitle: "Réanalyse à partir du BPM et de l'ancrage actuels, en cherchant le meilleur calage autour",
-  gridBaseBpmTitle: "BPM de base du morceau : celui qui définit la grille. Le pitch ne le change pas",
+  gridRegridTitle:
+    "Réanalyse à partir du BPM et de l'ancrage actuels, en cherchant le meilleur calage autour",
+  gridBaseBpmTitle:
+    "BPM de base du morceau : celui qui définit la grille. Le pitch ne le change pas",
   loop: "Loop",
   loopIn: "IN",
   loopInTitle: "Marque le début du loop à la position actuelle",
   loopOut: "OUT",
   loopOutTitle: "Marque la fin du loop et l'active",
   loopAutoTitle: "Loop automatique de {n} beats depuis le beat précédent",
-  loopMoveBackTitle: "Déplace le loop d'une longueur en arrière, sans changer sa taille",
-  loopMoveFwdTitle: "Déplace le loop d'une longueur en avant, sans changer sa taille",
-  loopHalveTitle: "Divise la longueur du loop par deux, en respectant la grille",
+  loopMoveBackTitle:
+    "Déplace le loop d'une longueur en arrière, sans changer sa taille",
+  loopMoveFwdTitle:
+    "Déplace le loop d'une longueur en avant, sans changer sa taille",
+  loopHalveTitle:
+    "Divise la longueur du loop par deux, en respectant la grille",
   loopDoubleTitle: "Double la longueur du loop, en respectant la grille",
-  loopLengthTitle: "Longueur du loop en beats (en secondes si l'IN/OUT ne tombe pas sur la grille)",
+  loopLengthTitle:
+    "Longueur du loop en beats (en secondes si l'IN/OUT ne tombe pas sur la grille)",
   rollLabel: "Roll",
-  rollSizeTitle: "Loop roll de {n} beats tant que la touche est maintenue. Au relâchement, la lecture reprend là où elle serait si le roll n'avait pas eu lieu",
+  rollSizeTitle:
+    "Loop roll de {n} beats tant que la touche est maintenue. Au relâchement, la lecture reprend là où elle serait si le roll n'avait pas eu lieu",
   savedLoopsLabel: "Loops",
   savedLoopsNone: "aucun loop",
   savedLoopSaveTitle: "Enregistre le loop actif sur le morceau",
@@ -117,9 +130,11 @@ export default {
   filter: "Filter",
   filterOff: "OFF",
   kill: "KILL",
-  eqTitle: "Bande d'EQ : clic droit = kill de la bande · double clic = remise à zéro",
+  eqTitle:
+    "Bande d'EQ : clic droit = kill de la bande · double clic = remise à zéro",
   gainTitle: "Gain du canal · clic droit ou double clic = remise à zéro",
-  filterTitle: "Filtre DJ : vers la gauche = passe-bas, vers la droite = passe-haut · clic droit ou double clic = OFF",
+  filterTitle:
+    "Filtre DJ : vers la gauche = passe-bas, vers la droite = passe-haut · clic droit ou double clic = OFF",
   crossfader: "Crossfader",
   resetHint: "clic droit = revenir à la position initiale",
   volumeTitle: "Volume du deck {side}",
@@ -167,10 +182,12 @@ export default {
   keySameTitle: "Même tonalité que le morceau en cours",
   keyCompatibleTitle: "Compatible avec le morceau en cours",
   keyClashTitle: "Ne correspond pas à la tonalité du morceau en cours",
-  keyLegend: "En cours en {key} : en violet, les morceaux harmoniquement compatibles.",
+  keyLegend:
+    "En cours en {key} : en violet, les morceaux harmoniquement compatibles.",
   showArtwork: "Pochettes",
   showArtworkTitle: "Afficher ou masquer les vignettes de pochette",
-  showArtworkNote: "Les masquer libère de la place à l'écran ; les pochettes restent enregistrées.",
+  showArtworkNote:
+    "Les masquer libère de la place à l'écran ; les pochettes restent enregistrées.",
   listHeading: "Liste de morceaux",
   csvArtist: "Artiste",
   csvKey: "Tonalité",
@@ -178,7 +195,8 @@ export default {
   // Colores de la onda
   showKey: "Tonalité du morceau",
   wavePaletteHeading: "Couleurs de la forme d'onde",
-  wavePaletteNote: "Les graves, médiums et aigus sont déjà analysés : changer de palette recolore aussitôt, sans réanalyse.",
+  wavePaletteNote:
+    "Les graves, médiums et aigus sont déjà analysés : changer de palette recolore aussitôt, sans réanalyse.",
   paletteMinidj: "Mini DJ (par défaut)",
   paletteMono: "Vert classique (une seule couleur)",
   paletteCustom: "Personnalisée…",
@@ -206,7 +224,8 @@ export default {
   analysisAuto: "Automatique (en arrière-plan, lentement)",
   analysisDeck: "Uniquement au chargement dans un deck",
 
-  shortcuts: "Clavier (deck actif : Q=A, P=B ou clic sur le deck) — Espace : play/pause · C : cue/stop · 1-8 : hot cues (Maj : effacer) · I/O : loop in/out · L : loop on/off · A S D F G H : loop roll 1/8-4 · [ ] : déplacer le loop · − = : diviser/doubler · R : enregistrer le loop (Maj : l'activer) · , . : choisir le loop enregistré · ←/→ : nudge",
+  shortcuts:
+    "Clavier (deck actif : Q=A, P=B ou clic sur le deck) — Espace : play/pause · C : cue/stop · 1-8 : hot cues (Maj : effacer) · I/O : loop in/out · L : loop on/off · A S D F G H : loop roll 1/8-4 · [ ] : déplacer le loop · − = : diviser/doubler · R : enregistrer le loop (Maj : l'activer) · , . : choisir le loop enregistré · ←/→ : nudge",
   // Onglets des paramètres, verrou de chargement et vumètres
   tabAudio: "Audio",
   tabLibrary: "Bibliothèque",
@@ -214,18 +233,24 @@ export default {
   tabSafety: "Sécurité",
   safetyHeading: "Sécurité en live",
   lockLoadWhilePlaying: "Ne pas charger de morceau sur un deck en lecture",
-  lockLoadWhilePlayingNote: "Évite de casser le mix en direct : tant que le deck joue, ses boutons de chargement sont désactivés. Décochez pour retrouver le comportement d'avant.",
+  lockLoadWhilePlayingNote:
+    "Évite de casser le mix en direct : tant que le deck joue, ses boutons de chargement sont désactivés. Décochez pour retrouver le comportement d'avant.",
   loadToDeckTitle: "Charger ce morceau sur le deck {side}",
-  loadLockedTitle: "Le deck {side} est en lecture : impossible de charger un autre morceau. Arrêtez-le ou désactivez le verrou dans Paramètres ⚙ › Sécurité.",
+  loadLockedTitle:
+    "Le deck {side} est en lecture : impossible de charger un autre morceau. Arrêtez-le ou désactivez le verrou dans Paramètres ⚙ › Sécurité.",
   vuHeading: "Vumètres (VU)",
   vuModeContinuous: "Continu (barre pleine)",
   vuModeLed: "LED (segments, comme une table de mixage)",
-  vuNote: "Échelle en dBFS de −42 à 0. Vert jusqu'à −12, ambre jusqu'à −3 et rouge contre le plafond numérique ; le témoin retient la crête et le bloc rouge du haut signale la saturation.",
-  vuChannelTitle: "Niveau du canal en dBFS (après l'EQ, avant le fader : indépendant du fader et du crossfader)",
-  vuMasterTitle: "Niveau de la sortie master en dBFS (mesuré après le trim et le limiteur)",
+  vuNote:
+    "Échelle en dBFS de −42 à 0. Vert jusqu'à −12, ambre jusqu'à −3 et rouge contre le plafond numérique ; le témoin retient la crête et le bloc rouge du haut signale la saturation.",
+  vuChannelTitle:
+    "Niveau du canal en dBFS (après l'EQ, avant le fader : indépendant du fader et du crossfader)",
+  vuMasterTitle:
+    "Niveau de la sortie master en dBFS (mesuré après le trim et le limiteur)",
   tabLog: "Journal",
   logHeading: "Journal des erreurs",
-  logNote: "Les erreurs sont enregistrées avec un code de la zone où elles se sont produites (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). Elles sont toujours en anglais, jamais traduites, pour pouvoir les rechercher et les comparer. Les 200 dernières entrées sont conservées.",
+  logNote:
+    "Les erreurs sont enregistrées avec un code de la zone où elles se sont produites (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). Elles sont toujours en anglais, jamais traduites, pour pouvoir les rechercher et les comparer. Les 200 dernières entrées sont conservées.",
   logEmpty: "Aucune erreur enregistrée.",
   logCount: "{n} entrées",
   logDownload: "⬇ Télécharger",
@@ -240,10 +265,13 @@ export default {
   phraseBackFineTitle: "Recule la phrase de 1 kick",
   phraseFwdFineTitle: "Avance la phrase de 1 kick",
   phraseFwdCoarseTitle: "Avance la phrase de {n} kicks",
-  phraseSizeTitle: "Longueur de la phrase en kicks. C'est le même réglage que dans ⚙ Configuration",
-  structureRedetectTitle: "Redétecte la structure sur la grille actuelle, en gardant le décalage de phrase réglé à la main",
+  phraseSizeTitle:
+    "Longueur de la phrase en kicks. C'est le même réglage que dans ⚙ Configuration",
+  structureRedetectTitle:
+    "Redétecte la structure sur la grille actuelle, en gardant le décalage de phrase réglé à la main",
   phraseResetTitle: "Revient au décalage de phrase trouvé par l'analyse",
-  phraseOffsetTitle: "Décalage de phrase actuel, en kicks. En ambre quand tu l'as réglé à la main",
+  phraseOffsetTitle:
+    "Décalage de phrase actuel, en kicks. En ambre quand tu l'as réglé à la main",
   structureTipInKick: "Tu es dans la partie rythmée.",
   structureTipInBreak: "Tu es dans un break.",
   structureTipDrop: "Le break arrive dans {n} kicks.",
@@ -257,7 +285,8 @@ export default {
   structureTipPhrase: "Tu es sur le kick {pos} d'une phrase de {size}.",
   structureHeading: "Indicateur de structure",
   showStructure: "Afficher l'indicateur sur la forme d'onde",
-  structureNote: "Compte les kicks restants avant que le rythme parte (▼) et avant qu'il revienne (▲), et où tu en es dans la phrase. Analysé une seule fois, au chargement du morceau.",
+  structureNote:
+    "Compte les kicks restants avant que le rythme parte (▼) et avant qu'il revienne (▲), et où tu en es dans la phrase. Analysé une seule fois, au chargement du morceau.",
   phraseSizeLabel: "Longueur de phrase",
   structureUnitLabel: "Compter en",
   unitKicks: "Kicks",
@@ -266,7 +295,8 @@ export default {
   warnRedLabel: "Alerte rouge (kicks)",
   endWarnHeading: "Alerte de fin de morceau",
   endWarnOn: "Prévenir quand le morceau se termine",
-  endWarnNote: "Le bord de la forme d'onde clignote en rouge, de plus en plus insistant. Uniquement quand le morceau joue, et fixe si le mouvement réduit du système est activé.",
+  endWarnNote:
+    "Le bord de la forme d'onde clignote en rouge, de plus en plus insistant. Uniquement quand le morceau joue, et fixe si le mouvement réduit du système est activé.",
   endWarnModeLabel: "Déclencher par",
   endWarnModeSeconds: "Secondes restantes",
   endWarnModePercent: "Pourcentage restant",
@@ -276,7 +306,8 @@ export default {
   // Pitch (rango del fader y fuerza del bend)
   pitchHeading: "Pitch",
   bendRangeLabel: "Force du pitch bend",
-  pitchNote: "Valables pour les deux platines. La plage est le point de départ : si le SYNC a besoin de plus de course, il l'élargit tout seul sans toucher à ce réglage. La force du bend, c'est ce que tirent les boutons − et + de la platine.",
+  pitchNote:
+    "Valables pour les deux platines. La plage est le point de départ : si le SYNC a besoin de plus de course, il l'élargit tout seul sans toucher à ce réglage. La force du bend, c'est ce que tirent les boutons − et + de la platine.",
   masterBpmDownTitle: "Baisse le BPM du master de 1",
   masterBpmUpTitle: "Monte le BPM du master de 1",
 
@@ -290,7 +321,8 @@ export default {
   noArtworkFormatTitle: "Sans pochette · fichier {format}",
 
   // Resumen de la pista
-  overviewTitle: "Aperçu du morceau : clique ou fais glisser pour te déplacer. Les zones sombres sont les breaks ; la ligne rouge marque où le rythme part et la verte où il revient",
+  overviewTitle:
+    "Aperçu du morceau : clique ou fais glisser pour te déplacer. Les zones sombres sont les breaks ; la ligne rouge marque où le rythme part et la verte où il revient",
 
   // Pantalla LCD del deck
   lcdElapsed: "Écoulé",
@@ -306,13 +338,15 @@ export default {
   marqueeSlow: "Lent",
   marqueeNormal: "Normal",
   marqueeFast: "Rapide",
-  marqueeNote: "Quand le nom ne tient pas sur l'écran de la platine, il défile en boucle. C'est le navigateur qui l'anime, ça ne coûte pas de CPU. Il reste fixe si le mouvement réduit du système est activé.",
+  marqueeNote:
+    "Quand le nom ne tient pas sur l'écran de la platine, il défile en boucle. C'est le navigateur qui l'anime, ça ne coûte pas de CPU. Il reste fixe si le mouvement réduit du système est activé.",
 
   // Pantalla del deck: cifras redondeadas o de 14 segmentos
   lcdHeading: "Écran de la platine",
   lcdFontLabel: "Chiffres",
   lcdFontRounded: "Arrondis",
-  lcdFontNote: "Le titre en matrice de 5 x 7 points et les chiffres (temps, BPM, pitch…) avec le montage fixe d'un vrai afficheur : sept segments là où il n'y a que des chiffres, quatorze là où il faut un signe. Même encombrement qu'avec les lettres normales : changer ne décale rien.",
+  lcdFontNote:
+    "Le titre en matrice de 5 x 7 points et les chiffres (temps, BPM, pitch…) avec le montage fixe d'un vrai afficheur : sept segments là où il n'y a que des chiffres, quatorze là où il faut un signe. Même encombrement qu'avec les lettres normales : changer ne décale rien.",
   titleFontLabel: "Titre",
   lcdFontLcd: "Écran LCD",
   lcdFontDot: "Matrice de points",

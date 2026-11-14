@@ -94,10 +94,16 @@ function CentralMeters({
               }`}
               title={t("recTitle")}
             >
-              <span className="col-start-1 row-start-1 invisible h-0" aria-hidden>
+              <span
+                className="col-start-1 row-start-1 invisible h-0"
+                aria-hidden
+              >
                 {t("rec")}
               </span>
-              <span className="col-start-1 row-start-1 invisible h-0" aria-hidden>
+              <span
+                className="col-start-1 row-start-1 invisible h-0"
+                aria-hidden
+              >
                 ■ 00:00
               </span>
               <span className="col-start-1 row-start-1 whitespace-nowrap">

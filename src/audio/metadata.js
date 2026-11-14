@@ -68,7 +68,7 @@ async function makeThumbnail(picture) {
       return await canvas.convertToBlob({ type: "image/webp", quality: 0.8 });
     }
     return await new Promise((resolve) =>
-      canvas.toBlob(resolve, "image/webp", 0.8)
+      canvas.toBlob(resolve, "image/webp", 0.8),
     );
   } catch (err) {
     // Sin miniatura se sigue: la pista se carga igual

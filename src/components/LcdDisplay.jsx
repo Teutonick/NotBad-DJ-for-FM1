@@ -132,7 +132,9 @@ function Field({
         pad="start"
         color={color}
         size={size}
-        className={align === "text-right" && font !== "rounded" ? "justify-end" : ""}
+        className={
+          align === "text-right" && font !== "rounded" ? "justify-end" : ""
+        }
       />
       {suffix}
     </div>
@@ -159,7 +161,8 @@ function useDotGrid(boxRef, activa) {
     // quedaba un trozo de hueco sin rejilla al final de la línea —un pegote
     // negro antes del botón—. Poniendo una de más, la pantalla llega hasta el
     // borde y es el marco el que corta la última, como en un panel de verdad.
-    const medir = () => setCells(Math.max(0, Math.ceil(box.clientWidth / DOT_W)));
+    const medir = () =>
+      setCells(Math.max(0, Math.ceil(box.clientWidth / DOT_W)));
     medir();
     if (typeof ResizeObserver !== "function") return;
     const ro = new ResizeObserver(medir);
@@ -173,7 +176,18 @@ function useDotGrid(boxRef, activa) {
 // Una línea del título. En modo de segmentos rellena TODO el ancho de
 // casillas, encendidas las que tocan y apagadas el resto: así se ve dónde
 // están, como en un display de verdad.
-function TitleLine({ text, speed, font, color, size, glow = true, className, style, title, cells }) {
+function TitleLine({
+  text,
+  speed,
+  font,
+  color,
+  size,
+  glow = true,
+  className,
+  style,
+  title,
+  cells,
+}) {
   const matriz = font !== "rounded";
   return (
     // La línea va en una caja de alto fijo y con el contenido FUERA del flujo.
@@ -186,7 +200,13 @@ function TitleLine({ text, speed, font, color, size, glow = true, className, sty
         // La rejilla apagada: está SIEMPRE, y quieta. Es la pantalla, no el
         // texto. Lo que pasa de largo por encima es solo lo que enciende.
         <span className="pointer-events-none absolute inset-0 flex items-center">
-          <Readout text="" mode="dot" cells={cells} color={REJILLA} glow={false} />
+          <Readout
+            text=""
+            mode="dot"
+            cells={cells}
+            color={REJILLA}
+            glow={false}
+          />
         </span>
       )}
       <Marquee
@@ -311,121 +331,122 @@ function LcdDisplay({
           de cada grupo: el ancho mínimo de la fila es el de una sola cifra. */}
       <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
         <div className="flex flex-1 flex-wrap items-baseline gap-x-2 gap-y-1">
-        {/* Tiempo: lo más grande, es lo que se mira de reojo */}
-        <Field
-          font={font}
-          label={timeLabel}
-          cells={celdasTiempo}
-          pattern={PAT.time}
-          big
-          color="#67e8f9"
-          size="text-xl"
-          align="text-left"
-          title={timeTitle}
-          onClick={onToggleTime}
-        >
-          {time}
-        </Field>
-
-        {/* CUE: a cuánto estás del punto de partida */}
-        {cue && (
+          {/* Tiempo: lo más grande, es lo que se mira de reojo */}
           <Field
             font={font}
-            label={cue.label}
+            label={timeLabel}
             cells={celdasTiempo}
-            pattern={PAT.cue}
-            color="#fb923c"
-            size="text-[11px]"
+            pattern={PAT.time}
+            big
+            color="#67e8f9"
+            size="text-xl"
             align="text-left"
-            title={cue.title}
+            title={timeTitle}
+            onClick={onToggleTime}
           >
-            {cue.text}
+            {time}
           </Field>
-        )}
 
-        <div className="flex-1" />
+          {/* CUE: a cuánto estás del punto de partida */}
+          {cue && (
+            <Field
+              font={font}
+              label={cue.label}
+              cells={celdasTiempo}
+              pattern={PAT.cue}
+              color="#fb923c"
+              size="text-[11px]"
+              align="text-left"
+              title={cue.title}
+            >
+              {cue.text}
+            </Field>
+          )}
 
-        <Field
-          label={durationLabel}
-          cells={celdasTotal}
-          pattern={PAT.total}
-          color="#94a3b8"
-          size="text-[11px]"
-          font={font}
-        >
-          {duration}
-        </Field>
+          <div className="flex-1" />
 
-        {musicalKey !== null && (
           <Field
-            font={font}
-            label={keyText}
-            cells={8}
-            pattern={PAT.key}
-            color={keyKnown ? "#c4b5fd" : "#525252"}
+            label={durationLabel}
+            cells={celdasTotal}
+            pattern={PAT.total}
+            color="#94a3b8"
             size="text-[11px]"
-            title={keyTitle}
+            font={font}
           >
-            {musicalKey}
+            {duration}
           </Field>
-        )}
+
+          {musicalKey !== null && (
+            <Field
+              font={font}
+              label={keyText}
+              cells={8}
+              pattern={PAT.key}
+              color={keyKnown ? "#c4b5fd" : "#525252"}
+              size="text-[11px]"
+              title={keyTitle}
+            >
+              {musicalKey}
+            </Field>
+          )}
         </div>
 
         <div className="ml-auto flex flex-wrap items-baseline justify-end gap-x-2 gap-y-1">
-
-        {/* BPM base de la pista y BPM al que va de verdad con el pitch */}
-        <div onClick={onBpmClick}>
+          {/* BPM base de la pista y BPM al que va de verdad con el pitch */}
+          <div onClick={onBpmClick}>
+            <Field
+              font={font}
+              label={bpmLabel}
+              cells={3}
+              pattern={PAT.bpm}
+              big
+              color="#94a3b8"
+              size="text-xl"
+              title={bpmTitle}
+              onClick={onBpmClick}
+            >
+              {bpm}
+            </Field>
+          </div>
           <Field
-            font={font}
-            label={bpmLabel}
+            label={runningLabel}
             cells={3}
             pattern={PAT.bpm}
             big
-            color="#94a3b8"
+            color="#34d399"
             size="text-xl"
-            title={bpmTitle}
-            onClick={onBpmClick}
+            font={font}
           >
-            {bpm}
+            {runningBpm}
           </Field>
-        </div>
-        <Field
-          label={runningLabel}
-          cells={3}
-          pattern={PAT.bpm}
-          big
-          color="#34d399"
-          size="text-xl"
-          font={font}
-        >
-          {runningBpm}
-        </Field>
 
-        {/* Pitch y bend: viven aquí para que el fader de al lado sea más largo */}
-        <Field
-          font={font}
-          label={pitchLabel}
-          cells={7}
-          pattern={PAT.pitch}
-          color="#7dd3fc"
-          size="text-[11px]"
-          title={pitchTitle}
-          suffix={
-            keyLock ? <span className="ml-0.5 self-end text-[9px]">🔒</span> : null
-          }
-        >
-          {pitch}
-        </Field>
-        <Field
-          label={bendLabel}
-          cells={6}
-          pattern={PAT.bend}
-          color="#7dd3fc"
-          size="text-[11px]"
-          font={font}
-        >
-          {bend}
-        </Field>
+          {/* Pitch y bend: viven aquí para que el fader de al lado sea más largo */}
+          <Field
+            font={font}
+            label={pitchLabel}
+            cells={7}
+            pattern={PAT.pitch}
+            color="#7dd3fc"
+            size="text-[11px]"
+            title={pitchTitle}
+            suffix={
+              keyLock ? (
+                <span className="ml-0.5 self-end text-[9px]">🔒</span>
+              ) : null
+            }
+          >
+            {pitch}
+          </Field>
+          <Field
+            label={bendLabel}
+            cells={6}
+            pattern={PAT.bend}
+            color="#7dd3fc"
+            size="text-[11px]"
+            font={font}
+          >
+            {bend}
+          </Field>
         </div>
       </div>
     </div>

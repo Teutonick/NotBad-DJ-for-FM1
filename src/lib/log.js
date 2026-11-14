@@ -25,17 +25,29 @@ const MAX_VALUE = 200; // y cada valor de contexto
 // salida sin tener que acordarse de cómo estaba redactado el mensaje.
 export const ERRORS = {
   // Grafo de audio y ruteo de salidas
-  AUDIO_SINK_MASTER: ["AUDIO-SINK-MASTER", "Master output device could not be set"],
+  AUDIO_SINK_MASTER: [
+    "AUDIO-SINK-MASTER",
+    "Master output device could not be set",
+  ],
   AUDIO_SINK_DECK: ["AUDIO-SINK-DECK", "Deck output device could not be set"],
-  AUDIO_SINK_CUE: ["AUDIO-SINK-CUE", "Pre-listen output device could not be set"],
+  AUDIO_SINK_CUE: [
+    "AUDIO-SINK-CUE",
+    "Pre-listen output device could not be set",
+  ],
   AUDIO_PLAY: ["AUDIO-PLAY", "Deck playback could not start"],
 
   // Carga de pistas
   TRACK_LOAD: ["TRACK-LOAD", "Track could not be loaded or decoded"],
 
   // Análisis (BPM, rejilla, tonalidad, etiquetas)
-  ANALYSIS_LIST: ["ANALYSIS-LIST", "Background analysis of a list track failed"],
-  ANALYSIS_TEMPO_WORKER: ["ANALYSIS-TEMPO-WORKER", "Tempo worker failed, falling back to the main thread"],
+  ANALYSIS_LIST: [
+    "ANALYSIS-LIST",
+    "Background analysis of a list track failed",
+  ],
+  ANALYSIS_TEMPO_WORKER: [
+    "ANALYSIS-TEMPO-WORKER",
+    "Tempo worker failed, falling back to the main thread",
+  ],
   ANALYSIS_BEATS: ["ANALYSIS-BEATS", "Beat detection failed"],
   ANALYSIS_REGRID: ["ANALYSIS-REGRID", "Guided beat-grid reanalysis failed"],
   ANALYSIS_KEY: ["ANALYSIS-KEY", "Musical key detection failed"],
@@ -48,7 +60,10 @@ export const ERRORS = {
   LIB_DB_DELETE: ["LIB-DB-DELETE", "Stored track could not be deleted"],
 
   // Configuración
-  CONFIG_DEVICE_PERMISSION: ["CONFIG-DEVICE-PERMISSION", "Audio permission denied, output devices stay unnamed"],
+  CONFIG_DEVICE_PERMISSION: [
+    "CONFIG-DEVICE-PERMISSION",
+    "Audio permission denied, output devices stay unnamed",
+  ],
 
   // Grabación de la sesión
   REC_START: ["REC-START", "Session recording could not start"],
@@ -80,7 +95,10 @@ function describeError(err) {
 const describeContext = (context) =>
   context
     ? Object.entries(context)
-        .map(([k, v]) => `${k}=${clip(v === undefined ? "undefined" : v, MAX_VALUE)}`)
+        .map(
+          ([k, v]) =>
+            `${k}=${clip(v === undefined ? "undefined" : v, MAX_VALUE)}`,
+        )
         .join(" ")
     : "";
 
@@ -106,10 +124,7 @@ function push(entry) {
   try {
     const list = read();
     list.push(entry);
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(list.slice(-MAX_ENTRIES))
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(-MAX_ENTRIES)));
   } catch {
     // Sin almacenamiento o sin cuota: el registro es lo primero que sobra
   }

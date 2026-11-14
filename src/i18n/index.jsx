@@ -52,7 +52,7 @@ export function I18nProvider({ children }) {
       setLang,
       t: (key, params) => translate(textLang, key, params),
     }),
-    [lang, textLang, setLang]
+    [lang, textLang, setLang],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

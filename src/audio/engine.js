@@ -245,7 +245,7 @@ export class AudioEngine {
     // === AUTO-TRIM SUAVE (mantenemos la idea, pero sin rampas) ===
     const boostSum = [low, mid, high].reduce(
       (acc, v) => acc + Math.max(0, v),
-      0
+      0,
     );
     // cuando supera ~9 dB combinados, restamos un poco al pre-gain
     const trimDb = boostSum > 9 ? -(boostSum - 9) * 0.4 : 0;

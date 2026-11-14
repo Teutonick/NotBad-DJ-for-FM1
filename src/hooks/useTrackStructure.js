@@ -37,7 +37,7 @@ export function useTrackStructure({
 
   const gridStructure = useMemo(
     () => (structure ? alignStructure(structure, beats) : null),
-    [structure, beats]
+    [structure, beats],
   );
 
   // Detección: una vez por pista, cuando ya hay onda y rejilla
@@ -82,17 +82,23 @@ export function useTrackStructure({
       prev
         ? {
             ...prev,
-            phraseOffset: shiftPhraseOffset(prev.phraseOffset, delta, prev.phraseSize),
+            phraseOffset: shiftPhraseOffset(
+              prev.phraseOffset,
+              delta,
+              prev.phraseSize,
+            ),
             manual: true,
           }
-        : prev
+        : prev,
     );
   };
 
   // Vuelve al desplazamiento que dijo el análisis
   const resetPhrase = () => {
     setStructure((prev) =>
-      prev ? { ...prev, phraseOffset: prev.detectedOffset, manual: false } : prev
+      prev
+        ? { ...prev, phraseOffset: prev.detectedOffset, manual: false }
+        : prev,
     );
   };
 
@@ -108,7 +114,9 @@ export function useTrackStructure({
     });
     if (!found) return;
     setStructure((prev) =>
-      prev?.manual ? { ...found, phraseOffset: prev.phraseOffset, manual: true } : found
+      prev?.manual
+        ? { ...found, phraseOffset: prev.phraseOffset, manual: true }
+        : found,
     );
   };
 

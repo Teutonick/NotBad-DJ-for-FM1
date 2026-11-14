@@ -1,13 +1,15 @@
 export default {
   subtitle: "Dj Wincha 制作（制作中）",
   rec: "● REC",
-  recTitle: "マスターミックスを録音します。停止すると .webm でダウンロードされます",
+  recTitle:
+    "マスターミックスを録音します。停止すると .webm でダウンロードされます",
   master: "マスター",
   configTitle: "設定：オーディオ出力と解析",
   masterSync: "マスターシンク",
   masterSyncTitle:
     "マスターシンク：SYNC 中のデッキは相手デッキではなくこの BPM に追従します",
-  masterBpmTitle: "マスターシンクの BPM。上で押したまま上下にドラッグするか、ホイールを回すと、入力せずに調整できます（Shift でさらに細かく）",
+  masterBpmTitle:
+    "マスターシンクの BPM。上で押したまま上下にドラッグするか、ホイールを回すと、入力せずに調整できます（Shift でさらに細かく）",
   bpm: "BPM",
   language: "言語",
 
@@ -18,11 +20,13 @@ export default {
 
   deck: "デッキ {side}",
   keyboardBadge: "キーボード",
-  keyboardBadgeTitle: "アクティブなデッキ：キーボードショートカットを受け取ります",
+  keyboardBadgeTitle:
+    "アクティブなデッキ：キーボードショートカットを受け取ります",
   noFile: "ファイルなし",
   loadFile: "📂 ファイルを読み込む",
   cue: "CUE",
-  cueTitle: "CUE ポイント（{time}）までの距離。一時停止中に曲を移動すると設定され、Stop でそこに戻ります。",
+  cueTitle:
+    "CUE ポイント（{time}）までの距離。一時停止中に曲を移動すると設定され、Stop でそこに戻ります。",
   bpmDisplayTitle:
     "リズムに合わせてクリック（TAP）：ビートグリッドを再設定し BPM を再計算します",
   analyzingTrack: "⏳ トラックを解析中…",
@@ -30,7 +34,8 @@ export default {
   regridding: "⏳ グリッドを調整中…",
   updateDownloading: "アップデート {version} をダウンロード中… {percent}%",
   updateReady: "アップデート {version} の準備ができました",
-  updateReadyHint: "いま再起動しない場合は、アプリを閉じるときにインストールされます",
+  updateReadyHint:
+    "いま再起動しない場合は、アプリを閉じるときにインストールされます",
   updateInstall: "再起動してインストール",
   updateLater: "あとで",
   updateChecking: "アップデートを確認中…",
@@ -43,8 +48,7 @@ export default {
   sync: "SYNC",
   syncTitle:
     "連続シンクを有効化：このデッキは相手デッキまたはマスターの BPM に追従します",
-  syncActiveTitle:
-    "シンク固定：{source} の BPM に追従中（ピッチは自動調整）",
+  syncActiveTitle: "シンク固定：{source} の BPM に追従中（ピッチは自動調整）",
   keyLock: "🔒 キー",
   keyLockTitle:
     "キーロック：テンポを変えても音程を保ちます（OFF = レコードモード）",
@@ -54,7 +58,8 @@ export default {
   bendMinusTitle: "ベンド −（押している間は遅く）",
   bendPlusTitle: "ベンド +（押している間は速く）",
   hotCueSetTitle: "ホットキュー {n}：現在位置に設定",
-  hotCueGoTitle: "ホットキュー {n}：{time} へジャンプ · 右クリックまたは Shift+クリックで削除 · ダブルクリックで名前を付ける",
+  hotCueGoTitle:
+    "ホットキュー {n}：{time} へジャンプ · 右クリックまたは Shift+クリックで削除 · ダブルクリックで名前を付ける",
   hotCueNameLabel: "キュー {n} の名前",
   namePlaceholder: "drop、ボーカル…",
   nameSaveTitle: "名前を保存（Enter）",
@@ -77,28 +82,35 @@ export default {
   gridPhaseFwdFineTitle: "グリッドを 1 ms 後ろにずらす",
   gridPhaseFwdCoarseTitle: "グリッドを 10 ms 後ろにずらす",
   gridTempoLabel: "間隔",
-  gridTempoTitle: "トラックの基準 BPM を変えてビート間隔を広げたり詰めたりします。ピッチではありません（ピッチはフェーダーのまま）",
+  gridTempoTitle:
+    "トラックの基準 BPM を変えてビート間隔を広げたり詰めたりします。ピッチではありません（ピッチはフェーダーのまま）",
   gridTempoDownCoarseTitle: "基準 BPM を 0.1 下げる（ビート間隔が広がる）",
   gridTempoDownFineTitle: "基準 BPM を 0.01 下げる（ビート間隔が広がる）",
   gridTempoUpFineTitle: "基準 BPM を 0.01 上げる（ビート間隔が詰まる）",
   gridTempoUpCoarseTitle: "基準 BPM を 0.1 上げる（ビート間隔が詰まる）",
   gridHalveTitle: "アンカーを保ったまま基準 BPM を 1/2 にする",
   gridDoubleTitle: "アンカーを保ったまま基準 BPM を 2 倍にする",
-  gridRegridTitle: "現在の BPM とアンカーを起点に、その周辺で最適な合わせ方を探して再解析します",
-  gridBaseBpmTitle: "トラックの基準 BPM：グリッドを決める値です。ピッチでは変わりません",
+  gridRegridTitle:
+    "現在の BPM とアンカーを起点に、その周辺で最適な合わせ方を探して再解析します",
+  gridBaseBpmTitle:
+    "トラックの基準 BPM：グリッドを決める値です。ピッチでは変わりません",
   loop: "ループ",
   loopIn: "IN",
   loopInTitle: "現在位置にループ開始点を設定",
   loopOut: "OUT",
   loopOutTitle: "ループ終了点を設定して有効化",
   loopAutoTitle: "直前のビートから {n} ビートの自動ループ",
-  loopMoveBackTitle: "ループ全体を 1 つ分だけ前（早い位置）へ移動します。長さはそのままです",
-  loopMoveFwdTitle: "ループ全体を 1 つ分だけ後ろ（遅い位置）へ移動します。長さはそのままです",
+  loopMoveBackTitle:
+    "ループ全体を 1 つ分だけ前（早い位置）へ移動します。長さはそのままです",
+  loopMoveFwdTitle:
+    "ループ全体を 1 つ分だけ後ろ（遅い位置）へ移動します。長さはそのままです",
   loopHalveTitle: "ループの長さを半分にします（グリッドに合わせます）",
   loopDoubleTitle: "ループの長さを 2 倍にします（グリッドに合わせます）",
-  loopLengthTitle: "ループの長さ（ビート）。IN/OUT がグリッドに乗らない場合は秒で表示します",
+  loopLengthTitle:
+    "ループの長さ（ビート）。IN/OUT がグリッドに乗らない場合は秒で表示します",
   rollLabel: "Roll",
-  rollSizeTitle: "押している間だけ {n} ビートのループロール。離すと、ロールがなかった場合の位置から再生を続けます",
+  rollSizeTitle:
+    "押している間だけ {n} ビートのループロール。離すと、ロールがなかった場合の位置から再生を続けます",
   savedLoopsLabel: "ループ",
   savedLoopsNone: "ループなし",
   savedLoopSaveTitle: "現在のループをこの曲に保存します",
@@ -119,7 +131,8 @@ export default {
   kill: "キル",
   eqTitle: "EQ 帯域：右クリック = 帯域キル · ダブルクリック = ゼロに戻す",
   gainTitle: "チャンネルのゲイン · 右クリックまたはダブルクリック = ゼロに戻す",
-  filterTitle: "DJ フィルター：左 = ローパス、右 = ハイパス · 右クリックまたはダブルクリック = OFF",
+  filterTitle:
+    "DJ フィルター：左 = ローパス、右 = ハイパス · 右クリックまたはダブルクリック = OFF",
   crossfader: "クロスフェーダー",
   resetHint: "右クリック = 初期位置に戻す",
   volumeTitle: "デッキ {side} の音量",
@@ -170,7 +183,8 @@ export default {
   keyLegend: "再生中のキーは {key}：紫がハーモニックに相性の良いトラックです。",
   showArtwork: "ジャケット",
   showArtworkTitle: "ジャケットのサムネイルを表示／非表示",
-  showArtworkNote: "非表示にすると画面に余裕ができます。ジャケットは保存されたままです。",
+  showArtworkNote:
+    "非表示にすると画面に余裕ができます。ジャケットは保存されたままです。",
   listHeading: "曲リスト",
   csvArtist: "アーティスト",
   csvKey: "キー",
@@ -178,7 +192,8 @@ export default {
   // Colores de la onda
   showKey: "トラックのキー",
   wavePaletteHeading: "波形の色",
-  wavePaletteNote: "低域・中域・高域は解析済みです。カラーパレットを変えても再解析なしで即座に塗り直されます。",
+  wavePaletteNote:
+    "低域・中域・高域は解析済みです。カラーパレットを変えても再解析なしで即座に塗り直されます。",
   paletteMinidj: "Mini DJ（既定）",
   paletteMono: "クラシックグリーン（単色）",
   paletteCustom: "カスタム…",
@@ -206,7 +221,8 @@ export default {
   analysisAuto: "自動（バックグラウンドでゆっくり）",
   analysisDeck: "デッキに読み込んだときのみ",
 
-  shortcuts: "キーボード（アクティブなデッキ：Q=A、P=B またはデッキをクリック）— スペース：再生/一時停止 · C：cue/停止 · 1-8：ホットキュー（Shift：削除）· I/O：ループ IN/OUT · L：ループ オン/オフ · A S D F G H：ループロール 1/8-4 · [ ]：ループを移動 · − =：半分/2 倍 · R：ループを保存（Shift：呼び出し）· , .：保存したループを選ぶ · ←/→：ナッジ",
+  shortcuts:
+    "キーボード（アクティブなデッキ：Q=A、P=B またはデッキをクリック）— スペース：再生/一時停止 · C：cue/停止 · 1-8：ホットキュー（Shift：削除）· I/O：ループ IN/OUT · L：ループ オン/オフ · A S D F G H：ループロール 1/8-4 · [ ]：ループを移動 · − =：半分/2 倍 · R：ループを保存（Shift：呼び出し）· , .：保存したループを選ぶ · ←/→：ナッジ",
   // 設定タブ、読み込みロック、レベルメーター
   tabAudio: "オーディオ",
   tabLibrary: "ライブラリ",
@@ -214,18 +230,23 @@ export default {
   tabSafety: "安全",
   safetyHeading: "プレイ中の安全",
   lockLoadWhilePlaying: "再生中のデッキには曲を読み込まない",
-  lockLoadWhilePlayingNote: "本番のミックスを壊さないための設定です。デッキが再生している間は読み込みボタンが無効になります。オフにすると以前の動作に戻ります。",
+  lockLoadWhilePlayingNote:
+    "本番のミックスを壊さないための設定です。デッキが再生している間は読み込みボタンが無効になります。オフにすると以前の動作に戻ります。",
   loadToDeckTitle: "この曲をデッキ {side} に読み込む",
-  loadLockedTitle: "デッキ {side} は再生中です。別の曲は読み込めません。停止するか、設定 ⚙ › 安全 でロックを解除してください。",
+  loadLockedTitle:
+    "デッキ {side} は再生中です。別の曲は読み込めません。停止するか、設定 ⚙ › 安全 でロックを解除してください。",
   vuHeading: "レベルメーター（VU）",
   vuModeContinuous: "連続（塗りつぶしバー）",
   vuModeLed: "LED（ミキサーのようなセグメント）",
-  vuNote: "−42〜0 の dBFS スケール。−12 までが緑、−3 までがアンバー、デジタル上限際が赤。マーカーがピークを保持し、上部の赤いブロックがクリップを知らせます。",
-  vuChannelTitle: "チャンネルのレベル（dBFS、EQ 後・フェーダー前：フェーダーやクロスフェーダーの影響を受けません）",
+  vuNote:
+    "−42〜0 の dBFS スケール。−12 までが緑、−3 までがアンバー、デジタル上限際が赤。マーカーがピークを保持し、上部の赤いブロックがクリップを知らせます。",
+  vuChannelTitle:
+    "チャンネルのレベル（dBFS、EQ 後・フェーダー前：フェーダーやクロスフェーダーの影響を受けません）",
   vuMasterTitle: "マスター出力のレベル（dBFS、トリムとリミッターの後で測定）",
   tabLog: "ログ",
   logHeading: "エラーログ",
-  logNote: "エラーは発生した領域のコード（AUDIO、TRACK、ANALYSIS、LIB、CONFIG、REC）とともに記録されます。検索と比較のため、常に英語のままで翻訳しません。直近 200 件を保持します。",
+  logNote:
+    "エラーは発生した領域のコード（AUDIO、TRACK、ANALYSIS、LIB、CONFIG、REC）とともに記録されます。検索と比較のため、常に英語のままで翻訳しません。直近 200 件を保持します。",
   logEmpty: "記録されたエラーはありません。",
   logCount: "{n} 件",
   logDownload: "⬇ ダウンロード",
@@ -241,9 +262,11 @@ export default {
   phraseFwdFineTitle: "フレーズを 1 キック進める",
   phraseFwdCoarseTitle: "フレーズを {n} キック進める",
   phraseSizeTitle: "フレーズの長さ（キック数）。⚙ 設定にあるのと同じ項目です",
-  structureRedetectTitle: "現在のビートグリッドで構成を検出し直します。手動で設定したフレーズのずれはそのまま残ります",
+  structureRedetectTitle:
+    "現在のビートグリッドで構成を検出し直します。手動で設定したフレーズのずれはそのまま残ります",
   phraseResetTitle: "解析が見つけたフレーズのずれに戻す",
-  phraseOffsetTitle: "現在のフレーズのずれ（キック数）。手動で設定するとアンバー色になります",
+  phraseOffsetTitle:
+    "現在のフレーズのずれ（キック数）。手動で設定するとアンバー色になります",
   structureTipInKick: "リズムが鳴っている部分です。",
   structureTipInBreak: "ブレイクの中です。",
   structureTipDrop: "あと {n} キックでブレイクに入ります。",
@@ -257,7 +280,8 @@ export default {
   structureTipPhrase: "{size} キックのフレーズの {pos} キック目です。",
   structureHeading: "構成インジケーター",
   showStructure: "波形の上にインジケーターを表示",
-  structureNote: "リズムが抜けるまで（▼）と戻るまで（▲）のキック数、そしてフレーズ内の位置を表示します。曲を読み込むときに一度だけ解析します。",
+  structureNote:
+    "リズムが抜けるまで（▼）と戻るまで（▲）のキック数、そしてフレーズ内の位置を表示します。曲を読み込むときに一度だけ解析します。",
   phraseSizeLabel: "フレーズの長さ",
   structureUnitLabel: "カウント単位",
   unitKicks: "キック",
@@ -266,7 +290,8 @@ export default {
   warnRedLabel: "レッド警告（キック）",
   endWarnHeading: "曲の終わりの警告",
   endWarnOn: "曲が終わりに近づいたら知らせる",
-  endWarnNote: "波形のふちが赤く点滅し、終わりに近づくほど速くなります。再生中だけで、システムの「視差効果を減らす」が有効なら点滅せずに点灯します。",
+  endWarnNote:
+    "波形のふちが赤く点滅し、終わりに近づくほど速くなります。再生中だけで、システムの「視差効果を減らす」が有効なら点滅せずに点灯します。",
   endWarnModeLabel: "知らせる基準",
   endWarnModeSeconds: "残り秒数",
   endWarnModePercent: "残りの割合",
@@ -276,7 +301,8 @@ export default {
   // Pitch (rango del fader y fuerza del bend)
   pitchHeading: "ピッチ",
   bendRangeLabel: "ピッチベンドの強さ",
-  pitchNote: "両方のデッキで使います。レンジは出発点です。SYNC がもっと幅を必要とすれば自分で広げるので、この設定は変わりません。ベンドの強さは、デッキの − と + のボタンが引っぱる量です。",
+  pitchNote:
+    "両方のデッキで使います。レンジは出発点です。SYNC がもっと幅を必要とすれば自分で広げるので、この設定は変わりません。ベンドの強さは、デッキの − と + のボタンが引っぱる量です。",
   masterBpmDownTitle: "マスターの BPM を 1 下げる",
   masterBpmUpTitle: "マスターの BPM を 1 上げる",
 
@@ -290,7 +316,8 @@ export default {
   noArtworkFormatTitle: "ジャケットなし · {format} ファイル",
 
   // Resumen de la pista
-  overviewTitle: "曲全体の概観：クリックかドラッグで移動できます。暗い部分がブレイク、赤い線はリズムが抜ける場所、緑の線は戻る場所です",
+  overviewTitle:
+    "曲全体の概観：クリックかドラッグで移動できます。暗い部分がブレイク、赤い線はリズムが抜ける場所、緑の線は戻る場所です",
 
   // Pantalla LCD del deck
   lcdElapsed: "経過",
@@ -306,13 +333,15 @@ export default {
   marqueeSlow: "ゆっくり",
   marqueeNormal: "ふつう",
   marqueeFast: "はやい",
-  marqueeNote: "曲名がデッキの画面に収まらないときは繰り返し流れます。アニメーションはブラウザが担当するので CPU は使いません。システムの視差効果を減らす設定では止まります。",
+  marqueeNote:
+    "曲名がデッキの画面に収まらないときは繰り返し流れます。アニメーションはブラウザが担当するので CPU は使いません。システムの視差効果を減らす設定では止まります。",
 
   // Pantalla del deck: cifras redondeadas o de 14 segmentos
   lcdHeading: "デッキの画面",
   lcdFontLabel: "数字",
   lcdFontRounded: "丸い文字",
-  lcdFontNote: "曲名は 5 x 7 のドットマトリクス、数字（時間・BPM・ピッチなど）は本物のパネルと同じ固定構成で表示します。数字だけの桁は 7 セグメント、記号が入る桁は 14 セグメントです。ふつうの文字と同じ幅なので、切り替えてもずれません。",
+  lcdFontNote:
+    "曲名は 5 x 7 のドットマトリクス、数字（時間・BPM・ピッチなど）は本物のパネルと同じ固定構成で表示します。数字だけの桁は 7 セグメント、記号が入る桁は 14 セグメントです。ふつうの文字と同じ幅なので、切り替えてもずれません。",
   titleFontLabel: "曲名",
   lcdFontLcd: "LCD 表示",
   lcdFontDot: "ドットマトリクス",

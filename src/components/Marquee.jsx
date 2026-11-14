@@ -50,7 +50,9 @@ export default function Marquee({
     // Una vuelta = una copia más su hueco: así la segunda cae justo donde
     // estaba la primera
     const shift = ancho + HUECO;
-    setPaso(cabe ? { seconds: 0, shift: 0 } : { seconds: shift / speed, shift });
+    setPaso(
+      cabe ? { seconds: 0, shift: 0 } : { seconds: shift / speed, shift },
+    );
   }, [speed]);
 
   useLayoutEffect(() => {

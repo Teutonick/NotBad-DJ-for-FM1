@@ -90,7 +90,12 @@ let lastTab = TABS[0].id;
 // biblioteca y análisis, visualización y seguridad. Todo se guarda en el
 // mismo objeto `config` (localStorage "mini-dj-config") y lo aplica
 // MiniDJPlayer.
-export default function ConfigDialog({ open, onClose, config, onConfigChange }) {
+export default function ConfigDialog({
+  open,
+  onClose,
+  config,
+  onConfigChange,
+}) {
   const { t } = useI18n();
   const [devices, setDevices] = useState([]);
   const [labelsAllowed, setLabelsAllowed] = useState(false);
@@ -130,14 +135,20 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
   useEffect(() => {
     if (!open || tab !== "log") return;
     setEntries(readLog());
-    window.miniDJDesktop?.logPath?.().then(setLogFile).catch(() => {});
+    window.miniDJDesktop
+      ?.logPath?.()
+      .then(setLogFile)
+      .catch(() => {});
   }, [open, tab]);
 
   // El registro se descarga tal cual, en orden cronológico: es un log.
   // En la app de escritorio esto abre el diálogo nativo de guardado.
   const downloadLog = () => {
     const blob = new Blob([formatLog()], { type: "text/plain;charset=utf-8" });
-    downloadBlob(blob, `mini-dj-log-${new Date().toISOString().slice(0, 10)}.txt`);
+    downloadBlob(
+      blob,
+      `mini-dj-log-${new Date().toISOString().slice(0, 10)}.txt`,
+    );
   };
 
   const copyLog = () => {
@@ -234,12 +245,12 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
             {deviceSelect(
               "deckAOut",
               t("deckExternal", { side: "A" }),
-              t("internalMix")
+              t("internalMix"),
             )}
             {deviceSelect(
               "deckBOut",
               t("deckExternal", { side: "B" }),
-              t("internalMix")
+              t("internalMix"),
             )}
             <p className="text-[10px] text-neutral-500">{t("externalNote")}</p>
           </>
@@ -411,7 +422,10 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
                     type="color"
                     value={waveColors[band]}
                     onChange={(e) =>
-                      set("waveCustom", { ...waveColors, [band]: e.target.value })
+                      set("waveCustom", {
+                        ...waveColors,
+                        [band]: e.target.value,
+                      })
                     }
                     className="w-8 h-8 rounded border border-neutral-700 bg-neutral-800 cursor-pointer"
                   />
@@ -444,7 +458,7 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
             "phraseSize",
             t("phraseSizeLabel"),
             PHRASE_SIZES,
-            structure.phraseSize
+            structure.phraseSize,
           )}
           <label className="flex items-center justify-between gap-2 text-xs text-neutral-400">
             {t("structureUnitLabel")}
@@ -464,13 +478,13 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
             "structureWarnAmber",
             t("warnAmberLabel"),
             [8, 16, 32, 64],
-            structure.warnAmber
+            structure.warnAmber,
           )}
           {numberSelect(
             "structureWarnRed",
             t("warnRedLabel"),
             [1, 2, 4, 8, 16],
-            structure.warnRed
+            structure.warnRed,
           )}
         </div>
 
@@ -492,10 +506,10 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
                     v === 0
                       ? "marqueeOff"
                       : v <= 15
-                      ? "marqueeSlow"
-                      : v <= 30
-                      ? "marqueeNormal"
-                      : "marqueeFast"
+                        ? "marqueeSlow"
+                        : v <= 30
+                          ? "marqueeNormal"
+                          : "marqueeFast",
                   )}
                 </option>
               ))}
@@ -627,7 +641,9 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
           >
             {END_WARN_MODES.map((m) => (
               <option key={m} value={m}>
-                {t(m === "percent" ? "endWarnModePercent" : "endWarnModeSeconds")}
+                {t(
+                  m === "percent" ? "endWarnModePercent" : "endWarnModeSeconds",
+                )}
               </option>
             ))}
           </select>
@@ -637,13 +653,13 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
               "endWarnPercent",
               t("endWarnValuePercent"),
               [2, 5, 10, 15, 20],
-              structure.endWarn.percent
+              structure.endWarn.percent,
             )
           : numberSelect(
               "endWarnSeconds",
               t("endWarnValueSeconds"),
               [10, 15, 20, 30, 45, 60, 90],
-              structure.endWarn.seconds
+              structure.endWarn.seconds,
             )}
       </div>
     ),

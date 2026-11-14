@@ -113,8 +113,12 @@ export default function MiniDJMixer() {
   useEffect(() => {
     setRangeA(configPitchRange);
     setRangeB(configPitchRange);
-    setPitchPctA((p) => Math.max(-configPitchRange, Math.min(configPitchRange, p)));
-    setPitchPctB((p) => Math.max(-configPitchRange, Math.min(configPitchRange, p)));
+    setPitchPctA((p) =>
+      Math.max(-configPitchRange, Math.min(configPitchRange, p)),
+    );
+    setPitchPctB((p) =>
+      Math.max(-configPitchRange, Math.min(configPitchRange, p)),
+    );
   }, [configPitchRange]);
 
   useEffect(() => saveConfig(config), [config]);
@@ -153,7 +157,7 @@ export default function MiniDJMixer() {
         if (el) {
           if (!el.srcObject) el.srcObject = engine.getDeckStream(side);
           el.setSinkId?.(deviceId).catch((err) =>
-            logError(ERRORS.AUDIO_SINK_DECK, err, { deck: side, deviceId })
+            logError(ERRORS.AUDIO_SINK_DECK, err, { deck: side, deviceId }),
           );
           el.play().catch(() => {});
         }
@@ -162,7 +166,7 @@ export default function MiniDJMixer() {
         el?.pause();
       }
     },
-    [engine]
+    [engine],
   );
 
   useEffect(() => {
@@ -177,7 +181,7 @@ export default function MiniDJMixer() {
       audioElsRef.current[which] = el;
       engine.attachMediaElement(which, el);
     },
-    [engine]
+    [engine],
   );
 
   const onVolChange = useCallback((which, v) => {
@@ -208,49 +212,65 @@ export default function MiniDJMixer() {
 
   // Rejilla de un deck (detectada o ajustada a mano): alimenta el SYNC y, si
   // la pista vino de la lista, se guarda para no perder el ajuste al recargar
-  const onBpmDetected = useCallback((side, bpm, grid) => {
-    setBpms((prev) => (prev[side] === bpm ? prev : { ...prev, [side]: bpm }));
-    if (!bpm) return;
-    const loaded = deckTracksRef.current[side];
-    if (!loaded) return;
-    const dur = audioElsRef.current[side]?.duration;
-    const anchor = Number.isFinite(grid?.anchor) ? grid.anchor : null;
-    const manual = Boolean(grid?.manual);
-    updateTrack(loaded.id, (t) => withGrid(t, { bpm, anchor, manual, duration: dur }));
-  }, [updateTrack]);
+  const onBpmDetected = useCallback(
+    (side, bpm, grid) => {
+      setBpms((prev) => (prev[side] === bpm ? prev : { ...prev, [side]: bpm }));
+      if (!bpm) return;
+      const loaded = deckTracksRef.current[side];
+      if (!loaded) return;
+      const dur = audioElsRef.current[side]?.duration;
+      const anchor = Number.isFinite(grid?.anchor) ? grid.anchor : null;
+      const manual = Boolean(grid?.manual);
+      updateTrack(loaded.id, (t) =>
+        withGrid(t, { bpm, anchor, manual, duration: dur }),
+      );
+    },
+    [updateTrack],
+  );
 
   // Datos que llegan del deck (etiquetas al cargar, tonalidad al analizar):
   // se reflejan en la lista y se persisten para no repetir el trabajo
-  const onTrackMeta = useCallback((side, data) => {
-    if ("musicalKey" in data) {
-      setDeckKeys((prev) =>
-        prev[side] === data.musicalKey ? prev : { ...prev, [side]: data.musicalKey }
-      );
-    }
-    const loaded = deckTracksRef.current[side];
-    if (!loaded) return;
-    updateTrack(loaded.id, (t) => withDeckMeta(t, data));
-  }, [updateTrack]);
+  const onTrackMeta = useCallback(
+    (side, data) => {
+      if ("musicalKey" in data) {
+        setDeckKeys((prev) =>
+          prev[side] === data.musicalKey
+            ? prev
+            : { ...prev, [side]: data.musicalKey },
+        );
+      }
+      const loaded = deckTracksRef.current[side];
+      if (!loaded) return;
+      updateTrack(loaded.id, (t) => withDeckMeta(t, data));
+    },
+    [updateTrack],
+  );
 
   // Hot cues y loops que llegan del deck. Son del USUARIO: se guardan tal cual
   // en la fila de la pista y ningún análisis los vuelve a tocar. Solo se
   // escribe cuando algo ha cambiado de verdad, que esto viaja a IndexedDB.
-  const onCues = useCallback((side, data) => {
-    const loaded = deckTracksRef.current[side];
-    if (!loaded) return;
-    updateTrack(loaded.id, (t) => withCues(t, data));
-  }, [updateTrack]);
+  const onCues = useCallback(
+    (side, data) => {
+      const loaded = deckTracksRef.current[side];
+      if (!loaded) return;
+      updateTrack(loaded.id, (t) => withCues(t, data));
+    },
+    [updateTrack],
+  );
 
   // Estructura de la pista analizada en el deck: se guarda en su fila para no
   // volver a calcularla nunca más. Lo que el usuario haya ajustado a mano
   // (structure.manual) viaja dentro y el análisis de fondo no lo toca.
-  const onStructure = useCallback((side, structure) => {
-    const loaded = deckTracksRef.current[side];
-    if (!loaded) return;
-    const clean = sanitizeStructure(structure);
-    if (!clean) return;
-    updateTrack(loaded.id, (t) => withStructure(t, clean));
-  }, [updateTrack]);
+  const onStructure = useCallback(
+    (side, structure) => {
+      const loaded = deckTracksRef.current[side];
+      if (!loaded) return;
+      const clean = sanitizeStructure(structure);
+      if (!clean) return;
+      updateTrack(loaded.id, (t) => withStructure(t, clean));
+    },
+    [updateTrack],
+  );
 
   // Tamaño de frase: el selector rápido del deck y el del diálogo ⚙ son el
   // MISMO ajuste visto desde dos sitios.
@@ -265,7 +285,9 @@ export default function MiniDJMixer() {
   }, []);
 
   const onPlayingChange = useCallback((side, isPlaying) => {
-    setPlaying((prev) => (prev[side] === isPlaying ? prev : { ...prev, [side]: isPlaying }));
+    setPlaying((prev) =>
+      prev[side] === isPlaying ? prev : { ...prev, [side]: isPlaying },
+    );
     if (isPlaying) setLastStarted(side);
   }, []);
 
@@ -277,11 +299,14 @@ export default function MiniDJMixer() {
   }, []);
 
   // Marcar en la lista que la pista ya se pinchó en ese deck
-  const onPlayed = useCallback((side) => {
-    const loaded = deckTracksRef.current[side];
-    if (!loaded) return;
-    updateTrack(loaded.id, (t) => withPlayed(t, side));
-  }, [updateTrack]);
+  const onPlayed = useCallback(
+    (side) => {
+      const loaded = deckTracksRef.current[side];
+      if (!loaded) return;
+      updateTrack(loaded.id, (t) => withPlayed(t, side));
+    },
+    [updateTrack],
+  );
 
   // SYNC continuo: alterna el modo sync del deck
   const onSync = useCallback((side) => {
@@ -311,7 +336,7 @@ export default function MiniDJMixer() {
   const onOpenConfig = useCallback(() => setShowConfig(true), []);
   const onToggleArtwork = useCallback(
     (v) => setConfig((prev) => ({ ...prev, showArtwork: v })),
-    []
+    [],
   );
 
   // Motor de sync: mientras un deck tenga SYNC, su pitch se ajusta solo al
@@ -358,24 +383,25 @@ export default function MiniDJMixer() {
   // Guardián de carga: con el bloqueo puesto, un deck que está sonando no
   // admite otra pista. Los botones ya salen deshabilitados, pero esto cierra
   // la puerta también a atajos y a cualquier vía futura.
-  const onLoadToDeck = useCallback(
-    (side, track) => {
-      if (lockLoadRef.current && playingRef.current[side]) return;
-      setDeckTracks((prev) => ({
-        ...prev,
-        [side]: { ...track, loadToken: (prev[side]?.loadToken || 0) + 1 },
-      }));
-    },
-    []
-  );
+  const onLoadToDeck = useCallback((side, track) => {
+    if (lockLoadRef.current && playingRef.current[side]) return;
+    setDeckTracks((prev) => ({
+      ...prev,
+      [side]: { ...track, loadToken: (prev[side]?.loadToken || 0) + 1 },
+    }));
+  }, []);
 
   // === Atajos de teclado (actúan sobre el deck activo) ===
   // Con ⚙ abierto no: Espacio tiene que activar la pestaña con el foco, no
   // poner la pista en marcha detrás del diálogo.
-  useDeckShortcuts({ deckRefs, activeDeck, setActiveDeck, suspended: showConfig });
+  useDeckShortcuts({
+    deckRefs,
+    activeDeck,
+    setActiveDeck,
+    suspended: showConfig,
+  });
 
-  const syncLabel = (side) =>
-    masterSyncOn ? "MST" : side === "A" ? "B" : "A";
+  const syncLabel = (side) => (masterSyncOn ? "MST" : side === "A" ? "B" : "A");
   const canSyncFor = (side) => canSync(side, { bpms, masterSyncOn });
 
   // Tonalidad de referencia para la lista: la del deck que esté sonando (si
@@ -394,7 +420,7 @@ export default function MiniDJMixer() {
   // Paleta de la onda: se reconstruye solo al cambiar de preset o de color
   const wavePalette = useMemo(
     () => buildWavePalette(resolveWaveColors(config)),
-    [config]
+    [config],
   );
 
   const eqPair = useMemo(() => ({ A: eqA, B: eqB }), [eqA, eqB]);

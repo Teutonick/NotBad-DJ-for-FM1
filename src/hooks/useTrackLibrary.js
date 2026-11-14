@@ -44,7 +44,7 @@ export function useTrackLibrary({ analysisMode }) {
         const updated = fn(t);
         if (persist && updated !== t) storeTrack(updated);
         return updated;
-      })
+      }),
     );
   }, []);
 
@@ -52,7 +52,9 @@ export function useTrackLibrary({ analysisMode }) {
     setTracks((prev) => {
       const next = [...prev];
       for (const file of files) {
-        const exists = next.some((t) => t.name === file.name && t.size === file.size);
+        const exists = next.some(
+          (t) => t.name === file.name && t.size === file.size,
+        );
         if (!exists) {
           const track = newTrackFromFile(file);
           next.push(track);
@@ -99,13 +101,15 @@ export function useTrackLibrary({ analysisMode }) {
         .then(({ bpm, gridAnchor, duration, musicalKey }) => {
           // Un ajuste manual de rejilla nunca lo pisa el análisis de fondo
           updateTrack(pending.id, (t) =>
-            mergeTrackAnalysis(t, { bpm, gridAnchor, duration, musicalKey })
+            mergeTrackAnalysis(t, { bpm, gridAnchor, duration, musicalKey }),
           );
         })
         .catch((err) => {
           logError(ERRORS.ANALYSIS_LIST, err, { track: pending.name });
           // Solo en memoria: al recargar se reintenta
-          updateTrack(pending.id, (t) => ({ ...t, analyzeFailed: true }), { persist: false });
+          updateTrack(pending.id, (t) => ({ ...t, analyzeFailed: true }), {
+            persist: false,
+          });
         })
         .finally(() => {
           analysisBusyRef.current = false;

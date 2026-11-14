@@ -7,7 +7,8 @@ export default {
   masterSync: "MASTER SYNC",
   masterSyncTitle:
     "Master sync: SYNC duten deckek BPM hau jarraitzen dute beste deckarena beharrean",
-  masterBpmTitle: "Master sync-aren BPMa. Sakatu gainean eta arrastatu gora edo behera, edo erabili gurpila, teklatu gabe doitzeko (Shift-ekin, finago)",
+  masterBpmTitle:
+    "Master sync-aren BPMa. Sakatu gainean eta arrastatu gora edo behera, edo erabili gurpila, teklatu gabe doitzeko (Shift-ekin, finago)",
   bpm: "BPM",
   language: "Hizkuntza",
 
@@ -22,7 +23,8 @@ export default {
   noFile: "Fitxategirik ez",
   loadFile: "📂 Fitxategia kargatu",
   cue: "CUE",
-  cueTitle: "CUE punturainoko distantzia; puntua {time} unean dago. Pista pausan kokatzean ezartzen da; Stop-ek hara itzultzen du.",
+  cueTitle:
+    "CUE punturainoko distantzia; puntua {time} unean dago. Pista pausan kokatzean ezartzen da; Stop-ek hara itzultzen du.",
   bpmDisplayTitle:
     "Egin klik erritmoan (TAP): beat-sareta birfinkatzen du eta BPMa birkalkulatzen",
   analyzingTrack: "⏳ Pista aztertzen…",
@@ -30,7 +32,8 @@ export default {
   regridding: "⏳ Sareta doitzen…",
   updateDownloading: "{version} eguneraketa deskargatzen… %{percent}",
   updateReady: "{version} eguneraketa prest",
-  updateReadyHint: "Orain berrabiarazten ez baduzu, aplikazioa ixtean instalatuko da",
+  updateReadyHint:
+    "Orain berrabiarazten ez baduzu, aplikazioa ixtean instalatuko da",
   updateInstall: "Berrabiarazi eta instalatu",
   updateLater: "Geroago",
   updateChecking: "Eguneratzeak bilatzen…",
@@ -54,7 +57,8 @@ export default {
   bendMinusTitle: "Bend − (motelago sakatuta duzun bitartean)",
   bendPlusTitle: "Bend + (azkarrago sakatuta duzun bitartean)",
   hotCueSetTitle: "Hot cue {n}: uneko posizioan finkatu",
-  hotCueGoTitle: "Hot cue {n}: {time}-ra jauzi · ezabatu eskuin-klikarekin edo Shift+klik · klik bikoitza izena jartzeko",
+  hotCueGoTitle:
+    "Hot cue {n}: {time}-ra jauzi · ezabatu eskuin-klikarekin edo Shift+klik · klik bikoitza izena jartzeko",
   hotCueNameLabel: "{n} cue-aren izena",
   namePlaceholder: "drop, ahotsa…",
   nameSaveTitle: "Izena gorde (Sartu)",
@@ -71,21 +75,25 @@ export default {
   quantizeTitle:
     "Quantize: hot cueak, loopak eta jauziak saretako beat hurbilenera imantatzen ditu",
   gridPhaseLabel: "Fasea",
-  gridPhaseTitle: "Sareta osoa atzera edo aurrera mugitzen du, BPMa aldatu gabe",
+  gridPhaseTitle:
+    "Sareta osoa atzera edo aurrera mugitzen du, BPMa aldatu gabe",
   gridPhaseBackCoarseTitle: "Atzeratu sareta 10 ms",
   gridPhaseBackFineTitle: "Atzeratu sareta 1 ms",
   gridPhaseFwdFineTitle: "Aurreratu sareta 1 ms",
   gridPhaseFwdCoarseTitle: "Aurreratu sareta 10 ms",
   gridTempoLabel: "Tartea",
-  gridTempoTitle: "Beat-en arteko tartea zabaldu edo estutzen du pistaren oinarrizko BPMa aldatuz. Ez da pitch-a: pitch-a faderrean dago",
+  gridTempoTitle:
+    "Beat-en arteko tartea zabaldu edo estutzen du pistaren oinarrizko BPMa aldatuz. Ez da pitch-a: pitch-a faderrean dago",
   gridTempoDownCoarseTitle: "Jaitsi oinarrizko BPMa 0,1 (beat-ak urrunago)",
   gridTempoDownFineTitle: "Jaitsi oinarrizko BPMa 0,01 (beat-ak urrunago)",
   gridTempoUpFineTitle: "Igo oinarrizko BPMa 0,01 (beat-ak hurbilago)",
   gridTempoUpCoarseTitle: "Igo oinarrizko BPMa 0,1 (beat-ak hurbilago)",
   gridHalveTitle: "Zatitu oinarrizko BPMa 2z, ainguraketa mantenduz",
   gridDoubleTitle: "Bikoiztu oinarrizko BPMa, ainguraketa mantenduz",
-  gridRegridTitle: "Berranalizatu uneko BPMtik eta ainguratik abiatuta, inguruko egokitzapenik onena bilatuz",
-  gridBaseBpmTitle: "Pistaren oinarrizko BPMa: sareta zehazten duena. Pitch-ak ez du aldatzen",
+  gridRegridTitle:
+    "Berranalizatu uneko BPMtik eta ainguratik abiatuta, inguruko egokitzapenik onena bilatuz",
+  gridBaseBpmTitle:
+    "Pistaren oinarrizko BPMa: sareta zehazten duena. Pitch-ak ez du aldatzen",
   loop: "Loop",
   loopIn: "IN",
   loopInTitle: "Loop-aren hasiera uneko posizioan markatzen du",
@@ -96,9 +104,11 @@ export default {
   loopMoveFwdTitle: "Loopa luzera bat aurrera mugitzen du, tamaina aldatu gabe",
   loopHalveTitle: "Looparen luzera erdira murrizten du, sareta errespetatuz",
   loopDoubleTitle: "Looparen luzera bikoizten du, sareta errespetatuz",
-  loopLengthTitle: "Looparen luzera beatetan (segundotan, IN/OUT saretan sartzen ez bada)",
+  loopLengthTitle:
+    "Looparen luzera beatetan (segundotan, IN/OUT saretan sartzen ez bada)",
   rollLabel: "Roll",
-  rollSizeTitle: "{n} beateko loop rolla sakatuta duzun bitartean. Askatzean, pista rolla gertatu ez balitz egongo litzatekeen lekuan jarraitzen du",
+  rollSizeTitle:
+    "{n} beateko loop rolla sakatuta duzun bitartean. Askatzean, pista rolla gertatu ez balitz egongo litzatekeen lekuan jarraitzen du",
   savedLoopsLabel: "Loopak",
   savedLoopsNone: "looprik ez",
   savedLoopSaveTitle: "Loop aktiboa pistan gordetzen du",
@@ -119,7 +129,8 @@ export default {
   kill: "KILL",
   eqTitle: "EQ banda: eskuin-klika = banda kill · klik bikoitza = zerora",
   gainTitle: "Kanalaren irabazia · eskuin-klika edo klik bikoitza = zerora",
-  filterTitle: "DJ iragazkia: ezkerrera = behe-iragazkia, eskuinera = goi-iragazkia · eskuin-klika edo klik bikoitza = OFF",
+  filterTitle:
+    "DJ iragazkia: ezkerrera = behe-iragazkia, eskuinera = goi-iragazkia · eskuin-klika edo klik bikoitza = OFF",
   crossfader: "Crossfader",
   resetHint: "eskuin-klika = hasierako posiziora itzuli",
   volumeTitle: "{side} deck-aren bolumena",
@@ -168,10 +179,12 @@ export default {
   keySameTitle: "Entzuten ari den pistaren tonalitate bera",
   keyCompatibleTitle: "Entzuten ari den pistarekin bateragarria",
   keyClashTitle: "Ez dator bat entzuten ari den pistaren tonalitatearekin",
-  keyLegend: "{key} tonalitatean ari da: morez, harmonikoki bateragarriak diren pistak.",
+  keyLegend:
+    "{key} tonalitatean ari da: morez, harmonikoki bateragarriak diren pistak.",
   showArtwork: "Azalak",
   showArtworkTitle: "Erakutsi edo ezkutatu azalen miniaturak",
-  showArtworkNote: "Ezkutatzeak pantailan lekua irabazten du; azalak gordeta jarraitzen dute.",
+  showArtworkNote:
+    "Ezkutatzeak pantailan lekua irabazten du; azalak gordeta jarraitzen dute.",
   listHeading: "Abesti-zerrenda",
   csvArtist: "Artista",
   csvKey: "Tonalitatea",
@@ -179,7 +192,8 @@ export default {
   // Colores de la onda
   showKey: "Pistaren tonalitatea",
   wavePaletteHeading: "Uhinaren koloreak",
-  wavePaletteNote: "Baxuak, ertainak eta altuak aztertuta daude jada: paleta aldatzeak berehala koloreztatzen du, ezer berriro aztertu gabe.",
+  wavePaletteNote:
+    "Baxuak, ertainak eta altuak aztertuta daude jada: paleta aldatzeak berehala koloreztatzen du, ezer berriro aztertu gabe.",
   paletteMinidj: "Mini DJ (lehenetsia)",
   paletteMono: "Berde klasikoa (kolore bakarra)",
   paletteCustom: "Pertsonalizatua…",
@@ -207,26 +221,34 @@ export default {
   analysisAuto: "Automatikoa (bigarren planoan, poliki)",
   analysisDeck: "Deck batean kargatzean bakarrik",
 
-  shortcuts: "Teklatua (deck aktiboa: Q=A, P=B edo klika deckean) — Zuriunea: play/pausa · C: cue/stop · 1-8: hot cueak (Shift: ezabatu) · I/O: loop in/out · L: loop on/off · A S D F G H: loop rolla 1/8-4 · [ ]: loopa mugitu · − =: erdira/bikoiztu · R: loopa gorde (Shift: aktibatu) · , .: gordetako loopa aukeratu · ←/→: nudge",
+  shortcuts:
+    "Teklatua (deck aktiboa: Q=A, P=B edo klika deckean) — Zuriunea: play/pausa · C: cue/stop · 1-8: hot cueak (Shift: ezabatu) · I/O: loop in/out · L: loop on/off · A S D F G H: loop rolla 1/8-4 · [ ]: loopa mugitu · − =: erdira/bikoiztu · R: loopa gorde (Shift: aktibatu) · , .: gordetako loopa aukeratu · ←/→: nudge",
   // Konfigurazio-fitxak, kargatze-blokeoa eta VU
   tabAudio: "Audioa",
   tabLibrary: "Liburutegia",
   tabDisplay: "Bistaratzea",
   tabSafety: "Segurtasuna",
   safetyHeading: "Segurtasuna zuzenean",
-  lockLoadWhilePlaying: "Ez kargatu pistarik erreproduzitzen ari den deck batean",
-  lockLoadWhilePlayingNote: "Zuzeneko nahasketa ez hondatzeko: deck-a erreproduzitzen ari den bitartean, haren kargatze-botoiak desgaituta agertzen dira. Desaktibatu betiko portaerara itzultzeko.",
+  lockLoadWhilePlaying:
+    "Ez kargatu pistarik erreproduzitzen ari den deck batean",
+  lockLoadWhilePlayingNote:
+    "Zuzeneko nahasketa ez hondatzeko: deck-a erreproduzitzen ari den bitartean, haren kargatze-botoiak desgaituta agertzen dira. Desaktibatu betiko portaerara itzultzeko.",
   loadToDeckTitle: "Kargatu pista hau {side} deck-ean",
-  loadLockedTitle: "{side} deck-a erreproduzitzen ari da: ezin da beste pistarik kargatu. Gelditu ezazu edo desaktibatu blokeoa Konfigurazioa ⚙ › Segurtasuna atalean.",
+  loadLockedTitle:
+    "{side} deck-a erreproduzitzen ari da: ezin da beste pistarik kargatu. Gelditu ezazu edo desaktibatu blokeoa Konfigurazioa ⚙ › Segurtasuna atalean.",
   vuHeading: "Maila-neurgailuak (VU)",
   vuModeContinuous: "Jarraitua (barra betea)",
   vuModeLed: "LED (segmentuak, mahai batean bezala)",
-  vuNote: "dBFS eskala, −42tik 0ra. Berdea −12 arte, anbarra −3 arte eta gorria sabai digitalaren ondoan; adierazleak gailurra atxikitzen du eta goiko bloke gorriak saturazioaz ohartarazten du.",
-  vuChannelTitle: "Kanalaren maila dBFS-etan (EQ ondoren, fader aurretik: ez dago fader-aren ez crossfader-aren mende)",
-  vuMasterTitle: "Master irteeraren maila dBFS-etan (trim-aren eta mugatzailearen ondoren neurtua)",
+  vuNote:
+    "dBFS eskala, −42tik 0ra. Berdea −12 arte, anbarra −3 arte eta gorria sabai digitalaren ondoan; adierazleak gailurra atxikitzen du eta goiko bloke gorriak saturazioaz ohartarazten du.",
+  vuChannelTitle:
+    "Kanalaren maila dBFS-etan (EQ ondoren, fader aurretik: ez dago fader-aren ez crossfader-aren mende)",
+  vuMasterTitle:
+    "Master irteeraren maila dBFS-etan (trim-aren eta mugatzailearen ondoren neurtua)",
   tabLog: "Erregistroa",
   logHeading: "Erroreen erregistroa",
-  logNote: "Hutsegiteak gertatu diren eremuaren kodearekin gordetzen dira (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). Beti ingelesez daude, itzuli gabe, bilatu eta alderatu ahal izateko. Azken 200 sarrerak gordetzen dira.",
+  logNote:
+    "Hutsegiteak gertatu diren eremuaren kodearekin gordetzen dira (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). Beti ingelesez daude, itzuli gabe, bilatu eta alderatu ahal izateko. Azken 200 sarrerak gordetzen dira.",
   logEmpty: "Ez dago errorerik erregistratuta.",
   logCount: "{n} sarrera",
   logDownload: "⬇ Deskargatu",
@@ -241,10 +263,13 @@ export default {
   phraseBackFineTitle: "Atzeratu esaldia kick 1",
   phraseFwdFineTitle: "Aurreratu esaldia kick 1",
   phraseFwdCoarseTitle: "Aurreratu esaldia {n} kick",
-  phraseSizeTitle: "Esaldiaren tamaina kick-etan. ⚙ Konfigurazioan dagoen ezarpen bera da",
-  structureRedetectTitle: "Egitura berriro detektatu uneko saretaren gainean, eskuz jarritako esaldi-desplazamendua errespetatuz",
+  phraseSizeTitle:
+    "Esaldiaren tamaina kick-etan. ⚙ Konfigurazioan dagoen ezarpen bera da",
+  structureRedetectTitle:
+    "Egitura berriro detektatu uneko saretaren gainean, eskuz jarritako esaldi-desplazamendua errespetatuz",
   phraseResetTitle: "Itzuli esaldi-desplazamendua analisiak aurkitutakora",
-  phraseOffsetTitle: "Uneko esaldi-desplazamendua, kick-etan. Anbar kolorez zuk eskuz jarri duzunean",
+  phraseOffsetTitle:
+    "Uneko esaldi-desplazamendua, kick-etan. Anbar kolorez zuk eskuz jarri duzunean",
   structureTipInKick: "Erritmoa duen zatian zaude.",
   structureTipInBreak: "Jaitsiera batean zaude.",
   structureTipDrop: "Jaitsiera {n} kick barru sartzen da.",
@@ -258,7 +283,8 @@ export default {
   structureTipPhrase: "{size} kick-eko esaldi baten {pos}. kick-ean zaude.",
   structureHeading: "Egitura-adierazlea",
   showStructure: "Erakutsi adierazlea uhinaren gainean",
-  structureNote: "Erritmoa joan arte (▼) eta itzuli arte (▲) falta diren kick-ak zenbatzen ditu, eta esaldiaren barruan non zauden. Behin bakarrik analizatzen da, pista kargatzean.",
+  structureNote:
+    "Erritmoa joan arte (▼) eta itzuli arte (▲) falta diren kick-ak zenbatzen ditu, eta esaldiaren barruan non zauden. Behin bakarrik analizatzen da, pista kargatzean.",
   phraseSizeLabel: "Esaldiaren tamaina",
   structureUnitLabel: "Zenbatu honela",
   unitKicks: "Kick-ak",
@@ -267,7 +293,8 @@ export default {
   warnRedLabel: "Abisu gorria (kick)",
   endWarnHeading: "Pista amaitzeko abisua",
   endWarnOn: "Abisatu pista amaitzear dagoenean",
-  endWarnNote: "Uhinaren ertza gorriz keinuka hasten da, gero eta setatiago. Pista jotzen ari denean bakarrik, eta geldi sistemaren mugimendu murriztua aktibatuta baduzu.",
+  endWarnNote:
+    "Uhinaren ertza gorriz keinuka hasten da, gero eta setatiago. Pista jotzen ari denean bakarrik, eta geldi sistemaren mugimendu murriztua aktibatuta baduzu.",
   endWarnModeLabel: "Abisatu honen arabera",
   endWarnModeSeconds: "Geratzen diren segundoak",
   endWarnModePercent: "Geratzen den ehunekoa",
@@ -277,7 +304,8 @@ export default {
   // Pitch (rango del fader y fuerza del bend)
   pitchHeading: "Pitch-a",
   bendRangeLabel: "Pitch bend-aren indarra",
-  pitchNote: "Bi deckentzat balio dute. Tartea abiapuntua da: SYNC-ek ibilbide gehiago behar badu, berak zabaltzen du, hau ukitu gabe. Bend-aren indarra deckeko − eta + botoiek tiratzen dutena da.",
+  pitchNote:
+    "Bi deckentzat balio dute. Tartea abiapuntua da: SYNC-ek ibilbide gehiago behar badu, berak zabaltzen du, hau ukitu gabe. Bend-aren indarra deckeko − eta + botoiek tiratzen dutena da.",
   masterBpmDownTitle: "Jaitsi 1 masterraren BPMa",
   masterBpmUpTitle: "Igo 1 masterraren BPMa",
 
@@ -291,7 +319,8 @@ export default {
   noArtworkFormatTitle: "Azalik gabe · {format} fitxategia",
 
   // Resumen de la pista
-  overviewTitle: "Pistaren laburpena: sakatu edo arrastatu mugitzeko. Zati ilunak jaitsierak dira; marra gorriak erritmoa non doan markatzen du eta berdeak non itzultzen den",
+  overviewTitle:
+    "Pistaren laburpena: sakatu edo arrastatu mugitzeko. Zati ilunak jaitsierak dira; marra gorriak erritmoa non doan markatzen du eta berdeak non itzultzen den",
 
   // Pantalla LCD del deck
   lcdElapsed: "Igarota",
@@ -299,7 +328,8 @@ export default {
   lcdTotal: "Guztira",
   lcdTrackBpm: "Pistaren BPM",
   lcdKey: "Tonua",
-  lcdTimeTitle: "Pistaren denbora. Sakatu igarotakoaren eta falta denaren artean txandakatzeko",
+  lcdTimeTitle:
+    "Pistaren denbora. Sakatu igarotakoaren eta falta denaren artean txandakatzeko",
 
   // Marquesina del nombre de la pista
   marqueeSpeedLabel: "Marka mugikorra",
@@ -307,13 +337,15 @@ export default {
   marqueeSlow: "Motela",
   marqueeNormal: "Normala",
   marqueeFast: "Azkarra",
-  marqueeNote: "Izena deckeko pantailan sartzen ez denean, begiztan pasatzen da. Animazioa nabigatzaileak egiten du, ez du CPUrik jaten. Sistemaren mugimendu murriztuarekin geldi geratzen da.",
+  marqueeNote:
+    "Izena deckeko pantailan sartzen ez denean, begiztan pasatzen da. Animazioa nabigatzaileak egiten du, ez du CPUrik jaten. Sistemaren mugimendu murriztuarekin geldi geratzen da.",
 
   // Pantalla del deck: cifras redondeadas o de 14 segmentos
   lcdHeading: "Deckaren pantaila",
   lcdFontLabel: "Zifrak",
   lcdFontRounded: "Biribilduak",
-  lcdFontNote: "Izenburua 5 x 7 puntu-matrizean eta zifrak (denbora, BPM, pitch…) benetako pantaila baten muntaia finkoarekin: zazpi segmentu zenbakiak baino ez doazen tokian eta hamalau ikur bat behar denean. Betiko letrek adina leku hartzen du: aldatzeak ez du ezer mugitzen.",
+  lcdFontNote:
+    "Izenburua 5 x 7 puntu-matrizean eta zifrak (denbora, BPM, pitch…) benetako pantaila baten muntaia finkoarekin: zazpi segmentu zenbakiak baino ez doazen tokian eta hamalau ikur bat behar denean. Betiko letrek adina leku hartzen du: aldatzeak ez du ezer mugitzen.",
   titleFontLabel: "Izenburua",
   lcdFontLcd: "LCD pantaila",
   lcdFontDot: "Puntu-matrizea",

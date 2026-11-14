@@ -4,14 +4,11 @@ import { GLOSS, PRESS, SKIN } from "./PadButton";
 import { csvLine } from "../lib/csv";
 import { downloadBlob } from "../lib/download";
 import { formatClock, formatSize } from "../lib/format";
-import {
-  camelotSortIndex,
-  harmonicRelation,
-  keyLabel,
-} from "../lib/camelot";
+import { camelotSortIndex, harmonicRelation, keyLabel } from "../lib/camelot";
 
 // La lista cuenta minutos aunque pase de la hora, y «--:--» si no hay dato
-const formatDuration = (s) => formatClock(s, { fallback: "--:--", hours: false });
+const formatDuration = (s) =>
+  formatClock(s, { fallback: "--:--", hours: false });
 
 // Nombre a mostrar: título de las etiquetas si lo hay, si no el archivo
 function displayTitle(track) {
@@ -91,8 +88,8 @@ function TrackList({
     if (q) {
       list = list.filter((tr) =>
         [tr.name, tr.title, tr.artist, tr.album].some((v) =>
-          v ? v.toLowerCase().includes(q) : false
-        )
+          v ? v.toLowerCase().includes(q) : false,
+        ),
       );
     }
     if (activeSort !== "added") {
@@ -194,8 +191,7 @@ function TrackList({
     const relation = referenceKey ? harmonicRelation(own, referenceKey) : null;
     if (relation === "same") {
       return {
-        className:
-          "bg-violet-500/35 text-violet-100 ring-1 ring-violet-400/60",
+        className: "bg-violet-500/35 text-violet-100 ring-1 ring-violet-400/60",
         title: t("keySameTitle"),
       };
     }
@@ -289,13 +285,9 @@ function TrackList({
       </div>
 
       {tracks.length === 0 ? (
-        <p className="text-sm text-neutral-500">
-          {t("emptyList")}
-        </p>
+        <p className="text-sm text-neutral-500">{t("emptyList")}</p>
       ) : visibleTracks.length === 0 ? (
-        <p className="text-sm text-neutral-500">
-          {t("noMatch", { query })}
-        </p>
+        <p className="text-sm text-neutral-500">{t("noMatch", { query })}</p>
       ) : (
         <>
           {/* Cabecera: las mismas anchuras que las filas, en una línea muy
@@ -305,15 +297,22 @@ function TrackList({
             className="flex items-center gap-x-3 pb-1 pr-4 text-[9px] uppercase tracking-wide text-neutral-500 border-b border-neutral-800"
           >
             <span className="w-12 shrink-0" />
-            <span className="w-14 shrink-0 text-right truncate" title={t("csvDuration")}>
+            <span
+              className="w-14 shrink-0 text-right truncate"
+              title={t("csvDuration")}
+            >
               {t("csvDuration")}
             </span>
             <span className="w-24 shrink-0 text-center">{t("bpm")}</span>
-            <span className="w-[6.5rem] shrink-0 text-center">{t("colDeck")}</span>
+            <span className="w-[6.5rem] shrink-0 text-center">
+              {t("colDeck")}
+            </span>
             {showArtwork && <span className="w-8 shrink-0" />}
             <span className="flex-1 min-w-24 truncate">{t("csvName")}</span>
             {showKey && (
-              <span className="w-20 shrink-0 text-center truncate">{t("sortKey")}</span>
+              <span className="w-20 shrink-0 text-center truncate">
+                {t("sortKey")}
+              </span>
             )}
             <span className="w-16 shrink-0 text-right truncate hidden sm:block">
               {t("csvSize")}
@@ -324,145 +323,147 @@ function TrackList({
               Windows con la opción puesta) la barra se comía el botón de
               quitar. Este hueco lo deja siempre libre. */}
           <ul className="divide-y divide-neutral-800 max-h-64 overflow-y-auto pr-2">
-          {visibleTracks.map((track) => {
-            const art = showArtwork ? artworkUrl(track) : null;
-            const badge = showKey ? keyBadge(track) : null;
-            return (
-              <li
-                key={track.id}
-                className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2"
-              >
-                {/* Orden de la fila, pensado para pinchar: dónde ha sonado
+            {visibleTracks.map((track) => {
+              const art = showArtwork ? artworkUrl(track) : null;
+              const badge = showKey ? keyBadge(track) : null;
+              return (
+                <li
+                  key={track.id}
+                  className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2"
+                >
+                  {/* Orden de la fila, pensado para pinchar: dónde ha sonado
                     ya · cuánto dura · a qué BPM · cargarla · y por último qué
                     es (carátula, título, artista y su ficha). */}
-                {/* Badges de deck (actual en color, historial en gris) */}
-                <div className="flex items-center gap-1 w-12 shrink-0">
-                  {["A", "B"].map((side) => {
-                    const state = badgeState(track, side);
-                    if (!state) return null;
-                    return (
-                      <span
-                        key={side}
-                        className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeClasses[side][state]}`}
-                        title={
-                          state === "current"
-                            ? t("badgeCurrentTitle", { side })
-                            : t("badgePlayedTitle", { side })
-                        }
-                      >
-                        {side}
+                  {/* Badges de deck (actual en color, historial en gris) */}
+                  <div className="flex items-center gap-1 w-12 shrink-0">
+                    {["A", "B"].map((side) => {
+                      const state = badgeState(track, side);
+                      if (!state) return null;
+                      return (
+                        <span
+                          key={side}
+                          className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeClasses[side][state]}`}
+                          title={
+                            state === "current"
+                              ? t("badgeCurrentTitle", { side })
+                              : t("badgePlayedTitle", { side })
+                          }
+                        >
+                          {side}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <span className="w-14 text-right text-xs text-neutral-400 tabular-nums shrink-0">
+                    {formatDuration(track.duration)}
+                  </span>
+                  <span className="w-24 shrink-0 text-center">
+                    {track.bpm != null ? (
+                      <span className="inline-block w-full px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold tabular-nums truncate">
+                        {track.bpm.toFixed(1)} {t("bpm")}
                       </span>
-                    );
-                  })}
-                </div>
-                <span className="w-14 text-right text-xs text-neutral-400 tabular-nums shrink-0">
-                  {formatDuration(track.duration)}
-                </span>
-                <span className="w-24 shrink-0 text-center">
-                  {track.bpm != null ? (
-                    <span className="inline-block w-full px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold tabular-nums truncate">
-                      {track.bpm.toFixed(1)} {t("bpm")}
+                    ) : track.analyzeFailed ? (
+                      <span className="text-[10px] text-neutral-600">
+                        {t("bpmUnknown")}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-neutral-500 animate-pulse">
+                        {t("pendingAnalysis")}
+                      </span>
+                    )}
+                  </span>
+                  <div className="flex w-[6.5rem] shrink-0 items-center justify-center gap-2">
+                    {["A", "B"].map((side) => {
+                      const blocked = deckBlocked[side];
+                      return (
+                        // El title va en el envoltorio: un <button disabled> no
+                        // dispara eventos de ratón y el navegador no le enseña
+                        // el tooltip
+                        <span
+                          key={side}
+                          className="inline-flex"
+                          title={
+                            blocked
+                              ? t("loadLockedTitle", { side })
+                              : t("loadToDeckTitle", { side })
+                          }
+                        >
+                          <button
+                            onClick={() => onLoadToDeck(side, track)}
+                            disabled={blocked}
+                            aria-disabled={blocked}
+                            className={`px-3 py-1 rounded-lg border text-xs font-semibold whitespace-nowrap ${
+                              blocked
+                                ? "bg-neutral-800/60 border-neutral-700 text-neutral-600 opacity-60 cursor-not-allowed"
+                                : `${loadBtnClass[side]} ${GLOSS} active:translate-y-px active:shadow-none`
+                            }`}
+                          >
+                            {t("loadToDeck", { side })}
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                  {/* Carátula: hueco fijo de 32 px. Sin carátula se pinta un
+                    marcador discreto, así las filas nunca se descuadran. */}
+                  {showArtwork &&
+                    (art ? (
+                      <img
+                        src={art}
+                        alt=""
+                        loading="lazy"
+                        className="w-8 h-8 shrink-0 rounded object-cover border border-neutral-700"
+                      />
+                    ) : (
+                      <div
+                        className="w-8 h-8 shrink-0 rounded border border-neutral-800 bg-neutral-800/50 grid place-items-center overflow-hidden px-0.5 text-neutral-500 text-[8px] font-bold tracking-tight"
+                        title={t("noArtworkFormatTitle", {
+                          format: fileFormat(track),
+                        })}
+                      >
+                        {fileFormat(track)}
+                      </div>
+                    ))}
+                  {/* Título + artista: dos líneas siempre, aunque no haya
+                    artista, para que todas las filas midan lo mismo */}
+                  <div className="flex-1 min-w-24 grid">
+                    <span
+                      data-testid="track-title"
+                      className="truncate text-sm leading-tight"
+                    >
+                      {displayTitle(track)}
                     </span>
-                  ) : track.analyzeFailed ? (
-                    <span className="text-[10px] text-neutral-600">{t("bpmUnknown")}</span>
-                  ) : (
-                    <span className="text-[10px] text-neutral-500 animate-pulse">
-                      {t("pendingAnalysis")}
+                    <span className="truncate text-[11px] leading-tight text-neutral-500">
+                      {track.artist || " "}
+                    </span>
+                  </div>
+                  {/* Ficha de la pista, pegada a la derecha: tonalidad y tamaño */}
+                  {showKey && (
+                    <span className="w-20 shrink-0 text-center">
+                      <span
+                        className={`inline-block w-full px-1.5 py-0.5 rounded text-[10px] font-semibold truncate ${badge.className}`}
+                        title={badge.title}
+                      >
+                        {keyLabel(
+                          track.musicalKey?.pitchClass,
+                          track.musicalKey?.mode,
+                        ) || t("keyNone")}
+                      </span>
                     </span>
                   )}
-                </span>
-                <div className="flex w-[6.5rem] shrink-0 items-center justify-center gap-2">
-                  {["A", "B"].map((side) => {
-                    const blocked = deckBlocked[side];
-                    return (
-                      // El title va en el envoltorio: un <button disabled> no
-                      // dispara eventos de ratón y el navegador no le enseña
-                      // el tooltip
-                      <span
-                        key={side}
-                        className="inline-flex"
-                        title={
-                          blocked
-                            ? t("loadLockedTitle", { side })
-                            : t("loadToDeckTitle", { side })
-                        }
-                      >
-                        <button
-                          onClick={() => onLoadToDeck(side, track)}
-                          disabled={blocked}
-                          aria-disabled={blocked}
-                          className={`px-3 py-1 rounded-lg border text-xs font-semibold whitespace-nowrap ${
-                            blocked
-                              ? "bg-neutral-800/60 border-neutral-700 text-neutral-600 opacity-60 cursor-not-allowed"
-                              : `${loadBtnClass[side]} ${GLOSS} active:translate-y-px active:shadow-none`
-                          }`}
-                        >
-                          {t("loadToDeck", { side })}
-                        </button>
-                      </span>
-                    );
-                  })}
-                </div>
-                {/* Carátula: hueco fijo de 32 px. Sin carátula se pinta un
-                    marcador discreto, así las filas nunca se descuadran. */}
-                {showArtwork &&
-                  (art ? (
-                    <img
-                      src={art}
-                      alt=""
-                      loading="lazy"
-                      className="w-8 h-8 shrink-0 rounded object-cover border border-neutral-700"
-                    />
-                  ) : (
-                    <div
-                      className="w-8 h-8 shrink-0 rounded border border-neutral-800 bg-neutral-800/50 grid place-items-center overflow-hidden px-0.5 text-neutral-500 text-[8px] font-bold tracking-tight"
-                      title={t("noArtworkFormatTitle", {
-                        format: fileFormat(track),
-                      })}
-                    >
-                      {fileFormat(track)}
-                    </div>
-                  ))}
-                {/* Título + artista: dos líneas siempre, aunque no haya
-                    artista, para que todas las filas midan lo mismo */}
-                <div className="flex-1 min-w-24 grid">
-                  <span
-                    data-testid="track-title"
-                    className="truncate text-sm leading-tight"
+                  <span className="w-16 text-right text-xs text-neutral-500 tabular-nums shrink-0 hidden sm:block">
+                    {formatSize(track.size)}
+                  </span>
+                  <button
+                    onClick={() => onRemoveTrack(track.id)}
+                    className={`w-7 h-6 shrink-0 grid place-items-center rounded-lg border text-neutral-400 text-xs ${SKIN} ${GLOSS} ${PRESS} hover:text-red-400 hover:border-red-500/50`}
+                    title={t("removeTitle")}
                   >
-                    {displayTitle(track)}
-                  </span>
-                  <span className="truncate text-[11px] leading-tight text-neutral-500">
-                    {track.artist || " "}
-                  </span>
-                </div>
-                {/* Ficha de la pista, pegada a la derecha: tonalidad y tamaño */}
-                {showKey && (
-                  <span className="w-20 shrink-0 text-center">
-                    <span
-                      className={`inline-block w-full px-1.5 py-0.5 rounded text-[10px] font-semibold truncate ${badge.className}`}
-                      title={badge.title}
-                    >
-                      {keyLabel(
-                        track.musicalKey?.pitchClass,
-                        track.musicalKey?.mode
-                      ) || t("keyNone")}
-                    </span>
-                  </span>
-                )}
-                <span className="w-16 text-right text-xs text-neutral-500 tabular-nums shrink-0 hidden sm:block">
-                  {formatSize(track.size)}
-                </span>
-                <button
-                  onClick={() => onRemoveTrack(track.id)}
-                  className={`w-7 h-6 shrink-0 grid place-items-center rounded-lg border text-neutral-400 text-xs ${SKIN} ${GLOSS} ${PRESS} hover:text-red-400 hover:border-red-500/50`}
-                  title={t("removeTitle")}
-                >
-                  ✕
-                </button>
-              </li>
-            );
-          })}
+                    ✕
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </>
       )}

@@ -102,10 +102,16 @@ function BeatMatchPanel({ analysis, audioElsRef }) {
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900/70 p-3 shadow-xl">
-      <div className="text-xs text-neutral-400 mb-1" title={t("beatMatchTitle")}>
+      <div
+        className="text-xs text-neutral-400 mb-1"
+        title={t("beatMatchTitle")}
+      >
         {t("beatMatch")}
       </div>
-      <canvas ref={canvasRef} className="w-full h-20 bg-neutral-800 rounded-lg" />
+      <canvas
+        ref={canvasRef}
+        className="w-full h-20 bg-neutral-800 rounded-lg"
+      />
     </div>
   );
 }

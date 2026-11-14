@@ -6,7 +6,8 @@ export default {
   configTitle: "设置：音频输出与分析",
   masterSync: "主同步",
   masterSyncTitle: "主同步：开启 SYNC 的打碟机跟随此 BPM，而不是另一台",
-  masterBpmTitle: "Master sync 的 BPM。在上面按住并上下拖动，或滚动滚轮，就能不用键盘调整（按住 Shift 更精细）",
+  masterBpmTitle:
+    "Master sync 的 BPM。在上面按住并上下拖动，或滚动滚轮，就能不用键盘调整（按住 Shift 更精细）",
   bpm: "BPM",
   language: "语言",
 
@@ -20,7 +21,8 @@ export default {
   noFile: "无文件",
   loadFile: "📂 载入文件",
   cue: "CUE",
-  cueTitle: "到 CUE 点的距离，CUE 点在 {time}。暂停时定位曲目即可设定；停止会回到那里。",
+  cueTitle:
+    "到 CUE 点的距离，CUE 点在 {time}。暂停时定位曲目即可设定；停止会回到那里。",
   bpmDisplayTitle: "跟着节奏点击（TAP）：重新锚定节拍网格并重算 BPM",
   analyzingTrack: "⏳ 正在分析音轨…",
   detectingBpm: "⏳ 正在检测 BPM…",
@@ -69,7 +71,8 @@ export default {
   gridPhaseFwdFineTitle: "网格延后 1 毫秒",
   gridPhaseFwdCoarseTitle: "网格延后 10 毫秒",
   gridTempoLabel: "间距",
-  gridTempoTitle: "通过改变曲目的基准 BPM 来拉开或收紧节拍间距。这不是变速：变速仍在推子上",
+  gridTempoTitle:
+    "通过改变曲目的基准 BPM 来拉开或收紧节拍间距。这不是变速：变速仍在推子上",
   gridTempoDownCoarseTitle: "基准 BPM 降低 0.1（节拍更疏）",
   gridTempoDownFineTitle: "基准 BPM 降低 0.01（节拍更疏）",
   gridTempoUpFineTitle: "基准 BPM 提高 0.01（节拍更密）",
@@ -90,7 +93,8 @@ export default {
   loopDoubleTitle: "把循环长度加倍，并对齐节拍网格",
   loopLengthTitle: "循环长度（拍）；IN/OUT 不在网格上时显示秒",
   rollLabel: "Roll",
-  rollSizeTitle: "按住时进行 {n} 拍的 loop roll；松开后，从没有 roll 时本该到达的位置继续播放",
+  rollSizeTitle:
+    "按住时进行 {n} 拍的 loop roll；松开后，从没有 roll 时本该到达的位置继续播放",
   savedLoopsLabel: "循环",
   savedLoopsNone: "无循环",
   savedLoopSaveTitle: "把当前循环保存到这首曲目",
@@ -169,7 +173,8 @@ export default {
   // Colores de la onda
   showKey: "曲目调性",
   wavePaletteHeading: "波形颜色",
-  wavePaletteNote: "低频、中频和高频已经分析过了：切换配色会立即重新上色，无需重新分析。",
+  wavePaletteNote:
+    "低频、中频和高频已经分析过了：切换配色会立即重新上色，无需重新分析。",
   paletteMinidj: "Mini DJ（默认）",
   paletteMono: "经典绿（单色）",
   paletteCustom: "自定义…",
@@ -195,7 +200,8 @@ export default {
   analysisAuto: "自动（后台缓慢进行）",
   analysisDeck: "仅在载入打碟机时",
 
-  shortcuts: "键盘（当前打碟机：Q=A，P=B 或点击打碟机）— 空格：播放/暂停 · C：cue/停止 · 1-8：热点（Shift：删除）· I/O：循环起点/终点 · L：循环开关 · A S D F G H：loop roll 1/8-4 · [ ]：移动循环 · − =：减半/加倍 · R：保存循环（Shift：启用）· , .：选择已保存的循环 · ←/→：微调",
+  shortcuts:
+    "键盘（当前打碟机：Q=A，P=B 或点击打碟机）— 空格：播放/暂停 · C：cue/停止 · 1-8：热点（Shift：删除）· I/O：循环起点/终点 · L：循环开关 · A S D F G H：loop roll 1/8-4 · [ ]：移动循环 · − =：减半/加倍 · R：保存循环（Shift：启用）· , .：选择已保存的循环 · ←/→：微调",
   // 设置选项卡、载入锁定与电平表
   tabAudio: "音频",
   tabLibrary: "曲库",
@@ -203,18 +209,22 @@ export default {
   tabSafety: "安全",
   safetyHeading: "现场安全",
   lockLoadWhilePlaying: "正在播放的打碟机不允许载入曲目",
-  lockLoadWhilePlayingNote: "避免毁掉正在进行的混音：打碟机播放时，其载入按钮会变为不可用。关闭此项即可恢复原来的行为。",
+  lockLoadWhilePlayingNote:
+    "避免毁掉正在进行的混音：打碟机播放时，其载入按钮会变为不可用。关闭此项即可恢复原来的行为。",
   loadToDeckTitle: "把这首曲目载入打碟机 {side}",
-  loadLockedTitle: "打碟机 {side} 正在播放：无法载入其他曲目。请先停止播放，或在“设置 ⚙ › 安全”中关闭此锁定。",
+  loadLockedTitle:
+    "打碟机 {side} 正在播放：无法载入其他曲目。请先停止播放，或在“设置 ⚙ › 安全”中关闭此锁定。",
   vuHeading: "电平表（VU）",
   vuModeContinuous: "连续（实心条）",
   vuModeLed: "LED（分段，像调音台）",
-  vuNote: "dBFS 刻度，从 −42 到 0。−12 以下为绿色，−3 以下为琥珀色，紧贴数字满刻度处为红色；标记会保持峰值，顶部的红块提示削波。",
+  vuNote:
+    "dBFS 刻度，从 −42 到 0。−12 以下为绿色，−3 以下为琥珀色，紧贴数字满刻度处为红色；标记会保持峰值，顶部的红块提示削波。",
   vuChannelTitle: "通道电平（dBFS，EQ 之后、推子之前：不受推子和交叉推子影响）",
   vuMasterTitle: "主输出电平（dBFS，在 trim 与限幅器之后测量）",
   tabLog: "日志",
   logHeading: "错误日志",
-  logNote: "故障会连同发生区域的代码一起记录（AUDIO、TRACK、ANALYSIS、LIB、CONFIG、REC）。日志一律使用英文、不做翻译，以便检索和比对。仅保留最近 200 条。",
+  logNote:
+    "故障会连同发生区域的代码一起记录（AUDIO、TRACK、ANALYSIS、LIB、CONFIG、REC）。日志一律使用英文、不做翻译，以便检索和比对。仅保留最近 200 条。",
   logEmpty: "没有记录到错误。",
   logCount: "{n} 条",
   logDownload: "⬇ 下载",
@@ -230,7 +240,8 @@ export default {
   phraseFwdFineTitle: "乐句后移 1 个底鼓",
   phraseFwdCoarseTitle: "乐句后移 {n} 个底鼓",
   phraseSizeTitle: "乐句长度（底鼓数）。与 ⚙ 设置里的是同一项",
-  structureRedetectTitle: "在当前节拍网格上重新检测结构，保留你手动设定的乐句偏移",
+  structureRedetectTitle:
+    "在当前节拍网格上重新检测结构，保留你手动设定的乐句偏移",
   phraseResetTitle: "恢复到分析检测出的乐句偏移",
   phraseOffsetTitle: "当前乐句偏移（底鼓数）。手动设定时显示为琥珀色",
   structureTipInKick: "你正处在有节奏的部分。",
@@ -246,7 +257,8 @@ export default {
   structureTipPhrase: "你在一个 {size} 底鼓乐句的第 {pos} 个底鼓上。",
   structureHeading: "结构指示器",
   showStructure: "在波形上显示指示器",
-  structureNote: "统计还差几个底鼓节奏会消失（▼）以及会回来（▲），并显示你在乐句中的位置。只在载入曲目时分析一次。",
+  structureNote:
+    "统计还差几个底鼓节奏会消失（▼）以及会回来（▲），并显示你在乐句中的位置。只在载入曲目时分析一次。",
   phraseSizeLabel: "乐句长度",
   structureUnitLabel: "计数单位",
   unitKicks: "底鼓",
@@ -255,7 +267,8 @@ export default {
   warnRedLabel: "红色提醒（底鼓）",
   endWarnHeading: "曲目结束提醒",
   endWarnOn: "曲目快结束时提醒",
-  endWarnNote: "波形边框闪红，越接近结尾闪得越急。只在播放时出现；若系统开启了减少动态效果，则保持常亮。",
+  endWarnNote:
+    "波形边框闪红，越接近结尾闪得越急。只在播放时出现；若系统开启了减少动态效果，则保持常亮。",
   endWarnModeLabel: "触发方式",
   endWarnModeSeconds: "剩余秒数",
   endWarnModePercent: "剩余百分比",
@@ -265,7 +278,8 @@ export default {
   // Pitch (rango del fader y fuerza del bend)
   pitchHeading: "变速（Pitch）",
   bendRangeLabel: "Pitch bend 力度",
-  pitchNote: "两个 Deck 共用。范围只是起点：SYNC 需要更大行程时会自行放宽，不会改动这里。Bend 力度就是 Deck 上 − 和 + 按钮拉动的幅度。",
+  pitchNote:
+    "两个 Deck 共用。范围只是起点：SYNC 需要更大行程时会自行放宽，不会改动这里。Bend 力度就是 Deck 上 − 和 + 按钮拉动的幅度。",
   masterBpmDownTitle: "主控 BPM 减 1",
   masterBpmUpTitle: "主控 BPM 加 1",
 
@@ -279,7 +293,8 @@ export default {
   noArtworkFormatTitle: "无封面 · {format} 文件",
 
   // Resumen de la pista
-  overviewTitle: "整轨概览：点击或拖动即可跳转。暗色段是无鼓段；红线标出节奏消失的位置，绿线标出节奏回来的位置",
+  overviewTitle:
+    "整轨概览：点击或拖动即可跳转。暗色段是无鼓段；红线标出节奏消失的位置，绿线标出节奏回来的位置",
 
   // Pantalla LCD del deck
   lcdElapsed: "已播放",
@@ -295,13 +310,15 @@ export default {
   marqueeSlow: "慢",
   marqueeNormal: "正常",
   marqueeFast: "快",
-  marqueeNote: "名称在 Deck 屏幕上放不下时会循环滚动。动画由浏览器负责，不占 CPU。系统开启减少动态效果时保持静止。",
+  marqueeNote:
+    "名称在 Deck 屏幕上放不下时会循环滚动。动画由浏览器负责，不占 CPU。系统开启减少动态效果时保持静止。",
 
   // Pantalla del deck: cifras redondeadas o de 14 segmentos
   lcdHeading: "Deck 屏幕",
   lcdFontLabel: "数字",
   lcdFontRounded: "圆润字体",
-  lcdFontNote: "标题用 5 x 7 点阵，数字（时间、BPM、变速…）按真实面板的固定排布显示：只放数字的位用七段，需要符号的位用十四段。与普通字体占位相同，切换不会错位。",
+  lcdFontNote:
+    "标题用 5 x 7 点阵，数字（时间、BPM、变速…）按真实面板的固定排布显示：只放数字的位用七段，需要符号的位用十四段。与普通字体占位相同，切换不会错位。",
   titleFontLabel: "标题",
   lcdFontLcd: "LCD 屏幕",
   lcdFontDot: "点阵",

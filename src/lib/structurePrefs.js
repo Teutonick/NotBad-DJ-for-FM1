@@ -53,19 +53,31 @@ const clampInt = (v, min, max, fallback) => {
  * lo que espera quien mira el número.
  */
 export function resolveStructurePrefs(config = {}) {
-  const phraseSize = pickOption(PHRASE_SIZES, config.phraseSize, DEFAULT_PHRASE_SIZE);
+  const phraseSize = pickOption(
+    PHRASE_SIZES,
+    config.phraseSize,
+    DEFAULT_PHRASE_SIZE,
+  );
   const unit = pickOption(STRUCTURE_UNITS, config.structureUnit, "kicks");
   const amber = clampInt(config.structureWarnAmber, 1, 128, DEFAULT_WARN_AMBER);
   const red = Math.min(
     amber,
-    clampInt(config.structureWarnRed, 1, 128, DEFAULT_WARN_RED)
+    clampInt(config.structureWarnRed, 1, 128, DEFAULT_WARN_RED),
   );
   const endMode = pickOption(END_WARN_MODES, config.endWarnMode, "seconds");
 
   return {
     show: config.showStructure !== false,
-    marqueeSpeed: pickOption(MARQUEE_SPEEDS, config.marqueeSpeed, DEFAULT_MARQUEE_SPEED),
-    titleFont: pickOption(TITLE_FONTS, migraTitulo(config.titleFont), "rounded"),
+    marqueeSpeed: pickOption(
+      MARQUEE_SPEEDS,
+      config.marqueeSpeed,
+      DEFAULT_MARQUEE_SPEED,
+    ),
+    titleFont: pickOption(
+      TITLE_FONTS,
+      migraTitulo(config.titleFont),
+      "rounded",
+    ),
     lcdFont: pickOption(LCD_FONTS, migraCifras(config.lcdFont), "rounded"),
     phraseSize,
     unit,

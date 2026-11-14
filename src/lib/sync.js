@@ -22,7 +22,8 @@ export function computeSyncPitch({ ownBpm, targetBpm, currentRange, ranges }) {
   const wanted = (targetBpm / ownBpm - 1) * 100;
   let range = currentRange;
   if (Math.abs(wanted) > range) {
-    range = ranges.find((r) => r >= Math.abs(wanted)) ?? ranges[ranges.length - 1];
+    range =
+      ranges.find((r) => r >= Math.abs(wanted)) ?? ranges[ranges.length - 1];
   }
   return { pitch: Math.max(-range, Math.min(range, wanted)), range };
 }

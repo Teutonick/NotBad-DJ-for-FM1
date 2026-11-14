@@ -11,7 +11,10 @@ const loaders = import.meta.glob(["./*.js", "!./index.js", "!./en.js"], {
 });
 const codeOf = (path) => path.slice(2, -3); // "./es.js" → "es"
 
-export const LOCALE_CODES = [DEFAULT_LOCALE, ...Object.keys(loaders).map(codeOf)];
+export const LOCALE_CODES = [
+  DEFAULT_LOCALE,
+  ...Object.keys(loaders).map(codeOf),
+];
 
 // Caché de diccionarios ya cargados; translate() lee de aquí
 export const LOCALES = { [DEFAULT_LOCALE]: en };

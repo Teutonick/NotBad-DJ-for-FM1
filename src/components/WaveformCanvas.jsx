@@ -126,7 +126,7 @@ function WaveformCanvas({
             bandIndex,
             Math.floor(from + x * perPx),
             Math.floor(from + (x + 1) * perPx),
-            colored
+            colored,
           );
           if (col) addBar(x, col.peak, col.ci);
         }
@@ -150,7 +150,7 @@ function WaveformCanvas({
       // entera de rojo, así que por debajo de 4 px por beat no se dibuja: a
       // esa escala no sirve para nada.
       if (dur > 0 && beats && beats.length > 1) {
-        const beatPx = ((beats[1] - beats[0]) / dur) * total / perPx;
+        const beatPx = (((beats[1] - beats[0]) / dur) * total) / perPx;
         if (beatPx >= 4) {
           const desde = from * (dur / total);
           const hasta = (from + width * perPx) * (dur / total);
@@ -266,7 +266,7 @@ function WaveformCanvas({
           strip.start,
           samplesPerPixel,
           colored,
-          dur
+          dur,
         );
       }
       ctx.drawImage(
@@ -278,7 +278,7 @@ function WaveformCanvas({
         0,
         0,
         w,
-        h
+        h,
       );
 
       // Región de loop. Verde el loop normal; ámbar mientras hay un loop roll
@@ -289,17 +289,17 @@ function WaveformCanvas({
         if (outFrac >= leftFrac && inFrac <= rightFrac) {
           const x1 = Math.max(
             0,
-            ((inFrac - leftFrac) / (rightFrac - leftFrac)) * w
+            ((inFrac - leftFrac) / (rightFrac - leftFrac)) * w,
           );
           const x2 = Math.min(
             w,
-            ((outFrac - leftFrac) / (rightFrac - leftFrac)) * w
+            ((outFrac - leftFrac) / (rightFrac - leftFrac)) * w,
           );
           const relleno = loopRolling
             ? "rgba(251,191,36,0.24)"
             : loopOn
-            ? "rgba(16,185,129,0.22)"
-            : "rgba(16,185,129,0.10)";
+              ? "rgba(16,185,129,0.22)"
+              : "rgba(16,185,129,0.10)";
           const borde = loopRolling
             ? "rgba(251,191,36,0.95)"
             : "rgba(16,185,129,0.9)";
@@ -395,7 +395,8 @@ function WaveformCanvas({
           if (reducedMotionRef.current) {
             pulse = 0.7;
           } else {
-            pulse = 0.5 + 0.5 * Math.sin((now / 1000) * Math.PI * 2 - Math.PI / 2);
+            pulse =
+              0.5 + 0.5 * Math.sin((now / 1000) * Math.PI * 2 - Math.PI / 2);
           }
           const alpha = 0.22 + 0.18 * k + (0.5 + 0.1 * k) * pulse;
           // Rojo claro (red-400): sobre el fondo oscuro de la onda se ve
@@ -514,7 +515,7 @@ function WaveformCanvas({
       // Empujar la onda: mover la pista bajo la línea de reproducción
       const t = Math.max(
         0,
-        Math.min(dur - 0.01, d.startTime - dxTotal * secondsPerPixel)
+        Math.min(dur - 0.01, d.startTime - dxTotal * secondsPerPixel),
       );
       if (onDragSeek) onDragSeek(t);
     } else {

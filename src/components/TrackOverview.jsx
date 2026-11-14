@@ -99,7 +99,7 @@ function TrackOverview({
           bandIndex,
           Math.floor(x * porPixel),
           Math.floor((x + 1) * porPixel),
-          colored
+          colored,
         );
         if (!col) continue;
         let lista = columnas.get(col.ci);
@@ -158,7 +158,10 @@ function TrackOverview({
     };
 
     const dibujar = () => {
-      const { w, h, resized } = fitCanvas(canvas, canvas.getBoundingClientRect());
+      const { w, h, resized } = fitCanvas(
+        canvas,
+        canvas.getBoundingClientRect(),
+      );
       if (resized) cacheKeyRef.current = "";
 
       // ¿Hay que rehacer la capa fija? Aquí ya solo puede cambiar el tamaño
@@ -203,7 +206,11 @@ function TrackOverview({
 
       // Ventana que se ve ampliada en la onda de arriba
       const ventana = windowRef?.current;
-      if (ventana && ventana.to > ventana.from && ventana.to - ventana.from < 0.999) {
+      if (
+        ventana &&
+        ventana.to > ventana.from &&
+        ventana.to - ventana.from < 0.999
+      ) {
         const x1 = ventana.from * w;
         const x2 = ventana.to * w;
         ctx.fillStyle = "rgba(255,255,255,0.10)";
@@ -214,7 +221,7 @@ function TrackOverview({
           Math.round(x1) + 0.5,
           0.5,
           Math.max(2, Math.round(x2 - x1) - 1),
-          h - 1
+          h - 1,
         );
       }
 
@@ -229,14 +236,26 @@ function TrackOverview({
       if (!document.hidden) dibujar();
     }, REFRESH_MS);
     return () => clearInterval(timer);
-  }, [waveData, bandIndex, palette, beats, structure, duration, audioRef, windowRef]);
+  }, [
+    waveData,
+    bandIndex,
+    palette,
+    beats,
+    structure,
+    duration,
+    audioRef,
+    windowRef,
+  ]);
 
   // Moverse por la pista: pulsar o arrastrar lleva el playhead ahí
   const seekEn = (clientX) => {
     const canvas = canvasRef.current;
     if (!canvas || !onSeek) return;
     const rect = canvas.getBoundingClientRect();
-    const frac = Math.max(0, Math.min(1, (clientX - rect.left) / (rect.width || 1)));
+    const frac = Math.max(
+      0,
+      Math.min(1, (clientX - rect.left) / (rect.width || 1)),
+    );
     onSeek(frac);
   };
 

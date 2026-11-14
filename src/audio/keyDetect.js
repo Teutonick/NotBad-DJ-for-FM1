@@ -24,8 +24,7 @@ const F_MAX = 1800; // por encima el filtro anti-alias ya no es fiable
 // Temperley y Albrecht acertaron las 8. Se queda Temperley porque en pistas
 // reales da modos más estables.
 const MAJOR_PROFILE = [
-  0.748, 0.06, 0.488, 0.082, 0.67, 0.46, 0.096, 0.715, 0.104, 0.366, 0.057,
-  0.4,
+  0.748, 0.06, 0.488, 0.082, 0.67, 0.46, 0.096, 0.715, 0.104, 0.366, 0.057, 0.4,
 ];
 const MINOR_PROFILE = [
   0.712, 0.084, 0.474, 0.618, 0.049, 0.46, 0.105, 0.747, 0.404, 0.067, 0.133,
@@ -256,5 +255,8 @@ export function detectKeyFromChannels(channels, sampleRate) {
 /** Igual que detectKeyFromChannels pero desde un AudioBuffer del navegador. */
 export function detectKey(audioBuffer) {
   if (!audioBuffer) return null;
-  return detectKeyFromChannels(getChannels(audioBuffer), audioBuffer.sampleRate);
+  return detectKeyFromChannels(
+    getChannels(audioBuffer),
+    audioBuffer.sampleRate,
+  );
 }

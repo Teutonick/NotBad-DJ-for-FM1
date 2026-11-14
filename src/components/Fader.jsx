@@ -26,10 +26,10 @@ export default function Fader({
   ticks = 0,
   invert = false,
   disabled = false,
-  length,              // px (número) o valor CSS ("100%"); vertical por defecto se estira
-  thickness = 22,      // grosor del cabezal (ancho en vertical, alto en horizontal)
-  railThickness = 6,   // grosor del carril
-  accent = "#f5f5f5",  // color de la parte activa
+  length, // px (número) o valor CSS ("100%"); vertical por defecto se estira
+  thickness = 22, // grosor del cabezal (ancho en vertical, alto en horizontal)
+  railThickness = 6, // grosor del carril
+  accent = "#f5f5f5", // color de la parte activa
   className = "",
   title,
   ariaLabel,
@@ -54,10 +54,8 @@ export default function Fader({
 
   const tickList = useMemo(
     () =>
-      ticks > 1
-        ? Array.from({ length: ticks }, (_, i) => i / (ticks - 1))
-        : [],
-    [ticks]
+      ticks > 1 ? Array.from({ length: ticks }, (_, i) => i / (ticks - 1)) : [],
+    [ticks],
   );
 
   // Geometría del carril y del cabezal
@@ -76,8 +74,18 @@ export default function Fader({
     const lo = Math.min(from, visualPct);
     const hi = Math.max(from, visualPct);
     return vertical
-      ? { bottom: `${lo * 100}%`, height: `${(hi - lo) * 100}%`, left: 0, right: 0 }
-      : { left: `${lo * 100}%`, width: `${(hi - lo) * 100}%`, top: 0, bottom: 0 };
+      ? {
+          bottom: `${lo * 100}%`,
+          height: `${(hi - lo) * 100}%`,
+          left: 0,
+          right: 0,
+        }
+      : {
+          left: `${lo * 100}%`,
+          width: `${(hi - lo) * 100}%`,
+          top: 0,
+          bottom: 0,
+        };
   };
   const filled = fillStyle();
 
@@ -119,8 +127,18 @@ export default function Fader({
             className="absolute bg-neutral-600/70"
             style={
               vertical
-                ? { bottom: `${f * 100}%`, height: "1px", left: "-4px", right: "-4px" }
-                : { left: `${f * 100}%`, width: "1px", top: "-4px", bottom: "-4px" }
+                ? {
+                    bottom: `${f * 100}%`,
+                    height: "1px",
+                    left: "-4px",
+                    right: "-4px",
+                  }
+                : {
+                    left: `${f * 100}%`,
+                    width: "1px",
+                    top: "-4px",
+                    bottom: "-4px",
+                  }
             }
           />
         ))}
@@ -162,8 +180,20 @@ export default function Fader({
           className="absolute bg-neutral-700"
           style={
             vertical
-              ? { left: 1, right: 1, top: "50%", height: "2px", marginTop: "-1px" }
-              : { top: 1, bottom: 1, left: "50%", width: "2px", marginLeft: "-1px" }
+              ? {
+                  left: 1,
+                  right: 1,
+                  top: "50%",
+                  height: "2px",
+                  marginTop: "-1px",
+                }
+              : {
+                  top: 1,
+                  bottom: 1,
+                  left: "50%",
+                  width: "2px",
+                  marginLeft: "-1px",
+                }
           }
         />
       </div>

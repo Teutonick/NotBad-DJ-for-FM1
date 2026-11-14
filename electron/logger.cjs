@@ -56,7 +56,9 @@ function rotate(p) {
 function writeLine(line) {
   const p = filePath();
   if (!p) return;
-  const clean = String(line).replace(/[\r\n]+/g, " ⏎ ").slice(0, MAX_LINE);
+  const clean = String(line)
+    .replace(/[\r\n]+/g, " ⏎ ")
+    .slice(0, MAX_LINE);
   try {
     rotate(p);
     fs.appendFileSync(p, clean + "\n");
@@ -70,7 +72,9 @@ const clip = (v) => String(v === undefined ? "undefined" : v).slice(0, 200);
 function describeError(err) {
   if (!err) return "";
   if (err instanceof Error) {
-    return err.stack ? String(err.stack).slice(0, 1200) : `${err.name}: ${err.message}`;
+    return err.stack
+      ? String(err.stack).slice(0, 1200)
+      : `${err.name}: ${err.message}`;
   }
   return clip(err);
 }
@@ -82,7 +86,14 @@ function log(level, definition, err, context) {
         .map(([k, v]) => `${k}=${clip(v)}`)
         .join(" ")
     : "";
-  const line = [new Date().toISOString(), level, code, message, ctx, describeError(err)]
+  const line = [
+    new Date().toISOString(),
+    level,
+    code,
+    message,
+    ctx,
+    describeError(err),
+  ]
     .filter(Boolean)
     .join(" | ");
   console.log(line); // en desarrollo sí hay consola
@@ -93,7 +104,8 @@ module.exports = {
   CODES,
   logInfo: (definition, context) => log("INFO", definition, null, context),
   logWarn: (definition, err, context) => log("WARN", definition, err, context),
-  logError: (definition, err, context) => log("ERROR", definition, err, context),
+  logError: (definition, err, context) =>
+    log("ERROR", definition, err, context),
   writeLine,
   logFilePath: filePath,
 };

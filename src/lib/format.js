@@ -10,7 +10,10 @@ export function stripExtension(name) {
 // Reloj mm:ss (o hh:mm:ss a partir de la hora, si `hours`). Sin un número da
 // `fallback`; lo negativo cuenta como cero. El deck enseña horas; la lista y
 // el contador de grabación siguen contando minutos («75:00»), como siempre.
-export function formatClock(seconds, { fallback = "00:00", hours = true } = {}) {
+export function formatClock(
+  seconds,
+  { fallback = "00:00", hours = true } = {},
+) {
   if (!Number.isFinite(seconds)) return fallback;
   const total = Math.max(0, Math.floor(seconds));
   const pad = (v) => String(v).padStart(2, "0");

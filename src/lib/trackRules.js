@@ -7,7 +7,12 @@
 // otra. Lo del usuario (rejilla manual, cues, loops, estructura ajustada) no lo
 // pisa ningún análisis: ver también mergeTrackAnalysis en trackStore.js.
 
-import { sameCueData, sanitizeHotCues, sanitizeLoopRegion, sanitizeSavedLoops } from "./cuePoints";
+import {
+  sameCueData,
+  sanitizeHotCues,
+  sanitizeLoopRegion,
+  sanitizeSavedLoops,
+} from "./cuePoints";
 
 /** Fila nueva de la lista para un File, con todo por analizar. */
 export function newTrackFromFile(file) {
@@ -49,7 +54,8 @@ export function withGrid(track, { bpm, anchor, manual, duration }) {
     bpm,
     gridAnchor: anchor,
     gridManual: manual,
-    duration: Number.isFinite(duration) && duration > 0 ? duration : track.duration,
+    duration:
+      Number.isFinite(duration) && duration > 0 ? duration : track.duration,
   };
 }
 
@@ -85,7 +91,7 @@ export function withCues(track, data) {
   const savedLoops = sanitizeSavedLoops(data.savedLoops);
   const activeLoop =
     data.activeLoop === undefined
-      ? track.activeLoop ?? null
+      ? (track.activeLoop ?? null)
       : sanitizeLoopRegion(data.activeLoop);
   if (
     sameCueData(track.hotCues, hotCues) &&
@@ -118,13 +124,15 @@ export function sameStructure(a, b) {
     (s, i) =>
       s.start === b.sections[i].start &&
       s.end === b.sections[i].end &&
-      Boolean(s.kick) === Boolean(b.sections[i].kick)
+      Boolean(s.kick) === Boolean(b.sections[i].kick),
   );
 }
 
 /** Estructura (ya saneada) analizada o ajustada en el deck. */
 export function withStructure(track, structure) {
-  return sameStructure(track.structure, structure) ? track : { ...track, structure };
+  return sameStructure(track.structure, structure)
+    ? track
+    : { ...track, structure };
 }
 
 /** Marca que la pista ya se pinchó en ese deck. */
@@ -146,7 +154,10 @@ export function withTags(track, meta) {
  */
 export function nextPendingAnalysis(tracks) {
   return tracks.find(
-    (t) => !t.analyzed && (t.bpm == null || t.musicalKey == null) && !t.analyzeFailed
+    (t) =>
+      !t.analyzed &&
+      (t.bpm == null || t.musicalKey == null) &&
+      !t.analyzeFailed,
   );
 }
 

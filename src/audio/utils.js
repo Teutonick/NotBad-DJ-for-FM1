@@ -159,7 +159,7 @@ export function analyzeWaveform(audioBuffer, { withBands = true } = {}) {
       bandIndex[i] = bandColorIndex(
         rmsLow[i] / refLow,
         rmsMid[i] / refMid,
-        rmsHigh[i] / refHigh
+        rmsHigh[i] / refHigh,
       );
     }
   }

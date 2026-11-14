@@ -7,7 +7,8 @@ export default {
   masterSync: "MASTER SYNC",
   masterSyncTitle:
     "Master sync: os decks con SYNC seguen este BPM no canto do outro deck",
-  masterBpmTitle: "BPM do master sync. Preme enriba e arrastra arriba ou abaixo, ou xira a roda, para axustalo sen teclear (con Shift, máis fino)",
+  masterBpmTitle:
+    "BPM do master sync. Preme enriba e arrastra arriba ou abaixo, ou xira a roda, para axustalo sen teclear (con Shift, máis fino)",
   bpm: "BPM",
   language: "Idioma",
 
@@ -22,7 +23,8 @@ export default {
   noFile: "Sen ficheiro",
   loadFile: "📂 Cargar ficheiro",
   cue: "CUE",
-  cueTitle: "Distancia ata o punto CUE, que está en {time}. Fíxase ao posicionar a pista en pausa; Stop volve alí.",
+  cueTitle:
+    "Distancia ata o punto CUE, que está en {time}. Fíxase ao posicionar a pista en pausa; Stop volve alí.",
   bpmDisplayTitle:
     "Fai clic ao ritmo (TAP): reancora a grella de beats e recalcula o BPM",
   analyzingTrack: "⏳ Analizando pista…",
@@ -43,18 +45,17 @@ export default {
   sync: "SYNC",
   syncTitle:
     "Activa o sync continuo: este deck seguirá o BPM do outro deck ou do master",
-  syncActiveTitle:
-    "Sync fixado: segue o BPM de {source} (o pitch axústase só)",
+  syncActiveTitle: "Sync fixado: segue o BPM de {source} (o pitch axústase só)",
   keyLock: "🔒 Key",
-  keyLockTitle:
-    "Key lock: mantén o ton ao cambiar o tempo (OFF = modo vinilo)",
+  keyLockTitle: "Key lock: mantén o ton ao cambiar o tempo (OFF = modo vinilo)",
   rangeTitle: "Rango do fader de pitch",
   pitch: "Pitch",
   bend: "bend",
   bendMinusTitle: "Bend − (máis lento mentres o manteñas)",
   bendPlusTitle: "Bend + (máis rápido mentres o manteñas)",
   hotCueSetTitle: "Hot cue {n}: fixar na posición actual",
-  hotCueGoTitle: "Hot cue {n}: saltar a {time} · borrar con clic dereito ou Maiús+clic · dobre clic para poñerlle nome",
+  hotCueGoTitle:
+    "Hot cue {n}: saltar a {time} · borrar con clic dereito ou Maiús+clic · dobre clic para poñerlle nome",
   hotCueNameLabel: "Nome do cue {n}",
   namePlaceholder: "drop, voz…",
   nameSaveTitle: "Gardar o nome (Intro)",
@@ -71,34 +72,42 @@ export default {
   quantizeTitle:
     "Quantize: imanta hot cues, loops e saltos ao beat máis próximo da grella",
   gridPhaseLabel: "Fase",
-  gridPhaseTitle: "Move toda a grella cara atrás ou cara adiante, sen cambiar o BPM",
+  gridPhaseTitle:
+    "Move toda a grella cara atrás ou cara adiante, sen cambiar o BPM",
   gridPhaseBackCoarseTitle: "Atrasa a grella 10 ms",
   gridPhaseBackFineTitle: "Atrasa a grella 1 ms",
   gridPhaseFwdFineTitle: "Adianta a grella 1 ms",
   gridPhaseFwdCoarseTitle: "Adianta a grella 10 ms",
   gridTempoLabel: "Separación",
-  gridTempoTitle: "Separa ou xunta os beats cambiando o BPM base da pista. Non é o pitch: o pitch segue no fader",
+  gridTempoTitle:
+    "Separa ou xunta os beats cambiando o BPM base da pista. Non é o pitch: o pitch segue no fader",
   gridTempoDownCoarseTitle: "Baixa o BPM base 0,1 (beats máis separados)",
   gridTempoDownFineTitle: "Baixa o BPM base 0,01 (beats máis separados)",
   gridTempoUpFineTitle: "Sobe o BPM base 0,01 (beats máis xuntos)",
   gridTempoUpCoarseTitle: "Sobe o BPM base 0,1 (beats máis xuntos)",
   gridHalveTitle: "Divide o BPM base entre 2, mantendo a áncora",
   gridDoubleTitle: "Multiplica o BPM base por 2, mantendo a áncora",
-  gridRegridTitle: "Reanaliza partindo do BPM e da áncora actuais, buscando o mellor encaixe ao seu redor",
-  gridBaseBpmTitle: "BPM base da pista: o que define a grella. O pitch non o cambia",
+  gridRegridTitle:
+    "Reanaliza partindo do BPM e da áncora actuais, buscando o mellor encaixe ao seu redor",
+  gridBaseBpmTitle:
+    "BPM base da pista: o que define a grella. O pitch non o cambia",
   loop: "Loop",
   loopIn: "IN",
   loopInTitle: "Marca o inicio do loop na posición actual",
   loopOut: "OUT",
   loopOutTitle: "Marca o final do loop e actívao",
   loopAutoTitle: "Loop automático de {n} beats dende o beat anterior",
-  loopMoveBackTitle: "Move o loop unha lonxitude cara atrás, sen cambiar o seu tamaño",
-  loopMoveFwdTitle: "Move o loop unha lonxitude cara adiante, sen cambiar o seu tamaño",
+  loopMoveBackTitle:
+    "Move o loop unha lonxitude cara atrás, sen cambiar o seu tamaño",
+  loopMoveFwdTitle:
+    "Move o loop unha lonxitude cara adiante, sen cambiar o seu tamaño",
   loopHalveTitle: "Parte a lonxitude do loop á metade, respectando a grella",
   loopDoubleTitle: "Dobra a lonxitude do loop, respectando a grella",
-  loopLengthTitle: "Lonxitude do loop en beats (en segundos se o IN/OUT non cadra coa grella)",
+  loopLengthTitle:
+    "Lonxitude do loop en beats (en segundos se o IN/OUT non cadra coa grella)",
   rollLabel: "Roll",
-  rollSizeTitle: "Loop roll de {n} beats mentres o manteñas premido. Ao soltalo, a pista segue onde estaría se o roll non ocorrera",
+  rollSizeTitle:
+    "Loop roll de {n} beats mentres o manteñas premido. Ao soltalo, a pista segue onde estaría se o roll non ocorrera",
   savedLoopsLabel: "Loops",
   savedLoopsNone: "sen loops",
   savedLoopSaveTitle: "Garda o loop activo na pista",
@@ -119,7 +128,8 @@ export default {
   kill: "KILL",
   eqTitle: "Banda de EQ: clic dereito = kill da banda · dobre clic = a cero",
   gainTitle: "Ganancia da canle · clic dereito ou dobre clic = a cero",
-  filterTitle: "Filtro DJ: arrastra á esquerda = paso baixo, á dereita = paso alto · clic dereito ou dobre clic = OFF",
+  filterTitle:
+    "Filtro DJ: arrastra á esquerda = paso baixo, á dereita = paso alto · clic dereito ou dobre clic = OFF",
   crossfader: "Crossfader",
   resetHint: "clic dereito = volver á posición inicial",
   volumeTitle: "Volume do deck {side}",
@@ -171,7 +181,8 @@ export default {
   keyLegend: "Soa en {key}: en morado, as pistas harmonicamente compatibles.",
   showArtwork: "Portadas",
   showArtworkTitle: "Amosar ou agochar as miniaturas de portada",
-  showArtworkNote: "Agochalas gaña sitio na pantalla; as portadas gárdanse igual.",
+  showArtworkNote:
+    "Agochalas gaña sitio na pantalla; as portadas gárdanse igual.",
   listHeading: "Lista de cancións",
   csvArtist: "Artista",
   csvKey: "Tonalidade",
@@ -179,7 +190,8 @@ export default {
   // Colores de la onda
   showKey: "Tonalidade da pista",
   wavePaletteHeading: "Cores da onda",
-  wavePaletteNote: "Os graves, medios e agudos xa están analizados: cambiar de paleta recolorea ao momento, sen analizar nada outra vez.",
+  wavePaletteNote:
+    "Os graves, medios e agudos xa están analizados: cambiar de paleta recolorea ao momento, sen analizar nada outra vez.",
   paletteMinidj: "Mini DJ (por defecto)",
   paletteMono: "Verde clásico (unha soa cor)",
   paletteCustom: "Personalizada…",
@@ -207,7 +219,8 @@ export default {
   analysisAuto: "Automático (en segundo plano, amodo)",
   analysisDeck: "Só ao cargalas nun deck",
 
-  shortcuts: "Teclado (deck activo: Q=A, P=B ou clic no deck) — Espazo: play/pausa · C: cue/stop · 1-8: hot cues (Maiús: borrar) · I/O: loop in/out · L: loop on/off · A S D F G H: loop roll 1/8-4 · [ ]: mover o loop · − =: partir/dobrar · R: gardar loop (Maiús: activalo) · , .: escoller loop gardado · ←/→: nudge",
+  shortcuts:
+    "Teclado (deck activo: Q=A, P=B ou clic no deck) — Espazo: play/pausa · C: cue/stop · 1-8: hot cues (Maiús: borrar) · I/O: loop in/out · L: loop on/off · A S D F G H: loop roll 1/8-4 · [ ]: mover o loop · − =: partir/dobrar · R: gardar loop (Maiús: activalo) · , .: escoller loop gardado · ←/→: nudge",
   // Lapelas de configuración, bloqueo de carga e VU
   tabAudio: "Audio",
   tabLibrary: "Biblioteca",
@@ -215,18 +228,24 @@ export default {
   tabSafety: "Seguridade",
   safetyHeading: "Seguridade en directo",
   lockLoadWhilePlaying: "Non cargar pistas nun deck que está soando",
-  lockLoadWhilePlayingNote: "Evita estragar a mestura en directo: mentres o deck reproduce, os seus botóns de carga quedan desactivados. Desactívao para volver ao comportamento de sempre.",
+  lockLoadWhilePlayingNote:
+    "Evita estragar a mestura en directo: mentres o deck reproduce, os seus botóns de carga quedan desactivados. Desactívao para volver ao comportamento de sempre.",
   loadToDeckTitle: "Cargar esta pista no deck {side}",
-  loadLockedTitle: "O deck {side} está soando: non se pode cargar outra pista. Párao ou desactiva o bloqueo en Configuración ⚙ › Seguridade.",
+  loadLockedTitle:
+    "O deck {side} está soando: non se pode cargar outra pista. Párao ou desactiva o bloqueo en Configuración ⚙ › Seguridade.",
   vuHeading: "Medidores de nivel (VU)",
   vuModeContinuous: "Continuo (barra chea)",
   vuModeLed: "LED (segmentos, coma unha mesa)",
-  vuNote: "Escala en dBFS de −42 a 0. Verde ata −12, ámbar ata −3 e vermello pegado ao teito dixital; o testemuño retén o pico e o bloque vermello de arriba avisa de saturación.",
-  vuChannelTitle: "Nivel da canle en dBFS (post-EQ, pre-fader: non depende do fader nin do crossfader)",
-  vuMasterTitle: "Nivel da saída master en dBFS (medido tras o trim e o limitador)",
+  vuNote:
+    "Escala en dBFS de −42 a 0. Verde ata −12, ámbar ata −3 e vermello pegado ao teito dixital; o testemuño retén o pico e o bloque vermello de arriba avisa de saturación.",
+  vuChannelTitle:
+    "Nivel da canle en dBFS (post-EQ, pre-fader: non depende do fader nin do crossfader)",
+  vuMasterTitle:
+    "Nivel da saída master en dBFS (medido tras o trim e o limitador)",
   tabLog: "Rexistro",
   logHeading: "Rexistro de erros",
-  logNote: "Os fallos gárdanse cun código da zona onde ocorreron (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). Van sempre en inglés, sen traducir, para poder buscalos e comparalos. Consérvanse as últimas 200 entradas.",
+  logNote:
+    "Os fallos gárdanse cun código da zona onde ocorreron (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). Van sempre en inglés, sen traducir, para poder buscalos e comparalos. Consérvanse as últimas 200 entradas.",
   logEmpty: "Sen erros rexistrados.",
   logCount: "{n} entradas",
   logDownload: "⬇ Descargar",
@@ -241,14 +260,18 @@ export default {
   phraseBackFineTitle: "Atrasa a frase 1 kick",
   phraseFwdFineTitle: "Adianta a frase 1 kick",
   phraseFwdCoarseTitle: "Adianta a frase {n} kicks",
-  phraseSizeTitle: "Tamaño da frase en kicks. É o mesmo axuste que hai en ⚙ Configuración",
-  structureRedetectTitle: "Volve detectar a estrutura sobre a grella actual, respectando o desprazamento de frase que puxeses a man",
+  phraseSizeTitle:
+    "Tamaño da frase en kicks. É o mesmo axuste que hai en ⚙ Configuración",
+  structureRedetectTitle:
+    "Volve detectar a estrutura sobre a grella actual, respectando o desprazamento de frase que puxeses a man",
   phraseResetTitle: "Devolve o desprazamento de frase ao que atopou a análise",
-  phraseOffsetTitle: "Desprazamento de frase actual, en kicks. En ámbar cando o puxeches ti a man",
+  phraseOffsetTitle:
+    "Desprazamento de frase actual, en kicks. En ámbar cando o puxeches ti a man",
   structureTipInKick: "Estás na parte con ritmo.",
   structureTipInBreak: "Estás nunha baixada.",
   structureTipDrop: "A baixada entra dentro de {n} kicks.",
-  structureTipDropBars: "A baixada entra dentro de {n} kicks ({bars} compases).",
+  structureTipDropBars:
+    "A baixada entra dentro de {n} kicks ({bars} compases).",
   structureTipRise: "O ritmo volve dentro de {n} kicks.",
   structureTipRiseBars: "O ritmo volve dentro de {n} kicks ({bars} compases).",
   structureTipRiseAfter: "O ritmo volve {n} kicks despois.",
@@ -258,7 +281,8 @@ export default {
   structureTipPhrase: "Vas polo kick {pos} dunha frase de {size}.",
   structureHeading: "Indicador de estrutura",
   showStructure: "Amosar o indicador sobre a onda",
-  structureNote: "Conta os kicks que faltan para que marche o ritmo (▼) e para que volva (▲), e por onde vas dentro da frase. Analízase unha soa vez ao cargar a pista.",
+  structureNote:
+    "Conta os kicks que faltan para que marche o ritmo (▼) e para que volva (▲), e por onde vas dentro da frase. Analízase unha soa vez ao cargar a pista.",
   phraseSizeLabel: "Tamaño de frase",
   structureUnitLabel: "Contar en",
   unitKicks: "Kicks",
@@ -267,7 +291,8 @@ export default {
   warnRedLabel: "Aviso vermello (kicks)",
   endWarnHeading: "Aviso de fin de pista",
   endWarnOn: "Avisar cando a pista está a rematar",
-  endWarnNote: "O bordo da onda pestanexa en vermello, cada vez máis insistente. Só coa pista soando, e quieto se tes posto o movemento reducido do sistema.",
+  endWarnNote:
+    "O bordo da onda pestanexa en vermello, cada vez máis insistente. Só coa pista soando, e quieto se tes posto o movemento reducido do sistema.",
   endWarnModeLabel: "Avisar por",
   endWarnModeSeconds: "Segundos restantes",
   endWarnModePercent: "Porcentaxe restante",
@@ -277,7 +302,8 @@ export default {
   // Pitch (rango del fader y fuerza del bend)
   pitchHeading: "Pitch",
   bendRangeLabel: "Forza do pitch bend",
-  pitchNote: "Valen para os dous decks. O rango é o de partida: se o SYNC precisa máis percorrido ensánchao el só, sen tocar isto. A forza do bend é o que estiran os botóns − e + do deck.",
+  pitchNote:
+    "Valen para os dous decks. O rango é o de partida: se o SYNC precisa máis percorrido ensánchao el só, sen tocar isto. A forza do bend é o que estiran os botóns − e + do deck.",
   masterBpmDownTitle: "Baixa 1 o BPM do master",
   masterBpmUpTitle: "Sobe 1 o BPM do master",
 
@@ -291,7 +317,8 @@ export default {
   noArtworkFormatTitle: "Sen portada · ficheiro {format}",
 
   // Resumen de la pista
-  overviewTitle: "Resumo da pista: preme ou arrastra para moverte. Os tramos escuros son as baixadas; a liña vermella marca onde marcha o ritmo e a verde onde volve",
+  overviewTitle:
+    "Resumo da pista: preme ou arrastra para moverte. Os tramos escuros son as baixadas; a liña vermella marca onde marcha o ritmo e a verde onde volve",
 
   // Pantalla LCD del deck
   lcdElapsed: "Transcorrido",
@@ -299,7 +326,8 @@ export default {
   lcdTotal: "Total",
   lcdTrackBpm: "BPM pista",
   lcdKey: "Ton",
-  lcdTimeTitle: "Tempo da pista. Preme para alternar entre o transcorrido e o que queda",
+  lcdTimeTitle:
+    "Tempo da pista. Preme para alternar entre o transcorrido e o que queda",
 
   // Marquesina del nombre de la pista
   marqueeSpeedLabel: "Marquesiña",
@@ -307,13 +335,15 @@ export default {
   marqueeSlow: "Lenta",
   marqueeNormal: "Normal",
   marqueeFast: "Rápida",
-  marqueeNote: "Cando o nome non colle na pantalla do deck, pasa de longo en bucle. A animación faina o navegador, non custa CPU. Co movemento reducido do sistema queda quieta.",
+  marqueeNote:
+    "Cando o nome non colle na pantalla do deck, pasa de longo en bucle. A animación faina o navegador, non custa CPU. Co movemento reducido do sistema queda quieta.",
 
   // Pantalla del deck: cifras redondeadas o de 14 segmentos
   lcdHeading: "Pantalla do deck",
   lcdFontLabel: "Cifras",
   lcdFontRounded: "Redondeadas",
-  lcdFontNote: "O título en matriz de 5 x 7 puntos e as cifras (tempo, BPM, pitch…) coa montaxe fixa dunha pantalla de verdade: sete segmentos onde só van números e catorce onde fai falta un signo. Ocupa o mesmo que coas letras normais: cambiar non descoloca nada.",
+  lcdFontNote:
+    "O título en matriz de 5 x 7 puntos e as cifras (tempo, BPM, pitch…) coa montaxe fixa dunha pantalla de verdade: sete segmentos onde só van números e catorce onde fai falta un signo. Ocupa o mesmo que coas letras normais: cambiar non descoloca nada.",
   titleFontLabel: "Título",
   lcdFontLcd: "Pantalla LCD",
   lcdFontDot: "Matriz de puntos",

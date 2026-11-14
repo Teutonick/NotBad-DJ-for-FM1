@@ -9,7 +9,13 @@ import { useI18n } from "../i18n/context";
 // Estados que puede mandar el proceso principal: checking · downloading ·
 // ready · upToDate · error. Los tres que no piden nada al usuario se quitan
 // solos; "ready" se queda, que lleva botones.
-const VISIBLE = new Set(["checking", "downloading", "ready", "upToDate", "error"]);
+const VISIBLE = new Set([
+  "checking",
+  "downloading",
+  "ready",
+  "upToDate",
+  "error",
+]);
 
 // Cuánto aguanta en pantalla cada estado (0 = hasta que el usuario decida).
 // "checking" tiene tope por si la comprobación se queda colgada sin contestar
@@ -73,8 +79,8 @@ export default function UpdateToast() {
           status === "error"
             ? "text-red-300"
             : status === "checking"
-            ? "text-neutral-400"
-            : ""
+              ? "text-neutral-400"
+              : ""
         }`}
       >
         {headline}

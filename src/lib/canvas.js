@@ -8,7 +8,11 @@
 //
 // `fallbackW/H`: tamaño a usar mientras el elemento aún mide 0 (sin layout).
 // `dpr`: densidad de píxeles, para lienzos que se pintan a resolución nativa.
-export function fitCanvas(canvas, rect, { fallbackW = 0, fallbackH = 0, dpr = 1 } = {}) {
+export function fitCanvas(
+  canvas,
+  rect,
+  { fallbackW = 0, fallbackH = 0, dpr = 1 } = {},
+) {
   const w = Math.max(1, Math.round((rect.width || fallbackW) * dpr));
   const h = Math.max(1, Math.round((rect.height || fallbackH) * dpr));
   const resized = canvas.width !== w || canvas.height !== h;

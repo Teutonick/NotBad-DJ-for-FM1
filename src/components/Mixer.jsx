@@ -93,15 +93,7 @@ function EqColumn({
   );
 }
 
-function Mixer({
-  engine,
-  eq,
-  setEq,
-  vol,
-  onVolChange,
-  deckAutoGain,
-  vuMode,
-}) {
+function Mixer({ engine, eq, setEq, vol, onVolChange, deckAutoGain, vuMode }) {
   const { t } = useI18n();
   const [cross, setCross] = useState(0.5);
   // Auto-gain activo por defecto: nivela las pistas al cargarlas

@@ -24,7 +24,13 @@ const WAVE_FLAT_COLOR = "#22c55e";
 // valores oficiales: `brand` es solo el nombre que se muestra, sin traducir.
 export const WAVE_PRESETS = [
   // El de casa: naranja bombo/bajo, verde cuerpo, azul hats
-  { id: "minidj", brand: null, low: "#f97316", mid: "#22c55e", high: "#38bdf8" },
+  {
+    id: "minidj",
+    brand: null,
+    low: "#f97316",
+    mid: "#22c55e",
+    high: "#38bdf8",
+  },
   // Serato tira de RGB puro por banda
   {
     id: "serato",
@@ -98,12 +104,12 @@ function mix(bases, low, mid, high) {
   const w = [low, mid, high].map((v) => Math.pow(Math.max(0, v), DOMINANCE));
   const sum = w[0] + w[1] + w[2] || 1;
   const raw = [0, 1, 2].map(
-    (i) => (bases[0][i] * w[0] + bases[1][i] * w[1] + bases[2][i] * w[2]) / sum
+    (i) => (bases[0][i] * w[0] + bases[1][i] * w[1] + bases[2][i] * w[2]) / sum,
   );
   // Realce de saturación: sin él las mezclas equilibradas tiran a gris sucio
   const mean = (raw[0] + raw[1] + raw[2]) / 3;
   const boosted = raw.map((v) =>
-    Math.max(0, Math.min(255, Math.round(mean + (v - mean) * 1.45)))
+    Math.max(0, Math.min(255, Math.round(mean + (v - mean) * 1.45))),
   );
   return `#${boosted.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 }
@@ -132,7 +138,12 @@ export function buildWavePalette(colors = DEFAULT_WAVE_COLORS) {
         low /= sum;
         high /= sum;
       }
-      out[ql * LEVELS + qh] = mix(bases, low, Math.max(0, 1 - low - high), high);
+      out[ql * LEVELS + qh] = mix(
+        bases,
+        low,
+        Math.max(0, 1 - low - high),
+        high,
+      );
     }
   }
 
@@ -160,7 +171,9 @@ export function bandColorIndex(lowRms, midRms, highRms) {
     qh -= cutH;
     ql -= over - cutH;
   }
-  return Math.max(0, Math.min(max, ql)) * LEVELS + Math.max(0, Math.min(max, qh));
+  return (
+    Math.max(0, Math.min(max, ql)) * LEVELS + Math.max(0, Math.min(max, qh))
+  );
 }
 
 /**

@@ -26,7 +26,12 @@ export default function NumberField({
 }) {
   const inputRef = useRef(null);
   // El arrastre no necesita re-render: vive en un ref
-  const dragRef = useRef({ active: false, startY: 0, startValue: 0, moved: false });
+  const dragRef = useRef({
+    active: false,
+    startY: 0,
+    startValue: 0,
+    moved: false,
+  });
   // Los callbacks los lee el listener nativo de la rueda, que se registra una
   // sola vez; con refs no hay que volver a montarlo en cada render.
   const stateRef = useRef({ value, min, max, step, onChange });
@@ -125,7 +130,8 @@ export default function NumberField({
         setDraft(raw);
         // Un número válido dentro de los topes vale al momento, como antes
         const v = Number(raw);
-        if (raw.trim() !== "" && Number.isFinite(v) && clamp(v) === v) onChange(v);
+        if (raw.trim() !== "" && Number.isFinite(v) && clamp(v) === v)
+          onChange(v);
       }}
       onBlur={commitDraft}
       onKeyDown={(e) => {

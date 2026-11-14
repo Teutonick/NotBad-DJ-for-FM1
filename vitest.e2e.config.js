@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from "vitest/config";
 
 // Pruebas de navegador, aparte a propósito: necesitan un Chrome instalado en
 // la máquina y levantan el servidor de Vite. `npm test` no las incluye, así
@@ -8,12 +8,12 @@ import { defineConfig } from 'vitest/config'
 // los tests se saltan (no fallan).
 export default defineConfig({
   test: {
-    name: 'e2e',
-    environment: 'node',
-    include: ['tests/e2e/**/*.test.js'],
+    name: "e2e",
+    environment: "node",
+    include: ["tests/e2e/**/*.test.js"],
     testTimeout: 60000,
     hookTimeout: 120000,
     // Un navegador cada vez: son pesados y comparten el servidor
     fileParallelism: false,
   },
-})
+});

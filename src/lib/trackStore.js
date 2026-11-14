@@ -106,7 +106,7 @@ export async function storeTrack(track) {
         savedLoops: sanitizeSavedLoops(savedLoops),
         activeLoop: sanitizeLoopRegion(activeLoop),
         structure: sanitizeStructure(structure),
-      })
+      }),
     );
   } catch (err) {
     logError(ERRORS.LIB_DB_SAVE, err, { id: track?.id });
@@ -132,7 +132,10 @@ export async function removeStoredTrack(id) {
  * SIEMPRE: el análisis no los toca en ningún caso (aquí viajan intactos dentro
  * de `...track`).
  */
-export function mergeTrackAnalysis(track, { bpm, gridAnchor, duration, musicalKey } = {}) {
+export function mergeTrackAnalysis(
+  track,
+  { bpm, gridAnchor, duration, musicalKey } = {},
+) {
   if (track?.gridManual) {
     return { ...track, duration, musicalKey, analyzed: true };
   }

@@ -8,7 +8,8 @@ export default {
   masterSync: "MASTER SYNC",
   masterSyncTitle:
     "Master sync: decks with SYNC follow this BPM instead of the other deck",
-  masterBpmTitle: "Master sync BPM. Press and drag up or down, or use the wheel, to set it without typing (hold Shift for finer steps)",
+  masterBpmTitle:
+    "Master sync BPM. Press and drag up or down, or use the wheel, to set it without typing (hold Shift for finer steps)",
   bpm: "BPM",
   language: "Language",
 
@@ -25,7 +26,8 @@ export default {
   noFile: "No file",
   loadFile: "📂 Load file",
   cue: "CUE",
-  cueTitle: "Distance to the CUE point, which sits at {time}. It is set by positioning the track while paused; Stop returns there.",
+  cueTitle:
+    "Distance to the CUE point, which sits at {time}. It is set by positioning the track while paused; Stop returns there.",
   bpmDisplayTitle:
     "Click on the beat (TAP): re-anchors the beat grid and recomputes the BPM",
   analyzingTrack: "⏳ Analyzing track…",
@@ -33,7 +35,8 @@ export default {
   regridding: "⏳ Adjusting grid…",
   updateDownloading: "Downloading update {version}… {percent}%",
   updateReady: "Update {version} ready",
-  updateReadyHint: "If you don't restart now, it will install when you close the app",
+  updateReadyHint:
+    "If you don't restart now, it will install when you close the app",
   updateInstall: "Restart and install",
   updateLater: "Later",
   updateChecking: "Checking for updates…",
@@ -46,7 +49,8 @@ export default {
   sync: "SYNC",
   syncTitle:
     "Engage continuous sync: this deck will follow the other deck's or the master BPM",
-  syncActiveTitle: "Sync locked: following {source}'s BPM (pitch adjusts itself)",
+  syncActiveTitle:
+    "Sync locked: following {source}'s BPM (pitch adjusts itself)",
   keyLock: "🔒 Key",
   keyLockTitle:
     "Key lock: keeps the pitch when changing tempo (OFF = vinyl mode)",
@@ -56,7 +60,8 @@ export default {
   bendMinusTitle: "Bend − (slower while held)",
   bendPlusTitle: "Bend + (faster while held)",
   hotCueSetTitle: "Hot cue {n}: set at the current position",
-  hotCueGoTitle: "Hot cue {n}: jump to {time} · clear with right-click or Shift+click · double-click to name it",
+  hotCueGoTitle:
+    "Hot cue {n}: jump to {time} · clear with right-click or Shift+click · double-click to name it",
   hotCueNameLabel: "Cue {n} name",
   namePlaceholder: "drop, vocal…",
   nameSaveTitle: "Save the name (Enter)",
@@ -73,21 +78,25 @@ export default {
   quantizeTitle:
     "Quantize: snaps hot cues, loops and jumps to the nearest grid beat",
   gridPhaseLabel: "Phase",
-  gridPhaseTitle: "Moves the whole grid backward or forward, without changing the BPM",
+  gridPhaseTitle:
+    "Moves the whole grid backward or forward, without changing the BPM",
   gridPhaseBackCoarseTitle: "Move the grid 10 ms earlier",
   gridPhaseBackFineTitle: "Move the grid 1 ms earlier",
   gridPhaseFwdFineTitle: "Move the grid 1 ms later",
   gridPhaseFwdCoarseTitle: "Move the grid 10 ms later",
   gridTempoLabel: "Spacing",
-  gridTempoTitle: "Spreads or tightens the beats by changing the track's base BPM. This is not the pitch: the pitch stays on the fader",
+  gridTempoTitle:
+    "Spreads or tightens the beats by changing the track's base BPM. This is not the pitch: the pitch stays on the fader",
   gridTempoDownCoarseTitle: "Lower the base BPM by 0.1 (beats further apart)",
   gridTempoDownFineTitle: "Lower the base BPM by 0.01 (beats further apart)",
   gridTempoUpFineTitle: "Raise the base BPM by 0.01 (beats closer together)",
   gridTempoUpCoarseTitle: "Raise the base BPM by 0.1 (beats closer together)",
   gridHalveTitle: "Halve the base BPM, keeping the anchor",
   gridDoubleTitle: "Double the base BPM, keeping the anchor",
-  gridRegridTitle: "Re-analyse starting from the current BPM and anchor, looking for the best fit around them",
-  gridBaseBpmTitle: "Track's base BPM: the one that defines the grid. The pitch does not change it",
+  gridRegridTitle:
+    "Re-analyse starting from the current BPM and anchor, looking for the best fit around them",
+  gridBaseBpmTitle:
+    "Track's base BPM: the one that defines the grid. The pitch does not change it",
   loop: "Loop",
   loopIn: "IN",
   loopInTitle: "Sets the loop start at the current position",
@@ -98,9 +107,11 @@ export default {
   loopMoveFwdTitle: "Moves the loop one length forwards, keeping its size",
   loopHalveTitle: "Halves the loop length, staying on the grid",
   loopDoubleTitle: "Doubles the loop length, staying on the grid",
-  loopLengthTitle: "Loop length in beats (in seconds when the IN/OUT is off the grid)",
+  loopLengthTitle:
+    "Loop length in beats (in seconds when the IN/OUT is off the grid)",
   rollLabel: "Roll",
-  rollSizeTitle: "{n}-beat loop roll while held. On release, playback continues where it would be if the roll had never happened",
+  rollSizeTitle:
+    "{n}-beat loop roll while held. On release, playback continues where it would be if the roll had never happened",
   savedLoopsLabel: "Loops",
   savedLoopsNone: "no loops",
   savedLoopSaveTitle: "Saves the active loop on this track",
@@ -120,9 +131,11 @@ export default {
   filter: "Filter",
   filterOff: "OFF",
   kill: "KILL",
-  eqTitle: "EQ band: right-click = kill the band · double-click = reset to zero",
+  eqTitle:
+    "EQ band: right-click = kill the band · double-click = reset to zero",
   gainTitle: "Channel gain · right-click or double-click = reset to zero",
-  filterTitle: "DJ filter: drag left = low-pass, right = high-pass · right-click or double-click = OFF",
+  filterTitle:
+    "DJ filter: drag left = low-pass, right = high-pass · right-click or double-click = OFF",
   crossfader: "Crossfader",
   resetHint: "right-click = back to the default position",
   volumeTitle: "Deck {side} volume",
@@ -172,10 +185,12 @@ export default {
   keySameTitle: "Same key as the playing track",
   keyCompatibleTitle: "Harmonically compatible with the playing track",
   keyClashTitle: "Does not match the playing track's key",
-  keyLegend: "Playing in {key}: harmonically compatible tracks are shown in purple.",
+  keyLegend:
+    "Playing in {key}: harmonically compatible tracks are shown in purple.",
   showArtwork: "Artwork",
   showArtworkTitle: "Show or hide cover art thumbnails",
-  showArtworkNote: "Hiding them saves screen space; the artwork is still stored.",
+  showArtworkNote:
+    "Hiding them saves screen space; the artwork is still stored.",
   listHeading: "Track list",
   csvArtist: "Artist",
   csvKey: "Key",
@@ -183,7 +198,8 @@ export default {
   // Colores de la onda
   showKey: "Track key",
   wavePaletteHeading: "Waveform colours",
-  wavePaletteNote: "Lows, mids and highs are already analysed: switching palette recolours instantly, with no re-analysis.",
+  wavePaletteNote:
+    "Lows, mids and highs are already analysed: switching palette recolours instantly, with no re-analysis.",
   paletteMinidj: "Mini DJ (default)",
   paletteMono: "Classic green (single colour)",
   paletteCustom: "Custom…",
@@ -213,7 +229,8 @@ export default {
   analysisDeck: "Only when loaded into a deck",
 
   // Footer
-  shortcuts: "Keyboard (active deck: Q=A, P=B or click the deck) — Space: play/pause · C: cue/stop · 1-8: hot cues (Shift: clear) · I/O: loop in/out · L: loop on/off · A S D F G H: loop roll 1/8-4 · [ ]: move the loop · − =: halve/double · R: save loop (Shift: recall it) · , .: pick saved loop · ←/→: nudge",
+  shortcuts:
+    "Keyboard (active deck: Q=A, P=B or click the deck) — Space: play/pause · C: cue/stop · 1-8: hot cues (Shift: clear) · I/O: loop in/out · L: loop on/off · A S D F G H: loop roll 1/8-4 · [ ]: move the loop · − =: halve/double · R: save loop (Shift: recall it) · , .: pick saved loop · ←/→: nudge",
   // Settings tabs, load lock and level meters
   tabAudio: "Audio",
   tabLibrary: "Library",
@@ -221,18 +238,24 @@ export default {
   tabSafety: "Safety",
   safetyHeading: "Safety while playing",
   lockLoadWhilePlaying: "Don't load tracks onto a deck that is playing",
-  lockLoadWhilePlayingNote: "Keeps you from wrecking a live mix: while the deck is playing, its load buttons are disabled. Turn it off to go back to the old behaviour.",
+  lockLoadWhilePlayingNote:
+    "Keeps you from wrecking a live mix: while the deck is playing, its load buttons are disabled. Turn it off to go back to the old behaviour.",
   loadToDeckTitle: "Load this track onto deck {side}",
-  loadLockedTitle: "Deck {side} is playing: you can't load another track. Stop it, or turn the lock off in Settings ⚙ › Safety.",
+  loadLockedTitle:
+    "Deck {side} is playing: you can't load another track. Stop it, or turn the lock off in Settings ⚙ › Safety.",
   vuHeading: "Level meters (VU)",
   vuModeContinuous: "Continuous (solid bar)",
   vuModeLed: "LED (segments, like a mixer)",
-  vuNote: "dBFS scale from −42 to 0. Green up to −12, amber up to −3 and red against the digital ceiling; the marker holds the peak and the red block on top warns of clipping.",
-  vuChannelTitle: "Channel level in dBFS (post-EQ, pre-fader: independent of the fader and the crossfader)",
-  vuMasterTitle: "Master output level in dBFS (measured after the trim and the limiter)",
+  vuNote:
+    "dBFS scale from −42 to 0. Green up to −12, amber up to −3 and red against the digital ceiling; the marker holds the peak and the red block on top warns of clipping.",
+  vuChannelTitle:
+    "Channel level in dBFS (post-EQ, pre-fader: independent of the fader and the crossfader)",
+  vuMasterTitle:
+    "Master output level in dBFS (measured after the trim and the limiter)",
   tabLog: "Log",
   logHeading: "Error log",
-  logNote: "Failures are stored with a code for the area they happened in (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). They are always in English, never translated, so they can be searched and compared. The last 200 entries are kept.",
+  logNote:
+    "Failures are stored with a code for the area they happened in (AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC). They are always in English, never translated, so they can be searched and compared. The last 200 entries are kept.",
   logEmpty: "No errors logged.",
   logCount: "{n} entries",
   logDownload: "⬇ Download",
@@ -248,9 +271,11 @@ export default {
   phraseFwdFineTitle: "Shift the phrase 1 kick forward",
   phraseFwdCoarseTitle: "Shift the phrase {n} kicks forward",
   phraseSizeTitle: "Phrase length in kicks. Same setting as in ⚙ Config",
-  structureRedetectTitle: "Detect the structure again on the current beat grid, keeping the phrase shift you set by hand",
+  structureRedetectTitle:
+    "Detect the structure again on the current beat grid, keeping the phrase shift you set by hand",
   phraseResetTitle: "Back to the phrase shift the analysis found",
-  phraseOffsetTitle: "Current phrase shift, in kicks. Amber when you set it by hand",
+  phraseOffsetTitle:
+    "Current phrase shift, in kicks. Amber when you set it by hand",
   structureTipInKick: "You are in the part with the beat.",
   structureTipInBreak: "You are in a breakdown.",
   structureTipDrop: "The breakdown starts in {n} kicks.",
@@ -264,7 +289,8 @@ export default {
   structureTipPhrase: "You are on kick {pos} of a {size}-kick phrase.",
   structureHeading: "Structure indicator",
   showStructure: "Show the indicator over the waveform",
-  structureNote: "Counts the kicks left until the beat drops out (▼) and until it comes back (▲), plus where you are inside the phrase. Analysed once, when the track loads.",
+  structureNote:
+    "Counts the kicks left until the beat drops out (▼) and until it comes back (▲), plus where you are inside the phrase. Analysed once, when the track loads.",
   phraseSizeLabel: "Phrase length",
   structureUnitLabel: "Count in",
   unitKicks: "Kicks",
@@ -273,7 +299,8 @@ export default {
   warnRedLabel: "Red warning (kicks)",
   endWarnHeading: "End of track warning",
   endWarnOn: "Warn when the track is about to end",
-  endWarnNote: "The waveform border blinks red, more insistently as the end approaches. Only while the track is playing, and steady if you have the system's reduced motion setting on.",
+  endWarnNote:
+    "The waveform border blinks red, more insistently as the end approaches. Only while the track is playing, and steady if you have the system's reduced motion setting on.",
   endWarnModeLabel: "Trigger by",
   endWarnModeSeconds: "Seconds left",
   endWarnModePercent: "Percent left",
@@ -283,7 +310,8 @@ export default {
   // Pitch (rango del fader y fuerza del bend)
   pitchHeading: "Pitch",
   bendRangeLabel: "Pitch bend strength",
-  pitchNote: "Both decks use these. The range is the starting point: if SYNC needs more travel it widens on its own without changing this. The bend strength is how much the deck's − and + buttons pull.",
+  pitchNote:
+    "Both decks use these. The range is the starting point: if SYNC needs more travel it widens on its own without changing this. The bend strength is how much the deck's − and + buttons pull.",
   masterBpmDownTitle: "Lower the master BPM by 1",
   masterBpmUpTitle: "Raise the master BPM by 1",
 
@@ -297,7 +325,8 @@ export default {
   noArtworkFormatTitle: "No artwork · {format} file",
 
   // Resumen de la pista
-  overviewTitle: "Track overview: click or drag to move around. Dark sections are the breakdowns; the red line marks where the beat drops out and the green one where it comes back",
+  overviewTitle:
+    "Track overview: click or drag to move around. Dark sections are the breakdowns; the red line marks where the beat drops out and the green one where it comes back",
 
   // Pantalla LCD del deck
   lcdElapsed: "Elapsed",
@@ -313,13 +342,15 @@ export default {
   marqueeSlow: "Slow",
   marqueeNormal: "Normal",
   marqueeFast: "Fast",
-  marqueeNote: "When the name does not fit on the deck display, it scrolls in a loop. The browser animates it, so it costs no CPU. It stays still with the system's reduced motion setting.",
+  marqueeNote:
+    "When the name does not fit on the deck display, it scrolls in a loop. The browser animates it, so it costs no CPU. It stays still with the system's reduced motion setting.",
 
   // Pantalla del deck: cifras redondeadas o de 14 segmentos
   lcdHeading: "Deck display",
   lcdFontLabel: "Digits",
   lcdFontRounded: "Rounded",
-  lcdFontNote: "The title on a 5 x 7 dot matrix and the readouts (time, BPM, pitch…) wired like a real panel: seven segments where only digits go, fourteen where a sign is needed. It takes the same room as the plain letters, so switching does not shift anything.",
+  lcdFontNote:
+    "The title on a 5 x 7 dot matrix and the readouts (time, BPM, pitch…) wired like a real panel: seven segments where only digits go, fourteen where a sign is needed. It takes the same room as the plain letters, so switching does not shift anything.",
   titleFontLabel: "Title",
   lcdFontLcd: "LCD screen",
   lcdFontDot: "Dot matrix",

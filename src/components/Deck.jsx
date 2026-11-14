@@ -168,7 +168,12 @@ function Deck({
   // Editor de nombre abierto: { kind: "cue" | "loop", index, value }
   const [naming, setNaming] = useState(null);
 
-  const { bendPct, startBend, releaseBend, nudge: onNudge } = useBend(bendRange);
+  const {
+    bendPct,
+    startBend,
+    releaseBend,
+    nudge: onNudge,
+  } = useBend(bendRange);
 
   const [reverseAdvancedTime, setReverseAdvancedTime] = useState(true);
 
@@ -187,7 +192,7 @@ function Deck({
   const gridDuration = duration || bufferDuration;
   const beats = useMemo(
     () => buildBeatGrid(bpm, gridAnchor, gridDuration),
-    [bpm, gridAnchor, gridDuration]
+    [bpm, gridAnchor, gridDuration],
   );
 
   const onAnalysisRef = useRef(onAnalysis);
@@ -223,7 +228,7 @@ function Deck({
   // Aviso de fin de pista: segundos que quedan cuando empieza a parpadear
   const endWarnAt = useMemo(
     () => endWarnSeconds(prefs.endWarn, duration || bufferDuration),
-    [prefs.endWarn, duration, bufferDuration]
+    [prefs.endWarn, duration, bufferDuration],
   );
 
   const round2 = (v) => Math.round(v * 100) / 100;
@@ -244,7 +249,6 @@ function Deck({
   const getFilenameWithoutExtension = () => {
     return stripExtension(fileName) || t("noFile");
   };
-
 
   // Auto-cue: solo si el usuario no ha fijado un cue manual.
   // Si el deck está parado, colocamos también la pista en el cue.
@@ -363,7 +367,7 @@ function Deck({
       applyGrid(
         manualGrid ? cached.bpm : null,
         manualGrid ? cached.gridAnchor : 0,
-        manualGrid
+        manualGrid,
       );
       setCuePoint(0);
       setHotCues(hotCuesToSlots(cached?.hotCues));
@@ -454,15 +458,14 @@ function Deck({
       onWheelZoom: (...a) => waveHandlersRef.current.onWheelZoom?.(...a),
       onOverviewSeek: (...a) => waveHandlersRef.current.onOverviewSeek?.(...a),
     }),
-    []
+    [],
   );
 
   // === Quantize: imanta cues/loops/saltos al beat más cercano ===
   // Apagado de partida: imantar por sorpresa un cue o un loop que has puesto
   // a mano desconcierta más de lo que ayuda.
   const [quantize, setQuantize] = useState(false);
-  const snapToGrid = (time) =>
-    quantize ? nearestBeat(beats, time) : time;
+  const snapToGrid = (time) => (quantize ? nearestBeat(beats, time) : time);
 
   // === Beat jump (estilo Traktor): salto de N beats adelante/atrás ===
   const [jumpBeats, setJumpBeats] = useState(4);
@@ -599,15 +602,13 @@ function Deck({
 
   const renameSavedLoop = (idx, name) => {
     setSavedLoops((prev) =>
-      prev.map((l, i) => (i === idx ? { ...l, name: sanitizeName(name) } : l))
+      prev.map((l, i) => (i === idx ? { ...l, name: sanitizeName(name) } : l)),
     );
   };
 
   const selectSavedLoop = (dir) => {
     if (!savedLoops.length) return;
-    setSavedLoopIdx(
-      (i) => (i + dir + savedLoops.length) % savedLoops.length
-    );
+    setSavedLoopIdx((i) => (i + dir + savedLoops.length) % savedLoops.length);
   };
 
   // Los hot cues y los loops suben al padre, que los refleja en la lista y los
@@ -625,7 +626,16 @@ function Deck({
           ? { start: loopIn, end: loopOut, beats: loopBeats }
           : undefined,
     });
-  }, [hotCues, savedLoops, loopIn, loopOut, loopBeats, rolling, objectUrl, side]);
+  }, [
+    hotCues,
+    savedLoops,
+    loopIn,
+    loopOut,
+    loopBeats,
+    rolling,
+    objectUrl,
+    side,
+  ]);
 
   // API imperativa para atajos de teclado (MiniDJPlayer)
   useImperativeHandle(ref, () => ({
@@ -669,9 +679,8 @@ function Deck({
     () => () => {
       if (pitchCommitRef.current) cancelAnimationFrame(pitchCommitRef.current);
     },
-    []
+    [],
   );
-
 
   waveHandlersRef.current = {
     onSeek: (time) => {
@@ -709,7 +718,9 @@ function Deck({
       data-bpm={bpm ?? ""}
       data-running-bpm={runningBpm ?? ""}
       className={`rounded-2xl border bg-neutral-900/70 p-4 sm:p-5 shadow-xl relative overflow-hidden min-w-0 ${
-        isActive ? "border-sky-500/60 ring-1 ring-sky-500/40" : "border-neutral-800"
+        isActive
+          ? "border-sky-500/60 ring-1 ring-sky-500/40"
+          : "border-neutral-800"
       }`}
     >
       <div
@@ -745,10 +756,12 @@ function Deck({
                 Antes eran etiquetas sueltas repartidas por la tarjeta —dos de
                 ellas encima del fader de pitch, que por eso era más corto. */}
             <LcdDisplay
-              trackTitle={tags?.title || getFilenameWithoutExtension() || t("noFile")}
-              trackInfo={
-                [tags?.artist, tags?.album].filter(Boolean).join(" · ")
+              trackTitle={
+                tags?.title || getFilenameWithoutExtension() || t("noFile")
               }
+              trackInfo={[tags?.artist, tags?.album]
+                .filter(Boolean)
+                .join(" · ")}
               marqueeSpeed={prefs.marqueeSpeed}
               font={prefs.lcdFont}
               titleFont={prefs.titleFont}
@@ -757,7 +770,9 @@ function Deck({
                 // ya está a su izquierda, en la propia pantalla.
                 <span
                   className="shrink-0"
-                  title={loadBlocked ? t("loadLockedTitle", { side }) : t("loadFile")}
+                  title={
+                    loadBlocked ? t("loadLockedTitle", { side }) : t("loadFile")
+                  }
                 >
                   <PadButton
                     size="sm"
@@ -773,7 +788,9 @@ function Deck({
                   ? `-${formatClock(duration - current)}`
                   : formatClock(current)
               }
-              timeLabel={reverseAdvancedTime ? t("lcdRemaining") : t("lcdElapsed")}
+              timeLabel={
+                reverseAdvancedTime ? t("lcdRemaining") : t("lcdElapsed")
+              }
               timeTitle={t("lcdTimeTitle")}
               onToggleTime={() => setReverseAdvancedTime((prev) => !prev)}
               cue={
@@ -784,7 +801,9 @@ function Deck({
                       // El signo sale de la cifra YA redondeada: por debajo de
                       // un segundo estás en el cue, y un "−00:00" no dice nada
                       text: `${
-                        current < cuePoint && cuePoint - current >= 1 ? "−" : "+"
+                        current < cuePoint && cuePoint - current >= 1
+                          ? "−"
+                          : "+"
                       }${formatClock(Math.abs(current - cuePoint))}`,
                     }
                   : null
@@ -865,7 +884,9 @@ function Deck({
               {(analyzing === "bpm" || analyzing === "regrid") && (
                 <div className="absolute inset-x-0 bottom-1 flex justify-center pointer-events-none">
                   <span className="px-2 py-0.5 rounded bg-neutral-900/80 text-[10px] text-neutral-300 animate-pulse">
-                    {analyzing === "regrid" ? t("regridding") : t("detectingBpm")}
+                    {analyzing === "regrid"
+                      ? t("regridding")
+                      : t("detectingBpm")}
                   </span>
                 </div>
               )}
@@ -938,168 +959,169 @@ function Deck({
             </div>
           </div>
         </div>
-            {/* Transporte */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            {/* Un solo botón: en grid reservamos el ancho del texto más
+        {/* Transporte */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          {/* Un solo botón: en grid reservamos el ancho del texto más
                 largo (play/pausa) para que no baile al alternar idioma */}
-            <PadButton
-              size="transport"
-              radius={TRANSPORT_RADIUS}
-              skin="none"
-              contentClass="grid place-items-center w-full"
-              onClick={isPlaying ? pause : play}
-              disabled={!objectUrl && !isPlaying}
-              className={`min-w-24 text-sm text-black bg-gradient-to-b ${
-                isPlaying
-                  ? "from-yellow-300 to-yellow-500 border-yellow-400 hover:from-yellow-200 hover:to-yellow-400"
-                  : "from-emerald-400 to-emerald-600 border-emerald-500 hover:from-emerald-300 hover:to-emerald-500"
-              }`}
-            >
-              <span className="col-start-1 row-start-1 invisible h-0" aria-hidden>
-                {t("play")}
-              </span>
-              <span className="col-start-1 row-start-1 invisible h-0" aria-hidden>
-                {t("pause")}
-              </span>
-              <span className="col-start-1 row-start-1 whitespace-nowrap">
-                {isPlaying ? t("pause") : t("play")}
-              </span>
-            </PadButton>
-            <PadButton
-              size="transport"
-              radius={TRANSPORT_RADIUS}
-              skin="none"
-              onClick={stop}
-              disabled={!objectUrl}
-              className="min-w-24 text-sm text-black border-neutral-300 bg-gradient-to-b from-white to-neutral-300 hover:from-neutral-100 hover:to-neutral-400"
-              title={t("stopTitle")}
-            >
-              {t("stop")}
-            </PadButton>
-            {/* SYNC y KEY son de encender y apagar: llevan testigo con luz,
+          <PadButton
+            size="transport"
+            radius={TRANSPORT_RADIUS}
+            skin="none"
+            contentClass="grid place-items-center w-full"
+            onClick={isPlaying ? pause : play}
+            disabled={!objectUrl && !isPlaying}
+            className={`min-w-24 text-sm text-black bg-gradient-to-b ${
+              isPlaying
+                ? "from-yellow-300 to-yellow-500 border-yellow-400 hover:from-yellow-200 hover:to-yellow-400"
+                : "from-emerald-400 to-emerald-600 border-emerald-500 hover:from-emerald-300 hover:to-emerald-500"
+            }`}
+          >
+            <span className="col-start-1 row-start-1 invisible h-0" aria-hidden>
+              {t("play")}
+            </span>
+            <span className="col-start-1 row-start-1 invisible h-0" aria-hidden>
+              {t("pause")}
+            </span>
+            <span className="col-start-1 row-start-1 whitespace-nowrap">
+              {isPlaying ? t("pause") : t("play")}
+            </span>
+          </PadButton>
+          <PadButton
+            size="transport"
+            radius={TRANSPORT_RADIUS}
+            skin="none"
+            onClick={stop}
+            disabled={!objectUrl}
+            className="min-w-24 text-sm text-black border-neutral-300 bg-gradient-to-b from-white to-neutral-300 hover:from-neutral-100 hover:to-neutral-400"
+            title={t("stopTitle")}
+          >
+            {t("stop")}
+          </PadButton>
+          {/* SYNC y KEY son de encender y apagar: llevan testigo con luz,
                 como los de las cajas de abajo. min-w fijo en el SYNC para que
                 el texto SYNC·MST no ensanche ni desplace la fila. */}
-            <PadButton
-              size="transport"
-              led
-              active={syncActive}
-              onClick={() => onSync?.(side)}
-              disabled={!canSync || !bpm}
-              radius={TRANSPORT_RADIUS}
-              className="text-sm min-w-28"
-              title={
-                syncActive
-                  ? t("syncActiveTitle", { source: syncLabel })
-                  : t("syncTitle")
-              }
-            >
-              {syncActive ? `${t("sync")}·${syncLabel}` : t("sync")}
-            </PadButton>
-            <PadButton
-              size="transport"
-              led
-              active={keyLock}
-              color="#38bdf8"
-              onClick={() => setKeyLock(side, !keyLock)}
-              disabled={!objectUrl}
-              radius={TRANSPORT_RADIUS}
-              className="text-xs"
-              title={t("keyLockTitle")}
-            >
-              {t("keyLock")}
-            </PadButton>
-          </div>
+          <PadButton
+            size="transport"
+            led
+            active={syncActive}
+            onClick={() => onSync?.(side)}
+            disabled={!canSync || !bpm}
+            radius={TRANSPORT_RADIUS}
+            className="text-sm min-w-28"
+            title={
+              syncActive
+                ? t("syncActiveTitle", { source: syncLabel })
+                : t("syncTitle")
+            }
+          >
+            {syncActive ? `${t("sync")}·${syncLabel}` : t("sync")}
+          </PadButton>
+          <PadButton
+            size="transport"
+            led
+            active={keyLock}
+            color="#38bdf8"
+            onClick={() => setKeyLock(side, !keyLock)}
+            disabled={!objectUrl}
+            radius={TRANSPORT_RADIUS}
+            className="text-xs"
+            title={t("keyLockTitle")}
+          >
+            {t("keyLock")}
+          </PadButton>
+        </div>
         {/* Herramientas del deck, por pestañas.
               Antes eran tres filas de cajas y se comían media tarjeta. Cada
               pestaña enseña UN grupo, en el orden de siempre, y el panel
               tiene alto fijo: cambiar de pestaña no mueve nada de sitio. */}
-          <div className="pt-3 border-t border-neutral-800/70">
-            <div role="tablist" className="flex gap-0.5 overflow-x-auto">
-              {TOOL_TABS.map((tb) => (
-                <button
-                  key={tb.id}
-                  role="tab"
-                  aria-selected={tool === tb.id}
-                  onClick={() => setTool(tb.id)}
-                  className={`px-2 py-1 text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap border-b-2 -mb-px ${
-                    tool === tb.id
-                      ? "border-emerald-400 text-neutral-100"
-                      : "border-transparent text-neutral-500 hover:text-neutral-300"
-                  }`}
-                >
-                  {t(tb.labelKey)}
-                </button>
-              ))}
-            </div>
-            {/* Alto fijo: el deck mide lo mismo en todas las pestañas.
-                `relative` porque el editor de nombre flota sobre el panel. */}
-            <div className="relative mt-1 flex min-h-[5.25rem] flex-wrap items-stretch gap-2 rounded-lg border border-neutral-800 bg-neutral-900/40 p-1.5 text-xs">
-              {tool === "position" && (
-                <PositionTools
-                  objectUrl={objectUrl}
-                  bpm={bpm}
-                  hotCues={hotCues}
-                  triggerHotCue={triggerHotCue}
-                  clearHotCue={clearHotCue}
-                  renameHotCue={renameHotCue}
-                  naming={naming}
-                  setNaming={setNaming}
-                  jumpBeats={jumpBeats}
-                  setJumpBeats={setJumpBeats}
-                  beatJump={beatJump}
-                />
-              )}
-              {tool === "bpm" && (
-                <BpmTools
-                  objectUrl={objectUrl}
-                  bpm={bpm}
-                  analyzing={analyzing}
-                  quantize={quantize}
-                  setQuantize={setQuantize}
-                  onTapBeat={onTapBeat}
-                  scaleGrid={scaleGrid}
-                  regridFromManual={regridFromManual}
-                  nudgeGrid={nudgeGrid}
-                  stretchGrid={stretchGrid}
-                  structure={structure}
-                  phraseSize={phraseSize}
-                  onPhraseSize={onPhraseSize}
-                  shiftPhrase={shiftPhrase}
-                  redetectStructure={redetectStructure}
-                  resetPhrase={resetPhrase}
-                  bandLow={bandLow}
-                  beats={beats}
-                />
-              )}
-              {tool === "loops" && (
-                <LoopTools
-                  objectUrl={objectUrl}
-                  bpm={bpm}
-                  loopIn={loopIn}
-                  loopOut={loopOut}
-                  loopOn={loopOn}
-                  loopLabel={loopLabel}
-                  setLoopInNow={setLoopInNow}
-                  setLoopOutNow={setLoopOutNow}
-                  toggleLoop={toggleLoop}
-                  autoLoop={autoLoop}
-                  moveLoopBy={moveLoopBy}
-                  resizeLoopBy={resizeLoopBy}
-                  savedLoops={savedLoops}
-                  savedLoopIdx={savedLoopIdx}
-                  setSavedLoopIdx={setSavedLoopIdx}
-                  saveCurrentLoop={saveCurrentLoop}
-                  recallSavedLoop={recallSavedLoop}
-                  deleteSavedLoop={deleteSavedLoop}
-                  renameSavedLoop={renameSavedLoop}
-                  naming={naming}
-                  setNaming={setNaming}
-                  rolling={rolling}
-                  startRoll={startRoll}
-                  endRoll={endRoll}
-                />
-              )}              </div>
+        <div className="pt-3 border-t border-neutral-800/70">
+          <div role="tablist" className="flex gap-0.5 overflow-x-auto">
+            {TOOL_TABS.map((tb) => (
+              <button
+                key={tb.id}
+                role="tab"
+                aria-selected={tool === tb.id}
+                onClick={() => setTool(tb.id)}
+                className={`px-2 py-1 text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap border-b-2 -mb-px ${
+                  tool === tb.id
+                    ? "border-emerald-400 text-neutral-100"
+                    : "border-transparent text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                {t(tb.labelKey)}
+              </button>
+            ))}
           </div>
+          {/* Alto fijo: el deck mide lo mismo en todas las pestañas.
+                `relative` porque el editor de nombre flota sobre el panel. */}
+          <div className="relative mt-1 flex min-h-[5.25rem] flex-wrap items-stretch gap-2 rounded-lg border border-neutral-800 bg-neutral-900/40 p-1.5 text-xs">
+            {tool === "position" && (
+              <PositionTools
+                objectUrl={objectUrl}
+                bpm={bpm}
+                hotCues={hotCues}
+                triggerHotCue={triggerHotCue}
+                clearHotCue={clearHotCue}
+                renameHotCue={renameHotCue}
+                naming={naming}
+                setNaming={setNaming}
+                jumpBeats={jumpBeats}
+                setJumpBeats={setJumpBeats}
+                beatJump={beatJump}
+              />
+            )}
+            {tool === "bpm" && (
+              <BpmTools
+                objectUrl={objectUrl}
+                bpm={bpm}
+                analyzing={analyzing}
+                quantize={quantize}
+                setQuantize={setQuantize}
+                onTapBeat={onTapBeat}
+                scaleGrid={scaleGrid}
+                regridFromManual={regridFromManual}
+                nudgeGrid={nudgeGrid}
+                stretchGrid={stretchGrid}
+                structure={structure}
+                phraseSize={phraseSize}
+                onPhraseSize={onPhraseSize}
+                shiftPhrase={shiftPhrase}
+                redetectStructure={redetectStructure}
+                resetPhrase={resetPhrase}
+                bandLow={bandLow}
+                beats={beats}
+              />
+            )}
+            {tool === "loops" && (
+              <LoopTools
+                objectUrl={objectUrl}
+                bpm={bpm}
+                loopIn={loopIn}
+                loopOut={loopOut}
+                loopOn={loopOn}
+                loopLabel={loopLabel}
+                setLoopInNow={setLoopInNow}
+                setLoopOutNow={setLoopOutNow}
+                toggleLoop={toggleLoop}
+                autoLoop={autoLoop}
+                moveLoopBy={moveLoopBy}
+                resizeLoopBy={resizeLoopBy}
+                savedLoops={savedLoops}
+                savedLoopIdx={savedLoopIdx}
+                setSavedLoopIdx={setSavedLoopIdx}
+                saveCurrentLoop={saveCurrentLoop}
+                recallSavedLoop={recallSavedLoop}
+                deleteSavedLoop={deleteSavedLoop}
+                renameSavedLoop={renameSavedLoop}
+                naming={naming}
+                setNaming={setNaming}
+                rolling={rolling}
+                startRoll={startRoll}
+                endRoll={endRoll}
+              />
+            )}{" "}
+          </div>
+        </div>
         <audio
           ref={audioRef}
           className="hidden"

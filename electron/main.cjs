@@ -131,7 +131,7 @@ function configureSession(ses) {
     callback(ALLOWED_PERMISSIONS.has(permission));
   });
   ses.setPermissionCheckHandler((_wc, permission) =>
-    ALLOWED_PERMISSIONS.has(permission)
+    ALLOWED_PERMISSIONS.has(permission),
   );
 
   // Descargas (grabación .webm, CSV del tracklist): diálogo nativo de guardado.

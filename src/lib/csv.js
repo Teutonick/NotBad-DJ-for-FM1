@@ -3,7 +3,8 @@
 // no, un título como «Song; Remix» descoloca todas las columnas de la fila.
 export function csvField(value, sep = ";") {
   const s = value == null ? "" : String(value);
-  if (s.includes(sep) || /["\r\n]/.test(s)) return `"${s.replaceAll('"', '""')}"`;
+  if (s.includes(sep) || /["\r\n]/.test(s))
+    return `"${s.replaceAll('"', '""')}"`;
   return s;
 }
 

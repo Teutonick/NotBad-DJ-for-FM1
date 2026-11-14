@@ -59,7 +59,11 @@ export function pickOption(list, value, fallback) {
 export function resolveConfig(config = {}) {
   return {
     // Rango de PARTIDA del fader de pitch: el sync lo ensancha por su cuenta
-    pitchRange: pickOption(PITCH_RANGES, config.pitchRange, DEFAULT_PITCH_RANGE),
+    pitchRange: pickOption(
+      PITCH_RANGES,
+      config.pitchRange,
+      DEFAULT_PITCH_RANGE,
+    ),
     bendRange: pickOption(BEND_RANGES, config.bendRange, DEFAULT_BEND_RANGE),
     // LED por defecto, como una mesa de verdad
     vuMode: pickOption(VU_MODES, config.vuMode, "led"),

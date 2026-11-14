@@ -10,7 +10,10 @@ const path = require("node:path");
 function resolveDistPath(distDir, requestUrl) {
   let relative;
   try {
-    relative = decodeURIComponent(new URL(requestUrl).pathname).replace(/^\/+/, "");
+    relative = decodeURIComponent(new URL(requestUrl).pathname).replace(
+      /^\/+/,
+      "",
+    );
   } catch {
     return null;
   }
@@ -73,4 +76,9 @@ function createLineLimiter({ max, windowMs, now = Date.now }) {
   };
 }
 
-module.exports = { resolveDistPath, isSameOrigin, isExternalHttp, createLineLimiter };
+module.exports = {
+  resolveDistPath,
+  isSameOrigin,
+  isExternalHttp,
+  createLineLimiter,
+};

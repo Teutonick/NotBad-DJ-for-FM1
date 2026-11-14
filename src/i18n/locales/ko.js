@@ -7,7 +7,8 @@ export default {
   masterSync: "마스터 싱크",
   masterSyncTitle:
     "마스터 싱크: SYNC가 켜진 덱은 다른 덱 대신 이 BPM을 따릅니다",
-  masterBpmTitle: "마스터 싱크 BPM. 위에서 누른 채 위아래로 끌거나 휠을 돌리면 입력 없이 조절됩니다 (Shift를 누르면 더 미세하게)",
+  masterBpmTitle:
+    "마스터 싱크 BPM. 위에서 누른 채 위아래로 끌거나 휠을 돌리면 입력 없이 조절됩니다 (Shift를 누르면 더 미세하게)",
   bpm: "BPM",
   language: "언어",
 
@@ -22,7 +23,8 @@ export default {
   noFile: "파일 없음",
   loadFile: "📂 파일 불러오기",
   cue: "CUE",
-  cueTitle: "CUE 지점({time})까지의 거리. 일시정지 상태에서 트랙을 이동하면 설정되고, 정지하면 그 위치로 돌아갑니다.",
+  cueTitle:
+    "CUE 지점({time})까지의 거리. 일시정지 상태에서 트랙을 이동하면 설정되고, 정지하면 그 위치로 돌아갑니다.",
   bpmDisplayTitle:
     "박자에 맞춰 클릭(TAP): 비트 그리드를 다시 맞추고 BPM을 재계산합니다",
   analyzingTrack: "⏳ 트랙 분석 중…",
@@ -41,20 +43,18 @@ export default {
   stop: "■ 정지",
   stopTitle: "정지하고 CUE 지점으로 돌아갑니다",
   sync: "SYNC",
-  syncTitle:
-    "연속 싱크 활성화: 이 덱은 다른 덱이나 마스터의 BPM을 따릅니다",
-  syncActiveTitle:
-    "싱크 고정: {source}의 BPM을 따르는 중 (피치는 자동 조정)",
+  syncTitle: "연속 싱크 활성화: 이 덱은 다른 덱이나 마스터의 BPM을 따릅니다",
+  syncActiveTitle: "싱크 고정: {source}의 BPM을 따르는 중 (피치는 자동 조정)",
   keyLock: "🔒 키",
-  keyLockTitle:
-    "키 락: 템포를 바꿔도 음정을 유지합니다 (OFF = 바이닐 모드)",
+  keyLockTitle: "키 락: 템포를 바꿔도 음정을 유지합니다 (OFF = 바이닐 모드)",
   rangeTitle: "피치 페이더 범위",
   pitch: "피치",
   bend: "벤드",
   bendMinusTitle: "벤드 − (누르고 있는 동안 느리게)",
   bendPlusTitle: "벤드 + (누르고 있는 동안 빠르게)",
   hotCueSetTitle: "핫큐 {n}: 현재 위치에 설정",
-  hotCueGoTitle: "핫큐 {n}: {time}로 이동 · 오른쪽 클릭 또는 Shift+클릭으로 삭제 · 더블 클릭으로 이름 지정",
+  hotCueGoTitle:
+    "핫큐 {n}: {time}로 이동 · 오른쪽 클릭 또는 Shift+클릭으로 삭제 · 더블 클릭으로 이름 지정",
   hotCueNameLabel: "큐 {n} 이름",
   namePlaceholder: "drop, 보컬…",
   nameSaveTitle: "이름 저장 (Enter)",
@@ -77,28 +77,35 @@ export default {
   gridPhaseFwdFineTitle: "그리드를 1 ms 뒤로",
   gridPhaseFwdCoarseTitle: "그리드를 10 ms 뒤로",
   gridTempoLabel: "간격",
-  gridTempoTitle: "트랙의 기준 BPM을 바꿔 비트 간격을 벌리거나 좁힙니다. 피치가 아닙니다: 피치는 페이더에 그대로 있습니다",
+  gridTempoTitle:
+    "트랙의 기준 BPM을 바꿔 비트 간격을 벌리거나 좁힙니다. 피치가 아닙니다: 피치는 페이더에 그대로 있습니다",
   gridTempoDownCoarseTitle: "기준 BPM을 0.1 낮춤 (비트 간격이 넓어짐)",
   gridTempoDownFineTitle: "기준 BPM을 0.01 낮춤 (비트 간격이 넓어짐)",
   gridTempoUpFineTitle: "기준 BPM을 0.01 높임 (비트 간격이 좁아짐)",
   gridTempoUpCoarseTitle: "기준 BPM을 0.1 높임 (비트 간격이 좁아짐)",
   gridHalveTitle: "앵커를 유지한 채 기준 BPM을 1/2로",
   gridDoubleTitle: "앵커를 유지한 채 기준 BPM을 2배로",
-  gridRegridTitle: "현재 BPM과 앵커에서 출발해 그 주변에서 가장 잘 맞는 값을 찾아 재분석합니다",
-  gridBaseBpmTitle: "트랙의 기준 BPM: 그리드를 결정하는 값입니다. 피치는 이 값을 바꾸지 않습니다",
+  gridRegridTitle:
+    "현재 BPM과 앵커에서 출발해 그 주변에서 가장 잘 맞는 값을 찾아 재분석합니다",
+  gridBaseBpmTitle:
+    "트랙의 기준 BPM: 그리드를 결정하는 값입니다. 피치는 이 값을 바꾸지 않습니다",
   loop: "루프",
   loopIn: "IN",
   loopInTitle: "현재 위치에 루프 시작점을 표시",
   loopOut: "OUT",
   loopOutTitle: "루프 끝점을 표시하고 활성화",
   loopAutoTitle: "이전 비트부터 {n}비트 자동 루프",
-  loopMoveBackTitle: "루프 전체를 한 길이만큼 앞(빠른 쪽)으로 옮깁니다. 크기는 그대로입니다",
-  loopMoveFwdTitle: "루프 전체를 한 길이만큼 뒤(느린 쪽)로 옮깁니다. 크기는 그대로입니다",
+  loopMoveBackTitle:
+    "루프 전체를 한 길이만큼 앞(빠른 쪽)으로 옮깁니다. 크기는 그대로입니다",
+  loopMoveFwdTitle:
+    "루프 전체를 한 길이만큼 뒤(느린 쪽)로 옮깁니다. 크기는 그대로입니다",
   loopHalveTitle: "루프 길이를 절반으로 줄입니다. 그리드에 맞춥니다",
   loopDoubleTitle: "루프 길이를 두 배로 늘립니다. 그리드에 맞춥니다",
-  loopLengthTitle: "루프 길이(비트). IN/OUT이 그리드에 맞지 않으면 초로 표시합니다",
+  loopLengthTitle:
+    "루프 길이(비트). IN/OUT이 그리드에 맞지 않으면 초로 표시합니다",
   rollLabel: "Roll",
-  rollSizeTitle: "누르고 있는 동안 {n}비트 루프 롤. 손을 떼면 롤이 없었을 때의 위치에서 재생이 이어집니다",
+  rollSizeTitle:
+    "누르고 있는 동안 {n}비트 루프 롤. 손을 떼면 롤이 없었을 때의 위치에서 재생이 이어집니다",
   savedLoopsLabel: "루프",
   savedLoopsNone: "루프 없음",
   savedLoopSaveTitle: "현재 루프를 이 트랙에 저장합니다",
@@ -119,7 +126,8 @@ export default {
   kill: "킬",
   eqTitle: "EQ 대역: 오른쪽 클릭 = 대역 킬 · 더블 클릭 = 0으로",
   gainTitle: "채널 게인 · 오른쪽 클릭 또는 더블 클릭 = 0으로",
-  filterTitle: "DJ 필터: 왼쪽 = 로우패스, 오른쪽 = 하이패스 · 오른쪽 클릭 또는 더블 클릭 = OFF",
+  filterTitle:
+    "DJ 필터: 왼쪽 = 로우패스, 오른쪽 = 하이패스 · 오른쪽 클릭 또는 더블 클릭 = OFF",
   crossfader: "크로스페이더",
   resetHint: "오른쪽 클릭 = 초기 위치로",
   volumeTitle: "덱 {side} 볼륨",
@@ -129,8 +137,7 @@ export default {
   cueVolTitle: "프리 리스닝 볼륨",
 
   cueBus: "🎧 큐",
-  cueBusTitle:
-    "프리 리스닝(페이더 전). 헤드폰 출력은 설정 ⚙에서 선택하세요",
+  cueBusTitle: "프리 리스닝(페이더 전). 헤드폰 출력은 설정 ⚙에서 선택하세요",
   pflTitle: "덱 {side}를 헤드폰으로 미리 듣기",
   vol: "볼륨",
 
@@ -170,7 +177,8 @@ export default {
   keyLegend: "{key}로 재생 중: 보라색이 화성적으로 어울리는 트랙입니다.",
   showArtwork: "앨범 아트",
   showArtworkTitle: "앨범 아트 썸네일 표시/숨기기",
-  showArtworkNote: "숨기면 화면 공간이 넓어집니다. 앨범 아트는 계속 저장됩니다.",
+  showArtworkNote:
+    "숨기면 화면 공간이 넓어집니다. 앨범 아트는 계속 저장됩니다.",
   listHeading: "곡 목록",
   csvArtist: "아티스트",
   csvKey: "키",
@@ -178,7 +186,8 @@ export default {
   // Colores de la onda
   showKey: "트랙 키",
   wavePaletteHeading: "파형 색상",
-  wavePaletteNote: "저역·중역·고역은 이미 분석되어 있습니다. 팔레트를 바꾸면 재분석 없이 즉시 다시 칠해집니다.",
+  wavePaletteNote:
+    "저역·중역·고역은 이미 분석되어 있습니다. 팔레트를 바꾸면 재분석 없이 즉시 다시 칠해집니다.",
   paletteMinidj: "Mini DJ(기본)",
   paletteMono: "클래식 그린(단색)",
   paletteCustom: "사용자 지정…",
@@ -206,7 +215,8 @@ export default {
   analysisAuto: "자동 (백그라운드에서 천천히)",
   analysisDeck: "덱에 불러올 때만",
 
-  shortcuts: "키보드 (활성 덱: Q=A, P=B 또는 덱 클릭) — 스페이스: 재생/일시정지 · C: cue/정지 · 1-8: 핫큐 (Shift: 삭제) · I/O: 루프 in/out · L: 루프 on/off · A S D F G H: 루프 롤 1/8-4 · [ ]: 루프 이동 · − =: 절반/두 배 · R: 루프 저장 (Shift: 불러오기) · , .: 저장된 루프 선택 · ←/→: 넛지",
+  shortcuts:
+    "키보드 (활성 덱: Q=A, P=B 또는 덱 클릭) — 스페이스: 재생/일시정지 · C: cue/정지 · 1-8: 핫큐 (Shift: 삭제) · I/O: 루프 in/out · L: 루프 on/off · A S D F G H: 루프 롤 1/8-4 · [ ]: 루프 이동 · − =: 절반/두 배 · R: 루프 저장 (Shift: 불러오기) · , .: 저장된 루프 선택 · ←/→: 넛지",
   // 설정 탭, 불러오기 잠금, 레벨 미터
   tabAudio: "오디오",
   tabLibrary: "라이브러리",
@@ -214,18 +224,23 @@ export default {
   tabSafety: "안전",
   safetyHeading: "플레이 중 안전",
   lockLoadWhilePlaying: "재생 중인 덱에는 트랙을 불러오지 않기",
-  lockLoadWhilePlayingNote: "라이브 믹스를 망치지 않게 해 줍니다. 덱이 재생 중이면 불러오기 버튼이 비활성화됩니다. 끄면 이전 동작으로 돌아갑니다.",
+  lockLoadWhilePlayingNote:
+    "라이브 믹스를 망치지 않게 해 줍니다. 덱이 재생 중이면 불러오기 버튼이 비활성화됩니다. 끄면 이전 동작으로 돌아갑니다.",
   loadToDeckTitle: "이 트랙을 덱 {side}에 불러오기",
-  loadLockedTitle: "덱 {side}이(가) 재생 중입니다: 다른 트랙을 불러올 수 없습니다. 정지하거나 설정 ⚙ › 안전에서 잠금을 끄세요.",
+  loadLockedTitle:
+    "덱 {side}이(가) 재생 중입니다: 다른 트랙을 불러올 수 없습니다. 정지하거나 설정 ⚙ › 안전에서 잠금을 끄세요.",
   vuHeading: "레벨 미터(VU)",
   vuModeContinuous: "연속(채워진 막대)",
   vuModeLed: "LED(믹서처럼 분할된 세그먼트)",
-  vuNote: "−42에서 0까지의 dBFS 눈금. −12까지 녹색, −3까지 황색, 디지털 한계에 붙은 부분은 빨간색입니다. 표시기가 피크를 유지하고, 위쪽 빨간 블록이 클리핑을 알립니다.",
-  vuChannelTitle: "채널 레벨(dBFS, EQ 뒤·페이더 앞: 페이더와 크로스페이더의 영향을 받지 않음)",
+  vuNote:
+    "−42에서 0까지의 dBFS 눈금. −12까지 녹색, −3까지 황색, 디지털 한계에 붙은 부분은 빨간색입니다. 표시기가 피크를 유지하고, 위쪽 빨간 블록이 클리핑을 알립니다.",
+  vuChannelTitle:
+    "채널 레벨(dBFS, EQ 뒤·페이더 앞: 페이더와 크로스페이더의 영향을 받지 않음)",
   vuMasterTitle: "마스터 출력 레벨(dBFS, 트림과 리미터 뒤에서 측정)",
   tabLog: "로그",
   logHeading: "오류 로그",
-  logNote: "오류는 발생한 영역 코드(AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC)와 함께 저장됩니다. 검색과 비교를 위해 번역하지 않고 항상 영어로 기록합니다. 최근 200개 항목을 보관합니다.",
+  logNote:
+    "오류는 발생한 영역 코드(AUDIO, TRACK, ANALYSIS, LIB, CONFIG, REC)와 함께 저장됩니다. 검색과 비교를 위해 번역하지 않고 항상 영어로 기록합니다. 최근 200개 항목을 보관합니다.",
   logEmpty: "기록된 오류가 없습니다.",
   logCount: "{n}개 항목",
   logDownload: "⬇ 다운로드",
@@ -241,9 +256,11 @@ export default {
   phraseFwdFineTitle: "프레이즈를 1 킥 앞으로",
   phraseFwdCoarseTitle: "프레이즈를 {n} 킥 앞으로",
   phraseSizeTitle: "프레이즈 길이(킥 수). ⚙ 설정에 있는 것과 같은 항목입니다",
-  structureRedetectTitle: "현재 비트 그리드로 구조를 다시 감지합니다. 직접 맞춘 프레이즈 오프셋은 그대로 유지됩니다",
+  structureRedetectTitle:
+    "현재 비트 그리드로 구조를 다시 감지합니다. 직접 맞춘 프레이즈 오프셋은 그대로 유지됩니다",
   phraseResetTitle: "분석이 찾아낸 프레이즈 오프셋으로 되돌리기",
-  phraseOffsetTitle: "현재 프레이즈 오프셋(킥 수). 직접 맞췄을 때는 호박색으로 표시됩니다",
+  phraseOffsetTitle:
+    "현재 프레이즈 오프셋(킥 수). 직접 맞췄을 때는 호박색으로 표시됩니다",
   structureTipInKick: "리듬이 있는 구간입니다.",
   structureTipInBreak: "브레이크 구간입니다.",
   structureTipDrop: "{n} 킥 뒤에 브레이크가 시작됩니다.",
@@ -257,7 +274,8 @@ export default {
   structureTipPhrase: "{size} 킥 프레이즈의 {pos}번째 킥입니다.",
   structureHeading: "구조 표시기",
   showStructure: "파형 위에 표시기 보이기",
-  structureNote: "리듬이 빠질 때까지(▼)와 돌아올 때까지(▲) 남은 킥 수, 그리고 프레이즈 안의 위치를 셉니다. 트랙을 불러올 때 한 번만 분석합니다.",
+  structureNote:
+    "리듬이 빠질 때까지(▼)와 돌아올 때까지(▲) 남은 킥 수, 그리고 프레이즈 안의 위치를 셉니다. 트랙을 불러올 때 한 번만 분석합니다.",
   phraseSizeLabel: "프레이즈 길이",
   structureUnitLabel: "세는 단위",
   unitKicks: "킥",
@@ -266,7 +284,8 @@ export default {
   warnRedLabel: "빨간색 경고(킥)",
   endWarnHeading: "트랙 종료 경고",
   endWarnOn: "트랙이 끝나갈 때 알리기",
-  endWarnNote: "파형 테두리가 빨갛게 깜빡이며, 끝에 가까울수록 빨라집니다. 재생 중일 때만 나오고, 시스템의 동작 줄이기가 켜져 있으면 깜빡이지 않고 켜져 있습니다.",
+  endWarnNote:
+    "파형 테두리가 빨갛게 깜빡이며, 끝에 가까울수록 빨라집니다. 재생 중일 때만 나오고, 시스템의 동작 줄이기가 켜져 있으면 깜빡이지 않고 켜져 있습니다.",
   endWarnModeLabel: "알림 기준",
   endWarnModeSeconds: "남은 초",
   endWarnModePercent: "남은 비율",
@@ -276,7 +295,8 @@ export default {
   // Pitch (rango del fader y fuerza del bend)
   pitchHeading: "피치",
   bendRangeLabel: "피치 벤드 세기",
-  pitchNote: "두 덱에 모두 적용됩니다. 범위는 출발점입니다. SYNC가 더 넓은 폭이 필요하면 스스로 넓히며, 이 설정은 건드리지 않습니다. 벤드 세기는 덱의 − 와 + 버튼이 당기는 양입니다.",
+  pitchNote:
+    "두 덱에 모두 적용됩니다. 범위는 출발점입니다. SYNC가 더 넓은 폭이 필요하면 스스로 넓히며, 이 설정은 건드리지 않습니다. 벤드 세기는 덱의 − 와 + 버튼이 당기는 양입니다.",
   masterBpmDownTitle: "마스터 BPM 1 내리기",
   masterBpmUpTitle: "마스터 BPM 1 올리기",
 
@@ -290,7 +310,8 @@ export default {
   noArtworkFormatTitle: "커버 없음 · {format} 파일",
 
   // Resumen de la pista
-  overviewTitle: "트랙 개요: 누르거나 끌어서 이동합니다. 어두운 구간은 브레이크이고, 빨간 선은 리듬이 빠지는 지점, 초록 선은 돌아오는 지점입니다",
+  overviewTitle:
+    "트랙 개요: 누르거나 끌어서 이동합니다. 어두운 구간은 브레이크이고, 빨간 선은 리듬이 빠지는 지점, 초록 선은 돌아오는 지점입니다",
 
   // Pantalla LCD del deck
   lcdElapsed: "경과",
@@ -306,13 +327,15 @@ export default {
   marqueeSlow: "느리게",
   marqueeNormal: "보통",
   marqueeFast: "빠르게",
-  marqueeNote: "이름이 덱 화면에 다 들어가지 않으면 반복해서 흐릅니다. 애니메이션은 브라우저가 처리하므로 CPU를 쓰지 않습니다. 시스템의 동작 줄이기가 켜져 있으면 멈춥니다.",
+  marqueeNote:
+    "이름이 덱 화면에 다 들어가지 않으면 반복해서 흐릅니다. 애니메이션은 브라우저가 처리하므로 CPU를 쓰지 않습니다. 시스템의 동작 줄이기가 켜져 있으면 멈춥니다.",
 
   // Pantalla del deck: cifras redondeadas o de 14 segmentos
   lcdHeading: "덱 화면",
   lcdFontLabel: "숫자",
   lcdFontRounded: "둥근 글꼴",
-  lcdFontNote: "제목은 5 x 7 도트 매트릭스로, 숫자(시간·BPM·피치 등)는 실제 패널처럼 고정된 구성으로 표시합니다. 숫자만 오는 자리는 7 세그먼트, 기호가 필요한 자리는 14 세그먼트입니다. 보통 글자와 같은 자리를 차지하므로 바꿔도 어긋나지 않습니다.",
+  lcdFontNote:
+    "제목은 5 x 7 도트 매트릭스로, 숫자(시간·BPM·피치 등)는 실제 패널처럼 고정된 구성으로 표시합니다. 숫자만 오는 자리는 7 세그먼트, 기호가 필요한 자리는 14 세그먼트입니다. 보통 글자와 같은 자리를 차지하므로 바꿔도 어긋나지 않습니다.",
   titleFontLabel: "제목",
   lcdFontLcd: "LCD 화면",
   lcdFontDot: "도트 매트릭스",

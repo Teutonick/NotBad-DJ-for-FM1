@@ -99,7 +99,7 @@ export function useTrackLoader({
     () => () => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     },
-    [objectUrl]
+    [objectUrl],
   );
 
   useEffect(() => () => keyIdleRef.current?.(), []);
@@ -141,8 +141,12 @@ export function useTrackLoader({
 
     const duration = audioBuffer.duration;
     setBufferDuration(duration);
-    const { waveData: norm, bandIndex: bands, bandLow: low, peak } =
-      analyzeWaveform(audioBuffer);
+    const {
+      waveData: norm,
+      bandIndex: bands,
+      bandLow: low,
+      peak,
+    } = analyzeWaveform(audioBuffer);
 
     setWaveData(norm);
     setBandIndex(bands);
@@ -188,7 +192,9 @@ export function useTrackLoader({
     // Rejilla guardada por el usuario: se restaura tal cual y el análisis
     // automático no la vuelve a pisar.
     const manualGrid = Boolean(
-      cached?.gridManual && cached?.bpm > 0 && Number.isFinite(cached?.gridAnchor)
+      cached?.gridManual &&
+      cached?.bpm > 0 &&
+      Number.isFinite(cached?.gridAnchor),
     );
     cachedGridRef.current = manualGrid;
     envelopeRef.current = null;
@@ -202,7 +208,7 @@ export function useTrackLoader({
     setTags(
       cached?.artist || cached?.title
         ? { artist: cached.artist, title: cached.title, album: cached.album }
-        : null
+        : null,
     );
     events.current.onReset?.(cached, { manualGrid });
     setAnalyzing("wave");
@@ -214,7 +220,11 @@ export function useTrackLoader({
       readTrackMetadata(f).then((meta) => {
         if (loadIdRef.current !== loadId) return; // ya hay otra pista cargada
         if (meta.artist || meta.title) {
-          setTags({ artist: meta.artist, title: meta.title, album: meta.album });
+          setTags({
+            artist: meta.artist,
+            title: meta.title,
+            album: meta.album,
+          });
         }
         events.current.onTrackMeta?.(side, meta);
       });

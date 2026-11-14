@@ -65,7 +65,10 @@ export async function computeOnsetEnvelope(audioBuffer) {
   const Offline = getOfflineCtor();
   if (!Offline || !audioBuffer || !(audioBuffer.duration > 0)) return null;
 
-  const length = Math.max(HOP * 4, Math.ceil(audioBuffer.duration * RENDER_RATE));
+  const length = Math.max(
+    HOP * 4,
+    Math.ceil(audioBuffer.duration * RENDER_RATE),
+  );
   const ctx = new Offline(BANDS.length, length, RENDER_RATE);
   const src = ctx.createBufferSource();
   src.buffer = audioBuffer;
