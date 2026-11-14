@@ -2,24 +2,15 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../i18n/context";
 import { GLOSS, PRESS, SKIN } from "./PadButton";
 import { csvLine } from "../lib/csv";
+import { formatClock, formatSize } from "../lib/format";
 import {
   camelotSortIndex,
   harmonicRelation,
   keyLabel,
 } from "../lib/camelot";
 
-function formatSize(bytes) {
-  if (!Number.isFinite(bytes)) return "";
-  const mb = bytes / (1024 * 1024);
-  return `${mb.toFixed(1)} MB`;
-}
-
-function formatDuration(s) {
-  if (!Number.isFinite(s)) return "--:--";
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
-}
+// La lista cuenta minutos aunque pase de la hora, y «--:--» si no hay dato
+const formatDuration = (s) => formatClock(s, { fallback: "--:--", hours: false });
 
 // Nombre a mostrar: título de las etiquetas si lo hay, si no el archivo
 function displayTitle(track) {

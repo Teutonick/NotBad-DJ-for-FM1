@@ -68,7 +68,7 @@ import { detectKey } from "../audio/keyDetect";
 import { keyLabel } from "../lib/camelot";
 import { readTrackMetadata } from "../audio/metadata";
 import { ERRORS, logError, logWarn } from "../lib/log";
-import { stripExtension } from "../lib/format";
+import { formatClock, stripExtension } from "../lib/format";
 
 // Redondeo de la fila de transporte (play, stop, sync, key): uno solo para
 // los cuatro, que antes no coincidían entre ellos.
@@ -378,19 +378,6 @@ function Deck({
     return stripExtension(fileName) || t("noFile");
   };
 
-  const calcDuration = (time) => {
-    if (!Number.isFinite(time)) return "00:00";
-
-    const totalSeconds = Math.max(0, Math.floor(time));
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    const pad = (val) => String(val).padStart(2, "0");
-
-    return hours > 0
-      ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
-      : `${pad(minutes)}:${pad(seconds)}`;
-  };
 
   // === Waveform + bandas + loudness (una sola pasada por el buffer) ===
   // `name` solo se usa para el registro: el estado fileName todavía tiene
@@ -1408,8 +1395,8 @@ function Deck({
               }
               time={
                 reverseAdvancedTime
-                  ? `-${calcDuration(duration - current)}`
-                  : calcDuration(current)
+                  ? `-${formatClock(duration - current)}`
+                  : formatClock(current)
               }
               timeLabel={reverseAdvancedTime ? t("lcdRemaining") : t("lcdElapsed")}
               timeTitle={t("lcdTimeTitle")}
@@ -1418,16 +1405,16 @@ function Deck({
                 objectUrl
                   ? {
                       label: t("cue"),
-                      title: t("cueTitle", { time: calcDuration(cuePoint) }),
+                      title: t("cueTitle", { time: formatClock(cuePoint) }),
                       // El signo sale de la cifra YA redondeada: por debajo de
                       // un segundo estás en el cue, y un "−00:00" no dice nada
                       text: `${
                         current < cuePoint && cuePoint - current >= 1 ? "−" : "+"
-                      }${calcDuration(Math.abs(current - cuePoint))}`,
+                      }${formatClock(Math.abs(current - cuePoint))}`,
                     }
                   : null
               }
-              duration={calcDuration(duration)}
+              duration={formatClock(duration)}
               durationLabel={t("lcdTotal")}
               bpm={bpm ? String(Math.round(bpm)) : "-"}
               bpmLabel={t("lcdTrackBpm")}
@@ -1702,7 +1689,7 @@ function Deck({
                         cue
                           ? t("hotCueGoTitle", {
                               n: i + 1,
-                              time: calcDuration(cue.t),
+                              time: formatClock(cue.t),
                             })
                           : t("hotCueSetTitle", { n: i + 1 })
                       }
