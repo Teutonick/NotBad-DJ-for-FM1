@@ -21,7 +21,6 @@ export default {
   loadFile: "📂 载入文件",
   cue: "CUE",
   cueTitle: "到 CUE 点的距离，CUE 点在 {time}。暂停时定位曲目即可设定；停止会回到那里。",
-  bpmNone: "BPM --",
   bpmDisplayTitle: "跟着节奏点击（TAP）：重新锚定节拍网格并重算 BPM",
   analyzingTrack: "⏳ 正在分析音轨…",
   detectingBpm: "⏳ 正在检测 BPM…",
@@ -118,7 +117,6 @@ export default {
   volumeTitle: "打碟机 {side} 音量",
   crossfaderTitle: "交叉推子：在打碟机 A 与 B 之间混合",
   masterVolTitle: "总输出音量",
-  seekTitle: "音轨中的位置",
   pitchFaderTitle: "音高推子：改变速度",
   cueVolTitle: "预监听音量",
 

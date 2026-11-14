@@ -198,7 +198,7 @@ export function analyzeWaveform(audioBuffer, { withBands = true } = {}) {
 // la reproducción: el nivelado dinámico bombeaba el volumen a mitad de tema.
 // Referencia = percentil 90 del RMS (la parte con todo el ritmo).
 
-export const AUTO_GAIN_TARGET_DB = -12; // nivel objetivo para la parte fuerte
+const AUTO_GAIN_TARGET_DB = -12; // nivel objetivo para la parte fuerte
 export const AUTO_GAIN_MIN_DB = -12;
 export const AUTO_GAIN_MAX_DB = 6;
 // Techo de pico: aunque el RMS pida más ganancia, los picos no pasan de aquí.

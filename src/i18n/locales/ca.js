@@ -23,7 +23,6 @@ export default {
   loadFile: "📂 Carrega fitxer",
   cue: "CUE",
   cueTitle: "Distància fins al punt CUE, que és a {time}. Es fixa en posicionar la pista en pausa; Stop hi torna.",
-  bpmNone: "BPM --",
   bpmDisplayTitle:
     "Fes clic al ritme (TAP): reancora la graella de beats i recalcula el BPM",
   analyzingTrack: "⏳ Analitzant pista…",
@@ -126,7 +125,6 @@ export default {
   volumeTitle: "Volum del deck {side}",
   crossfaderTitle: "Crossfader: mescla entre el deck A i el B",
   masterVolTitle: "Volum general de sortida",
-  seekTitle: "Posició a la pista",
   pitchFaderTitle: "Fader de pitch: canvia el tempo",
   cueVolTitle: "Volum de la pre-escolta",
 

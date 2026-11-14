@@ -10,11 +10,11 @@
 // CPU con los dos decks sonando.
 
 /** El reflejo: luz arriba, sombra abajo. */
-export const GLASS_SHEEN =
+const GLASS_SHEEN =
   "linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0) 42%, rgba(0,0,0,0.32))";
 
 /** El hueco: sombra dentro y el canto de arriba iluminado. */
-export const GLASS_WELL =
+const GLASS_WELL =
   "inset 0 2px 6px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.05)";
 
 /**

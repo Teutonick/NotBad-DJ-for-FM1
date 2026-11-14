@@ -23,7 +23,6 @@ export default {
   loadFile: "📂 Carregar ficheiro",
   cue: "CUE",
   cueTitle: "Distância até ao ponto CUE, que está em {time}. Define-se ao posicionar a faixa em pausa; Stop volta ali.",
-  bpmNone: "BPM --",
   bpmDisplayTitle:
     "Clica ao ritmo (TAP): reancora a grelha de beats e recalcula o BPM",
   analyzingTrack: "⏳ A analisar faixa…",
@@ -126,7 +125,6 @@ export default {
   volumeTitle: "Volume do deck {side}",
   crossfaderTitle: "Crossfader: mistura entre o deck A e o B",
   masterVolTitle: "Volume geral de saída",
-  seekTitle: "Posição na faixa",
   pitchFaderTitle: "Fader de pitch: muda o tempo",
   cueVolTitle: "Volume da pré-escuta",
 

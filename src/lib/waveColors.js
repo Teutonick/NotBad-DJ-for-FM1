@@ -18,7 +18,7 @@ export const PALETTE_SIZE = LEVELS * LEVELS;
 
 // Verde plano de siempre: se usa cuando una pista no tiene datos de bandas
 // (por ejemplo si el análisis falló) para no dejar la onda sin dibujar.
-export const WAVE_FLAT_COLOR = "#22c55e";
+const WAVE_FLAT_COLOR = "#22c55e";
 
 // Presets. Los de marca imitan el aspecto de esos programas, no son sus
 // valores oficiales: `brand` es solo el nombre que se muestra, sin traducir.
@@ -59,7 +59,7 @@ export const WAVE_PRESETS = [
   },
 ];
 
-export const DEFAULT_WAVE_COLORS = WAVE_PRESETS[0];
+const DEFAULT_WAVE_COLORS = WAVE_PRESETS[0];
 
 /** Colores efectivos a partir de la configuración guardada. */
 export function resolveWaveColors(config = {}) {

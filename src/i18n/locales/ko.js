@@ -23,7 +23,6 @@ export default {
   loadFile: "📂 파일 불러오기",
   cue: "CUE",
   cueTitle: "CUE 지점({time})까지의 거리. 일시정지 상태에서 트랙을 이동하면 설정되고, 정지하면 그 위치로 돌아갑니다.",
-  bpmNone: "BPM --",
   bpmDisplayTitle:
     "박자에 맞춰 클릭(TAP): 비트 그리드를 다시 맞추고 BPM을 재계산합니다",
   analyzingTrack: "⏳ 트랙 분석 중…",
@@ -126,7 +125,6 @@ export default {
   volumeTitle: "덱 {side} 볼륨",
   crossfaderTitle: "크로스페이더: 덱 A와 B 사이의 믹스",
   masterVolTitle: "전체 출력 볼륨",
-  seekTitle: "트랙 내 위치",
   pitchFaderTitle: "피치 페이더: 템포 변경",
   cueVolTitle: "프리 리스닝 볼륨",
 

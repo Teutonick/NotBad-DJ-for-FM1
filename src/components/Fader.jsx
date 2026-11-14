@@ -5,7 +5,7 @@ import { useI18n } from "../i18n/context";
  * Fader reutilizable con aspecto de mesa de mezclas.
  *
  * - orientation: "horizontal" | "vertical"
- * - variant: "fader" (cabezal rectangular con línea central) | "native"
+ * - Cabezal rectangular con línea central, como el de una mesa.
  * - fill: "start" (se ilumina desde el mínimo), "center" (desde el centro,
  *   útil para pitch/crossfader) o "none"
  * - ticks: número de marcas de escala a pintar en el carril (0 = ninguna)
@@ -22,7 +22,6 @@ export default function Fader({
   value = 0,
   onChange,
   orientation = "horizontal",
-  variant = "fader",
   fill = "start",
   ticks = 0,
   invert = false,
@@ -60,37 +59,6 @@ export default function Fader({
         : [],
     [ticks]
   );
-
-  if (variant === "native") {
-    return (
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={onChange}
-        onContextMenu={onContextMenu}
-        disabled={disabled}
-        title={fullTitle || undefined}
-        aria-label={ariaLabel}
-        style={
-          vertical
-            ? {
-                writingMode: "vertical-lr",
-                direction: "rtl",
-                width: `${thickness}px`,
-                ...(length ? { height: `${length}px` } : {}),
-                transform: invert ? "scaleY(-1)" : "none",
-              }
-            : { ...(length ? { width: length } : {}) }
-        }
-        className={`accent-white cursor-pointer ${
-          disabled ? "opacity-50 cursor-not-allowed" : ""
-        } ${className}`}
-      />
-    );
-  }
 
   // Geometría del carril y del cabezal
   const headLong = 12; // largo del cabezal en el eje de recorrido

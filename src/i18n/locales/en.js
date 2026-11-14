@@ -26,7 +26,6 @@ export default {
   loadFile: "📂 Load file",
   cue: "CUE",
   cueTitle: "Distance to the CUE point, which sits at {time}. It is set by positioning the track while paused; Stop returns there.",
-  bpmNone: "BPM --",
   bpmDisplayTitle:
     "Click on the beat (TAP): re-anchors the beat grid and recomputes the BPM",
   analyzingTrack: "⏳ Analyzing track…",
@@ -129,7 +128,6 @@ export default {
   volumeTitle: "Deck {side} volume",
   crossfaderTitle: "Crossfader: blend between deck A and B",
   masterVolTitle: "Overall output volume",
-  seekTitle: "Position in the track",
   pitchFaderTitle: "Pitch fader: changes the tempo",
   cueVolTitle: "Pre-listen volume",
 

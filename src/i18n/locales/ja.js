@@ -23,7 +23,6 @@ export default {
   loadFile: "📂 ファイルを読み込む",
   cue: "CUE",
   cueTitle: "CUE ポイント（{time}）までの距離。一時停止中に曲を移動すると設定され、Stop でそこに戻ります。",
-  bpmNone: "BPM --",
   bpmDisplayTitle:
     "リズムに合わせてクリック（TAP）：ビートグリッドを再設定し BPM を再計算します",
   analyzingTrack: "⏳ トラックを解析中…",
@@ -126,7 +125,6 @@ export default {
   volumeTitle: "デッキ {side} の音量",
   crossfaderTitle: "クロスフェーダー：デッキ A と B のミックス",
   masterVolTitle: "全体の出力音量",
-  seekTitle: "トラック内の位置",
   pitchFaderTitle: "ピッチフェーダー：テンポを変える",
   cueVolTitle: "プリリスニングの音量",
 

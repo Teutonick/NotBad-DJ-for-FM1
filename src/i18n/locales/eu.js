@@ -23,7 +23,6 @@ export default {
   loadFile: "📂 Fitxategia kargatu",
   cue: "CUE",
   cueTitle: "CUE punturainoko distantzia; puntua {time} unean dago. Pista pausan kokatzean ezartzen da; Stop-ek hara itzultzen du.",
-  bpmNone: "BPM --",
   bpmDisplayTitle:
     "Egin klik erritmoan (TAP): beat-sareta birfinkatzen du eta BPMa birkalkulatzen",
   analyzingTrack: "⏳ Pista aztertzen…",
@@ -126,7 +125,6 @@ export default {
   volumeTitle: "{side} deck-aren bolumena",
   crossfaderTitle: "Crossfader: A eta B decken arteko nahasketa",
   masterVolTitle: "Irteerako bolumen orokorra",
-  seekTitle: "Pistako posizioa",
   pitchFaderTitle: "Pitch faderra: tempoa aldatzen du",
   cueVolTitle: "Aurre-entzutearen bolumena",
 

@@ -42,7 +42,7 @@ const BANDS = [
 // Rango de búsqueda por defecto. Amplio a propósito: la librería anterior
 // plegaba todo a 90-180 BPM, y eso partía por la mitad el hardcore y la
 // makina (160-220 BPM reales).
-export const DEFAULT_BPM_RANGE = [70, 220];
+const DEFAULT_BPM_RANGE = [70, 220];
 
 // Pesos del peine armónico (1, 2, 3 y 4 periodos). El de 4 pesa como el de 1
 // a propósito: en 4/4 el pico del compás es el más fiable.

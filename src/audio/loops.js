@@ -14,12 +14,12 @@ export const ROLL_SIZES = [1 / 8, 1 / 4, 1 / 2, 1, 2, 4];
 export const AUTO_LOOP_SIZES = [4, 8, 16];
 
 // Límites al doblar y partir la longitud
-export const LOOP_MIN_BEATS = 1 / 32;
-export const LOOP_MAX_BEATS = 64;
+const LOOP_MIN_BEATS = 1 / 32;
+const LOOP_MAX_BEATS = 64;
 
 // Un loop sin rejilla (IN/OUT a mano) no se puede medir en beats: se le
 // aplican estos topes en segundos.
-export const LOOP_MIN_SECONDS = 0.02;
+const LOOP_MIN_SECONDS = 0.02;
 
 /** Duración de un beat en segundos, o null si no hay BPM. */
 export function beatSeconds(bpm) {
