@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // === Campo numérico que se ajusta arrastrando ===
 //
@@ -32,6 +32,11 @@ export default function NumberField({
   const stateRef = useRef({ value, min, max, step, onChange });
   stateRef.current = { value, min, max, step, onChange };
 
+  // Lo que se está tecleando. Mientras se escribe se deja tal cual (vacío,
+  // «1», «12»…): si se ajustara a los topes en cada tecla, borrar daría 40 y
+  // escribir «125» desde cero sería imposible. Se ajusta al soltar o con Enter.
+  const [draft, setDraft] = useState(null);
+
   const clamp = (v) => {
     let out = v;
     if (Number.isFinite(min)) out = Math.max(min, out);
@@ -50,6 +55,7 @@ export default function NumberField({
       const paso = e.shiftKey ? st.step / 5 : st.step;
       const dir = e.deltaY < 0 ? 1 : -1;
       const next = Number((st.value + dir * paso).toFixed(4));
+      setDraft(null); // la rueda manda sobre lo que hubiera a medio teclear
       st.onChange(clampCon(next, st));
     };
     el.addEventListener("wheel", onWheel, { passive: false });
@@ -94,6 +100,17 @@ export default function NumberField({
     if (!d.moved) inputRef.current?.focus();
   };
 
+  // Al soltar el campo (o con Enter): lo tecleado se ajusta a los topes; si
+  // no es un número, se vuelve al valor que había.
+  const commitDraft = () => {
+    if (draft == null) return;
+    const v = Number(draft);
+    setDraft(null);
+    if (draft.trim() === "" || !Number.isFinite(v)) return;
+    const next = clamp(v);
+    if (next !== value) onChange(next);
+  };
+
   return (
     <input
       ref={inputRef}
@@ -102,10 +119,17 @@ export default function NumberField({
       min={min}
       max={max}
       step={step}
-      value={value}
+      value={draft ?? value}
       onChange={(e) => {
-        const v = Number(e.target.value);
-        if (Number.isFinite(v)) onChange(clamp(v));
+        const raw = e.target.value;
+        setDraft(raw);
+        // Un número válido dentro de los topes vale al momento, como antes
+        const v = Number(raw);
+        if (raw.trim() !== "" && Number.isFinite(v) && clamp(v) === v) onChange(v);
+      }}
+      onBlur={commitDraft}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") commitDraft();
       }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
