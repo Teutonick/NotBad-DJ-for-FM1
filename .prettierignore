@@ -1,0 +1,8 @@
+# Lo generado y lo que no es nuestro
+dist
+release
+coverage
+build
+package-lock.json
+# Diario de trabajo local (no va en git)
+odd
