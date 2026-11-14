@@ -50,19 +50,14 @@ import {
   scaleBpm,
   stretchBpm,
 } from "../audio/beatGrid";
-import {
-  alignStructure,
-  detectStructure,
-  refitPhrase,
-  sanitizeStructure,
-  shiftPhraseOffset,
-} from "../audio/structure";
+import { sanitizeStructure } from "../audio/structure";
 import { endWarnSeconds, resolveStructurePrefs } from "../lib/structurePrefs";
 import { detectKey } from "../audio/keyDetect";
 import { keyLabel } from "../lib/camelot";
 import { readTrackMetadata } from "../audio/metadata";
 import { ERRORS, logError, logWarn } from "../lib/log";
 import { formatClock, stripExtension } from "../lib/format";
+import { useTrackStructure } from "../hooks/useTrackStructure";
 
 // Redondeo de la fila de transporte (play, stop, sync, key): uno solo para
 // los cuatro, que antes no coincidían entre ellos.
@@ -146,8 +141,6 @@ function Deck({
   // === Estructura (tramos con ritmo / sin ritmo + frase) ===
   // Se calcula una sola vez, al cargar, y se guarda con la pista. Lo que
   // ajuste el usuario a mano (`manual`) no lo pisa el análisis.
-  const [structure, setStructure] = useState(null);
-  const cachedStructureRef = useRef(false);
   // === Rejilla de beats ===
   // BPM base de la pista (el analizado, o el que haya dejado el usuario a
   // mano). NO incluye el pitch: el pitch va aparte, en el fader.
@@ -265,87 +258,22 @@ function Deck({
   // cuenta atrás. Es una función pura sobre media docena de tramos.
   const prefs = structurePrefs || DEFAULT_STRUCTURE_PREFS;
   const phraseSize = prefs.phraseSize;
-  const gridStructure = useMemo(
-    () => (structure ? alignStructure(structure, beats) : null),
-    [structure, beats]
-  );
-
-  // Detección: UNA vez por pista, cuando ya hay onda y rejilla. Nunca durante
-  // la reproducción y nunca si la pista ya traía su estructura guardada.
-  //
-  // OJO con la duración: tiene que ser la del buffer que produjo `bandLow`
-  // (bufferDuration), no la de la rejilla. La cadencia de los graves se deduce
-  // de bandLow.length / duración, así que con la duración del <audio> —que en
-  // FLAC no coincide al milímetro con la del buffer— el mapeo de beat a
-  // muestra deriva y los tramos se mueven un kick o más.
-  useEffect(() => {
-    if (structure || cachedStructureRef.current) return;
-    if (!bandLow?.length || !beats.length || !(bufferDuration > 0)) return;
-    const found = detectStructure({
-      bandLow,
-      duration: bufferDuration,
-      beats,
-      phraseSize,
-    });
-    if (found) setStructure(found);
-  }, [structure, bandLow, beats, bufferDuration, phraseSize]);
-
-  // Cambiar el tamaño de frase (aquí o en ⚙: es el mismo ajuste) recoloca la
-  // retícula sin volver a analizar nada.
-  // Depende también de la estructura: una guardada con otro tamaño de frase
-  // (se analizó con 16 y ⚙ dice ahora 8) se recoloca al cargarla. Si no, el
-  // indicador contaba con un tamaño y la retícula estaba hecha con otro, y se
-  // volvía a guardar la vieja. refitPhrase devuelve el MISMO objeto cuando
-  // el tamaño ya cuadra, así que esto no entra en bucle.
-  useEffect(() => {
-    setStructure((prev) => (prev ? refitPhrase(prev, phraseSize) : prev));
-  }, [phraseSize, structure]);
-
-  // La estructura sube al padre, que la refleja en la lista y la persiste
-  const onStructureRef = useRef(onStructure);
-  onStructureRef.current = onStructure;
-  useEffect(() => {
-    if (!objectUrl || !structure) return;
-    onStructureRef.current?.(side, structure);
-  }, [structure, objectUrl, side]);
-
-  // Mueve la frase n kicks. Queda marcado como manual: el análisis ya no lo pisa.
-  const shiftPhrase = (delta) => {
-    setStructure((prev) =>
-      prev
-        ? {
-            ...prev,
-            phraseOffset: shiftPhraseOffset(prev.phraseOffset, delta, prev.phraseSize),
-            manual: true,
-          }
-        : prev
-    );
-  };
-
-  // Vuelve al desplazamiento que dijo el análisis
-  const resetPhrase = () => {
-    setStructure((prev) =>
-      prev ? { ...prev, phraseOffset: prev.detectedOffset, manual: false } : prev
-    );
-  };
-
-  // Relanza la detección sobre la rejilla ACTUAL (la que haya ajustado el
-  // usuario). Un desplazamiento de frase puesto a mano se conserva.
-  const redetectStructure = () => {
-    if (!bandLow?.length || !beats.length || !(bufferDuration > 0)) return;
-    const found = detectStructure({
-      bandLow,
-      duration: bufferDuration,
-      beats,
-      phraseSize,
-    });
-    if (!found) return;
-    setStructure((prev) =>
-      prev?.manual
-        ? { ...found, phraseOffset: prev.phraseOffset, manual: true }
-        : found
-    );
-  };
+  const {
+    structure,
+    gridStructure,
+    restore: restoreStructure,
+    shiftPhrase,
+    resetPhrase,
+    redetectStructure,
+  } = useTrackStructure({
+    bandLow,
+    beats,
+    bufferDuration,
+    phraseSize,
+    objectUrl,
+    side,
+    onStructure,
+  });
 
   // Aviso de fin de pista: segundos que quedan cuando empieza a parpadear
   const endWarnAt = useMemo(
@@ -619,9 +547,7 @@ function Deck({
     setBandLow(null);
     // Estructura guardada de ESTA pista: se restaura tal cual y el análisis
     // no la vuelve a calcular (ni pisa el ajuste manual de frase).
-    const cachedStructure = sanitizeStructure(cached?.structure);
-    cachedStructureRef.current = Boolean(cachedStructure);
-    setStructure(cachedStructure);
+    restoreStructure(sanitizeStructure(cached?.structure));
     setMusicalKey(cached?.musicalKey || null);
     setTags(
       cached?.artist || cached?.title
