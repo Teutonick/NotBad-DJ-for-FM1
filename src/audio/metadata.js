@@ -17,7 +17,15 @@ let parserPromise = null;
 
 function loadParser() {
   if (!parserPromise) {
-    parserPromise = import("music-metadata").then((m) => m.parseBlob);
+    // Si la carga falla (en la web, un chunk viejo que da 404 tras desplegar
+    // una versión nueva) se olvida la promesa: la siguiente pista lo vuelve a
+    // intentar en vez de quedarse sin etiquetas hasta recargar.
+    parserPromise = import("music-metadata")
+      .then((m) => m.parseBlob)
+      .catch((err) => {
+        parserPromise = null;
+        throw err;
+      });
   }
   return parserPromise;
 }
