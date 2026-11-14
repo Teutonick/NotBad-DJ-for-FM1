@@ -100,6 +100,19 @@ describe('VUBar', () => {
     expect(rojo).toBeGreaterThanOrEqual(2)
   })
 
+  it('con la pestaña oculta no pinta (nadie lo ve) y al volver sigue', () => {
+    const { container } = pintar({ mode: 'led' })
+    const canvas = container.querySelector('canvas')
+    const oculta = vi.spyOn(document, 'hidden', 'get').mockReturnValue(true)
+    const antes = llamadas(canvas, 'drawImage')
+    vi.advanceTimersByTime(330)
+    expect(llamadas(canvas, 'drawImage')).toBe(antes)
+    oculta.mockReturnValue(false)
+    vi.advanceTimersByTime(100)
+    expect(llamadas(canvas, 'drawImage')).toBeGreaterThan(antes)
+    oculta.mockRestore()
+  })
+
   it('sin motor no revienta ni pinta', () => {
     expect(() => renderWithI18n(<VUBar engine={null} side="A" />)).not.toThrow()
   })

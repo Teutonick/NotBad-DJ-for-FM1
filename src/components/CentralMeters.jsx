@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import Fader from "./Fader";
 import PadButton, { GLOSS, PRESS, SKIN } from "./PadButton";
 import NumberField from "./NumberField";
@@ -31,6 +31,10 @@ function CentralMeters({
   const recorderRef = useRef(null);
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
+
+  // Si el componente se va con la grabación en marcha, su reloj no se queda
+  // sumando segundos a un estado que ya no existe
+  useEffect(() => () => clearInterval(timerRef.current), []);
 
   const recSupported =
     typeof MediaRecorder !== "undefined" && !!engine?.getRecordStream;

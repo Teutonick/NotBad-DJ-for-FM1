@@ -320,6 +320,9 @@ export default function VUBar({
     let clave = "";
 
     const tick = () => {
+      // Pestaña oculta: nadie lo ve, no se pinta (el temporizador sigue y al
+      // volver arranca en el siguiente frame)
+      if (document.hidden) return;
       const mode = modeRef.current;
       const nueva = `${w}|${h}|${mode}`;
       if (nueva !== clave) {

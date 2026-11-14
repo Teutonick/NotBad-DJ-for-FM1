@@ -292,7 +292,9 @@ export default function MiniDJMixer() {
     setDeckAutoGain((prev) => ({ ...prev, [side]: gainDb }));
   }, []);
 
-  const onToggleMasterSync = () => {
+  // useCallback: CentralMeters es memo y un callback nuevo en cada render lo
+  // repintaba con cada movimiento de fader
+  const onToggleMasterSync = useCallback(() => {
     setMasterSyncOn((prev) => {
       const next = !prev;
       if (next) {
@@ -304,7 +306,13 @@ export default function MiniDJMixer() {
       }
       return next;
     });
-  };
+  }, [bpms, pitchPctA, pitchPctB]);
+
+  const onOpenConfig = useCallback(() => setShowConfig(true), []);
+  const onToggleArtwork = useCallback(
+    (v) => setConfig((prev) => ({ ...prev, showArtwork: v })),
+    []
+  );
 
   // Motor de sync: mientras un deck tenga SYNC, su pitch se ajusta solo al
   // objetivo (master BPM o BPM efectivo del otro deck)
@@ -406,7 +414,7 @@ export default function MiniDJMixer() {
           onToggleMasterSync={onToggleMasterSync}
           masterBpm={masterBpm}
           setMasterBpm={setMasterBpm}
-          onOpenConfig={() => setShowConfig(true)}
+          onOpenConfig={onOpenConfig}
           vuMode={vuMode}
         />
 
@@ -516,9 +524,7 @@ export default function MiniDJMixer() {
           referenceKey={referenceKey}
           showArtwork={settings.showArtwork}
           showKey={settings.showKey}
-          onToggleArtwork={(v) =>
-            setConfig((prev) => ({ ...prev, showArtwork: v }))
-          }
+          onToggleArtwork={onToggleArtwork}
           playing={playing}
           lockLoadWhilePlaying={lockLoadWhilePlaying}
         />
