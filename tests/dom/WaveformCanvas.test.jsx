@@ -123,3 +123,34 @@ describe('WaveformCanvas: la tira cacheada', () => {
     expect(rellenosTira).toBe(2)
   })
 })
+
+describe('WaveformCanvas: clic para saltar', () => {
+  // T32: el navegador actualiza currentTime a bloques; entre medias la onda
+  // se dibuja con el playhead interpolado. El clic tiene que convertirse con
+  // la MISMA ventana que se ve, no con el currentTime crudo, o en play cae
+  // unos píxeles desviado (aquí 0,1 s = 2,4 px).
+  it('en play, el clic cae donde se ve, con la ventana dibujada', async () => {
+    const { fireEvent } = await import('@testing-library/react')
+    const { computeWaveWindow } = await import('../../src/lib/waveWindow')
+    vi.spyOn(performance, 'now').mockImplementation(() => ahora)
+    HTMLCanvasElement.prototype.setPointerCapture = () => {}
+    const sonando = { current: { duration: 200, currentTime: 100, paused: false, playbackRate: 1 } }
+    const onSeek = vi.fn()
+    const { container } = render(
+      <WaveformCanvas waveData={onda} bandIndex={null} palette={PALETA} audioRef={sonando}
+        windowRef={VENTANA} zoom={8} hotCues={[]} beats={[]} onSeek={onSeek} />
+    )
+    // Dos frames sin que el <audio> actualice: el segundo se dibuja 40 ms
+    // por delante de currentTime
+    frames(2)
+    const canvas = container.querySelector('canvas')
+    fireEvent.pointerDown(canvas, { clientX: 300, pointerId: 1 })
+    fireEvent.pointerUp(canvas, { clientX: 300, pointerId: 1 })
+
+    const visto = computeWaveWindow({ total: onda.length, zoom: 8, curFrac: 100.04 / 200, hasDuration: true })
+    const esperado = (visto.leftFrac + 0.5 * visto.windowFrac) * 200
+    expect(onSeek).toHaveBeenCalledTimes(1)
+    expect(onSeek.mock.calls[0][0]).toBeCloseTo(esperado, 6)
+    delete HTMLCanvasElement.prototype.setPointerCapture
+  })
+})

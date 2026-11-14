@@ -30,6 +30,9 @@ function WaveformCanvas({
 }) {
   const canvasRef = useRef(null);
   const smoothTimeRef = useRef(null);
+  // La ventana del último frame pintado: un clic se convierte con ESTA, que
+  // es la que tiene delante el usuario (ver getWindow)
+  const drawnWindowRef = useRef(null);
   // Preferencia del sistema de movimiento reducido: con ella puesta, el aviso
   // de fin de pista se queda en un borde fijo en vez de parpadear.
   const reducedMotionRef = useRef(false);
@@ -197,6 +200,14 @@ function WaveformCanvas({
         hasDuration: dur > 0,
       });
       const start = leftFrac * total; // índice (fraccionario) en waveData
+      drawnWindowRef.current = {
+        leftFrac,
+        rightFrac,
+        windowFrac: rightFrac - leftFrac,
+        total,
+        zoom,
+        dur,
+      };
 
       if (windowRef) {
         windowRef.current.from = leftFrac;
@@ -421,9 +432,22 @@ function WaveformCanvas({
     audioRef,
   ]);
 
-  // Ventana visible actual (mismo cálculo que drawFrame) para convertir px ↔ tiempo
+  // Ventana visible para convertir px ↔ tiempo: la del último frame pintado.
+  // Se dibuja con el playhead INTERPOLADO; recalcularla con el currentTime
+  // crudo (que el navegador actualiza a bloques, hasta ~120 ms por detrás)
+  // hacía que en play el clic cayera unos píxeles desviado. Si aún no hay
+  // frame con estos datos y este zoom, se calcula igual que drawFrame.
   const getWindow = (audioEl) => {
     const dur = audioEl.duration || 0;
+    const drawn = drawnWindowRef.current;
+    if (
+      drawn &&
+      drawn.total === waveData.length &&
+      drawn.zoom === zoom &&
+      drawn.dur === dur
+    ) {
+      return drawn;
+    }
     return computeWaveWindow({
       total: waveData.length,
       zoom,
