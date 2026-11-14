@@ -731,7 +731,9 @@ function Deck({
           />
         </header>
         {/* Content */}
-        <div className="flex flex-row gap-3 w-full">
+        {/* min-w-0: pase lo que pase dentro de la pantalla, la columna del
+            pitch no se sale nunca de la tarjeta */}
+        <div className="flex flex-row gap-3 w-full min-w-0">
           <div className="flex flex-col gap-1 flex-1 min-w-0">
             {/* Pantalla LCD: tiempo, duración, BPM, tonalidad, pitch y bend.
                 Antes eran etiquetas sueltas repartidas por la tarjeta —dos de

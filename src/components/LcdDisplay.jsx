@@ -304,7 +304,13 @@ function LcdDisplay({
         </div>
         {loadButton}
       </div>
-      <div className="mt-1 flex items-baseline justify-between gap-2">
+      {/* Dos grupos: tiempos y tonalidad / BPM, pitch y bend. Si el deck es
+          estrecho (portátil: con menos de ~1650 px de ventana no cabían en
+          una línea y la fila empujaba el fader de pitch fuera de la tarjeta),
+          el segundo baja a otra línea, a la derecha. flex-wrap también DENTRO
+          de cada grupo: el ancho mínimo de la fila es el de una sola cifra. */}
+      <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
+        <div className="flex flex-1 flex-wrap items-baseline gap-x-2 gap-y-1">
         {/* Tiempo: lo más grande, es lo que se mira de reojo */}
         <Field
           font={font}
@@ -363,6 +369,9 @@ function LcdDisplay({
             {musicalKey}
           </Field>
         )}
+        </div>
+
+        <div className="ml-auto flex flex-wrap items-baseline justify-end gap-x-2 gap-y-1">
 
         {/* BPM base de la pista y BPM al que va de verdad con el pitch */}
         <div onClick={onBpmClick}>
@@ -417,6 +426,7 @@ function LcdDisplay({
         >
           {bend}
         </Field>
+        </div>
       </div>
     </div>
   );
