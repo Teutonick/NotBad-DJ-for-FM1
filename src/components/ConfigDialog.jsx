@@ -15,12 +15,8 @@ import {
   WAVE_PRESETS,
 } from "../lib/waveColors";
 import { PHRASE_SIZES } from "../audio/structure";
-import {
-  BEND_RANGES,
-  DEFAULT_BEND_RANGE,
-  DEFAULT_PITCH_RANGE,
-  PITCH_RANGES,
-} from "../lib/constants";
+import { BEND_RANGES, PITCH_RANGES } from "../lib/constants";
+import { resolveConfig } from "../lib/config";
 import {
   END_WARN_MODES,
   LCD_FONTS,
@@ -169,6 +165,9 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
   if (!open) return null;
 
   const set = (key, value) => onConfigChange({ ...config, [key]: value });
+  // Lo que vale cada ajuste ahora mismo, con los mismos valores de fábrica
+  // que usa la app (src/lib/config.js)
+  const settings = resolveConfig(config);
 
   // Colores efectivos: el preset elegido, o los del modo personalizado
   const waveColors = resolveWaveColors(config);
@@ -260,11 +259,7 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
         <label className="flex items-center justify-between gap-2 text-xs text-neutral-400">
           {t("rangeTitle")}
           <select
-            value={
-              PITCH_RANGES.includes(Number(config.pitchRange))
-                ? Number(config.pitchRange)
-                : DEFAULT_PITCH_RANGE
-            }
+            value={settings.pitchRange}
             onChange={(e) => set("pitchRange", Number(e.target.value))}
             className="w-24 shrink-0 bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-sm text-neutral-200 tabular-nums"
           >
@@ -278,11 +273,7 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
         <label className="flex items-center justify-between gap-2 text-xs text-neutral-400">
           {t("bendRangeLabel")}
           <select
-            value={
-              BEND_RANGES.includes(Number(config.bendRange))
-                ? Number(config.bendRange)
-                : DEFAULT_BEND_RANGE
-            }
+            value={settings.bendRange}
             onChange={(e) => set("bendRange", Number(e.target.value))}
             className="w-24 shrink-0 bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-sm text-neutral-200 tabular-nums"
           >
@@ -315,7 +306,7 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
               <input
                 type="radio"
                 name="analysisMode"
-                checked={(config.analysisMode || "auto") === opt.value}
+                checked={settings.analysisMode === opt.value}
                 onChange={() => set("analysisMode", opt.value)}
                 className="accent-emerald-500"
               />
@@ -332,7 +323,7 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
           <label className="flex items-center gap-2 text-sm text-neutral-300 cursor-pointer">
             <input
               type="checkbox"
-              checked={config.showArtwork !== false}
+              checked={settings.showArtwork}
               onChange={(e) => set("showArtwork", e.target.checked)}
               className="accent-emerald-500"
             />
@@ -342,7 +333,7 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
           <label className="flex items-center gap-2 text-sm text-neutral-300 cursor-pointer">
             <input
               type="checkbox"
-              checked={config.showKey !== false}
+              checked={settings.showKey}
               onChange={(e) => set("showKey", e.target.checked)}
               className="accent-emerald-500"
             />
@@ -370,7 +361,7 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
               <input
                 type="radio"
                 name="vuMode"
-                checked={(config.vuMode || "led") === opt.value}
+                checked={settings.vuMode === opt.value}
                 onChange={() => set("vuMode", opt.value)}
                 className="accent-emerald-500"
               />
@@ -608,7 +599,7 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
         <label className="flex items-center gap-2 text-sm text-neutral-300 cursor-pointer">
           <input
             type="checkbox"
-            checked={config.lockLoadWhilePlaying !== false}
+            checked={settings.lockLoadWhilePlaying}
             onChange={(e) => set("lockLoadWhilePlaying", e.target.checked)}
             className="accent-emerald-500"
           />

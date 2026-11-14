@@ -14,12 +14,7 @@ import {
   sanitizeLoopRegion,
   sanitizeSavedLoops,
 } from "./lib/cuePoints";
-import {
-  BEND_RANGES,
-  DEFAULT_BEND_RANGE,
-  DEFAULT_PITCH_RANGE,
-  PITCH_RANGES,
-} from "./lib/constants";
+import { PITCH_RANGES } from "./lib/constants";
 import Deck from "./components/Deck";
 import CentralMeters from "./components/CentralMeters";
 import Mixer from "./components/Mixer";
@@ -29,13 +24,13 @@ import ConfigDialog from "./components/ConfigDialog";
 import UpdateToast from "./components/UpdateToast";
 import { useI18n } from "./i18n/context";
 import { useDeckShortcuts } from "./hooks/useDeckShortcuts";
+import { loadConfig, resolveConfig, saveConfig } from "./lib/config";
 import { buildWavePalette, resolveWaveColors } from "./lib/waveColors";
 import { resolveStructurePrefs } from "./lib/structurePrefs";
 import { sanitizeStructure } from "./audio/structure";
 import { ERRORS, logError } from "./lib/log";
 
 
-const CONFIG_KEY = "mini-dj-config";
 
 
 // ¿Ha cambiado algo de la estructura que merezca escribir en IndexedDB?
@@ -129,32 +124,24 @@ export default function MiniDJMixer() {
   const deckOutBRef = useRef(null);
 
   // Configuración persistente (salidas de audio, modo de análisis)
-  const [config, setConfig] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(CONFIG_KEY)) || {};
-    } catch {
-      return {};
-    }
-  });
+  const [config, setConfig] = useState(() => loadConfig());
   const [showConfig, setShowConfig] = useState(false);
+  // Valores efectivos (con sus valores de fábrica): los mismos que enseña ⚙
+  const settings = useMemo(() => resolveConfig(config), [config]);
 
   // Bloqueo de carga sobre un deck en reproducción (activado por defecto)
-  const lockLoadWhilePlaying = config.lockLoadWhilePlaying !== false;
+  const lockLoadWhilePlaying = settings.lockLoadWhilePlaying;
   const lockLoadRef = useRef(lockLoadWhilePlaying);
   lockLoadRef.current = lockLoadWhilePlaying;
 
   // Modo de visualización de los VU: LED por defecto, como una mesa de verdad
-  const vuMode = config.vuMode === "continuous" ? "continuous" : "led";
+  const vuMode = settings.vuMode;
 
   // Rango del fader de pitch y cuánto estira el bend: se ajustan en ⚙ y valen
   // para los dos decks. El rango es el de PARTIDA: el sync puede ensancharlo
   // por su cuenta si necesita más recorrido, y eso no toca la configuración.
-  const configPitchRange = PITCH_RANGES.includes(Number(config.pitchRange))
-    ? Number(config.pitchRange)
-    : DEFAULT_PITCH_RANGE;
-  const bendRange = BEND_RANGES.includes(Number(config.bendRange))
-    ? Number(config.bendRange)
-    : DEFAULT_BEND_RANGE;
+  const configPitchRange = settings.pitchRange;
+  const bendRange = settings.bendRange;
 
   useEffect(() => {
     setRangeA(configPitchRange);
@@ -163,13 +150,7 @@ export default function MiniDJMixer() {
     setPitchPctB((p) => Math.max(-configPitchRange, Math.min(configPitchRange, p)));
   }, [configPitchRange]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-    } catch {
-      // almacenamiento no disponible
-    }
-  }, [config]);
+  useEffect(() => saveConfig(config), [config]);
 
   // Colas de análisis en segundo plano para la lista: las etiquetas van por
   // su lado porque son casi instantáneas (no hay que decodificar el audio),
@@ -248,7 +229,7 @@ export default function MiniDJMixer() {
   // tonalidad (p. ej. percusión pura), y hace que las que ya estaban
   // guardadas de antes con BPM pero sin key se analicen una vez más.
   useEffect(() => {
-    if ((config.analysisMode || "auto") !== "auto") return;
+    if (settings.analysisMode !== "auto") return;
     if (analysisBusyRef.current) return;
     const pending = tracks.find(
       (t) =>
@@ -305,12 +286,12 @@ export default function MiniDJMixer() {
       cancelled = true;
       clearTimeout(timerId);
     };
-  }, [tracks, config.analysisMode]);
+  }, [tracks, settings.analysisMode]);
 
   // Etiquetas ID3 + miniatura de carátula. Igual que el BPM, respeta el modo
   // de análisis: en "solo al cargar en un deck" no se toca nada aquí.
   useEffect(() => {
-    if ((config.analysisMode || "auto") !== "auto") return;
+    if (settings.analysisMode !== "auto") return;
     if (metaBusyRef.current) return;
     const pending = tracks.find((t) => !t.metaRead);
     if (!pending) return;
@@ -330,7 +311,7 @@ export default function MiniDJMixer() {
       .finally(() => {
         metaBusyRef.current = false;
       });
-  }, [tracks, config.analysisMode]);
+  }, [tracks, settings.analysisMode]);
 
   const onAttachEl = useCallback(
     (which, el) => {
@@ -736,7 +717,7 @@ export default function MiniDJMixer() {
             onStructure={onStructure}
             onPhraseSize={onPhraseSize}
             structurePrefs={structurePrefs}
-            showKey={config.showKey !== false}
+            showKey={settings.showKey}
             onLocalLoad={onLocalLoad}
             wavePalette={wavePalette}
             externalTrack={deckTracks.A}
@@ -783,7 +764,7 @@ export default function MiniDJMixer() {
             onStructure={onStructure}
             onPhraseSize={onPhraseSize}
             structurePrefs={structurePrefs}
-            showKey={config.showKey !== false}
+            showKey={settings.showKey}
             onLocalLoad={onLocalLoad}
             wavePalette={wavePalette}
             externalTrack={deckTracks.B}
@@ -805,8 +786,8 @@ export default function MiniDJMixer() {
           onLoadToDeck={onLoadToDeck}
           onRemoveTrack={onRemoveTrack}
           referenceKey={referenceKey}
-          showArtwork={config.showArtwork !== false}
-          showKey={config.showKey !== false}
+          showArtwork={settings.showArtwork}
+          showKey={settings.showKey}
           onToggleArtwork={(v) =>
             setConfig((prev) => ({ ...prev, showArtwork: v }))
           }

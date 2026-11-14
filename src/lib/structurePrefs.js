@@ -6,6 +6,7 @@
 // mismo y no haya dos verdades.
 
 import { DEFAULT_PHRASE_SIZE, PHRASE_SIZES } from "../audio/structure";
+import { pickOption } from "./config";
 
 export const STRUCTURE_UNITS = ["kicks", "bars"];
 export const END_WARN_MODES = ["seconds", "percent"];
@@ -52,32 +53,20 @@ const clampInt = (v, min, max, fallback) => {
  * lo que espera quien mira el número.
  */
 export function resolveStructurePrefs(config = {}) {
-  const phraseSize = PHRASE_SIZES.includes(Number(config.phraseSize))
-    ? Number(config.phraseSize)
-    : DEFAULT_PHRASE_SIZE;
-  const unit = STRUCTURE_UNITS.includes(config.structureUnit)
-    ? config.structureUnit
-    : "kicks";
+  const phraseSize = pickOption(PHRASE_SIZES, config.phraseSize, DEFAULT_PHRASE_SIZE);
+  const unit = pickOption(STRUCTURE_UNITS, config.structureUnit, "kicks");
   const amber = clampInt(config.structureWarnAmber, 1, 128, DEFAULT_WARN_AMBER);
   const red = Math.min(
     amber,
     clampInt(config.structureWarnRed, 1, 128, DEFAULT_WARN_RED)
   );
-  const endMode = END_WARN_MODES.includes(config.endWarnMode)
-    ? config.endWarnMode
-    : "seconds";
+  const endMode = pickOption(END_WARN_MODES, config.endWarnMode, "seconds");
 
   return {
     show: config.showStructure !== false,
-    marqueeSpeed: MARQUEE_SPEEDS.includes(Number(config.marqueeSpeed))
-      ? Number(config.marqueeSpeed)
-      : DEFAULT_MARQUEE_SPEED,
-    titleFont: TITLE_FONTS.includes(migraTitulo(config.titleFont))
-      ? migraTitulo(config.titleFont)
-      : "rounded",
-    lcdFont: LCD_FONTS.includes(migraCifras(config.lcdFont))
-      ? migraCifras(config.lcdFont)
-      : "rounded",
+    marqueeSpeed: pickOption(MARQUEE_SPEEDS, config.marqueeSpeed, DEFAULT_MARQUEE_SPEED),
+    titleFont: pickOption(TITLE_FONTS, migraTitulo(config.titleFont), "rounded"),
+    lcdFont: pickOption(LCD_FONTS, migraCifras(config.lcdFont), "rounded"),
     phraseSize,
     unit,
     warnAmber: amber,
