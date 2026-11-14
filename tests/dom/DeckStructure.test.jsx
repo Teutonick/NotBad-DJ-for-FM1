@@ -170,9 +170,24 @@ describe('caja de estructura', () => {
   })
 
   it('el tamaño que llega de la configuración manda sobre el guardado', async () => {
-    await montar({ structurePrefs: { ...prefsBase, phraseSize: 8 } })
+    const onStructure = vi.fn()
+    await montar({ onStructure, structurePrefs: { ...prefsBase, phraseSize: 8 } })
     expect(screen.getByTitle(t('phraseSizeTitle'))).toHaveValue('8')
-    // Y el desplazamiento se recoloca dentro de la frase nueva
+    // La estructura guardada (frase de 16) se recoloca en frases de 8: los
+    // cambios caen en los beats 64 y 128, así que el desplazamiento es 0. Antes
+    // se quedaba la de 16 tal cual (+4) y así se volvía a guardar.
+    await waitFor(() => expect(desplazamiento()).toHaveTextContent('+0'))
+    await waitFor(() =>
+      expect(onStructure.mock.calls.at(-1)[1]).toMatchObject({ phraseSize: 8, phraseOffset: 0 })
+    )
+  })
+
+  it('un desplazamiento puesto a mano se respeta al recolocar la frase guardada', async () => {
+    await montar({
+      track: { structure: estructura({ manual: true, phraseOffset: 12 }) },
+      structurePrefs: { ...prefsBase, phraseSize: 8 },
+    })
+    // 12 en frases de 8 → 4
     await waitFor(() => expect(desplazamiento()).toHaveTextContent('+4'))
   })
 

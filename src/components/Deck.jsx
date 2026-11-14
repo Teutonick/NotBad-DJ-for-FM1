@@ -301,9 +301,14 @@ function Deck({
 
   // Cambiar el tamaño de frase (aquí o en ⚙: es el mismo ajuste) recoloca la
   // retícula sin volver a analizar nada.
+  // Depende también de la estructura: una guardada con otro tamaño de frase
+  // (se analizó con 16 y ⚙ dice ahora 8) se recoloca al cargarla. Si no, el
+  // indicador contaba con un tamaño y la retícula estaba hecha con otro, y se
+  // volvía a guardar la vieja. refitPhrase devuelve el MISMO objeto cuando
+  // el tamaño ya cuadra, así que esto no entra en bucle.
   useEffect(() => {
     setStructure((prev) => (prev ? refitPhrase(prev, phraseSize) : prev));
-  }, [phraseSize]);
+  }, [phraseSize, structure]);
 
   // La estructura sube al padre, que la refleja en la lista y la persiste
   const onStructureRef = useRef(onStructure);
