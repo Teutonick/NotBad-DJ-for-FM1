@@ -193,6 +193,25 @@ describe('loop roll', () => {
     expect(ultimoLoop()).toBeUndefined()
   })
 
+  // T38: si el aviso llega tarde más de una vuelta entera (el hilo principal
+  // bloqueado, p. ej. por el análisis de tonalidad), el salto retrocede varias
+  // longitudes de golpe y la cuenta tiene que sumarlas todas
+  it('al soltar sigue donde estaría aunque un aviso llegara varias vueltas tarde', async () => {
+    const { api } = await montar(conRejilla)
+    ponerEn(20)
+    await tocar(api)
+    const t0 = performance.now()
+    const p0 = posicion()
+    act(() => api().rollStart(0.25)) // 0,125 s por vuelta
+    await esperar(50)
+    const hasta = performance.now() + 400
+    while (performance.now() < hasta); // hilo bloqueado: ~3 vueltas sin aviso
+    await esperar(100)
+    act(() => api().rollEnd())
+    const sinRoll = p0 + (performance.now() - t0) / 1000
+    expect(Math.abs(posicion() - sinRoll)).toBeLessThan(0.01)
+  })
+
   it('un segundo rollStart con uno en marcha no hace nada', async () => {
     const { api } = await montar(conRejilla)
     ponerEn(20)

@@ -194,8 +194,13 @@ export function useLoopEngine({
       }
       const now = el.currentTime || 0;
       if (now >= st.end) {
-        el.currentTime = wrapTime({ current: now, start: st.start, end: st.end });
-        st.wraps += 1;
+        const to = wrapTime({ current: now, start: st.start, end: st.end });
+        el.currentTime = to;
+        // Si el aviso llegó tarde más de una vuelta (hilo principal ocupado),
+        // el salto retrocede varias longitudes de golpe: se cuentan todas, o
+        // al soltar un roll la pista saldría vueltas enteras por detrás.
+        const len = st.end - st.start;
+        st.wraps += len > 0 ? Math.max(1, Math.round((now - to) / len)) : 1;
         timer = setTimeout(tick, 0);
         return;
       }
