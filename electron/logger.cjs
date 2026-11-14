@@ -28,6 +28,7 @@ const CODES = {
   UPDATE_STATE: ["UPDATE-STATE", "Updater state"],
   DOWNLOAD_DONE: ["DESKTOP-DOWNLOAD", "File download finished"],
   DOWNLOAD_FAILED: ["DESKTOP-DOWNLOAD", "File download did not complete"],
+  LOG_DROPPED: ["LOG-DROPPED", "Too many page log lines; some were dropped"],
 };
 
 let logFile = null;

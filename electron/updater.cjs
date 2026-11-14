@@ -56,8 +56,14 @@ function initAutoUpdate(getWindow) {
   };
 
   // Instalar es lo único que la página puede pedir, y solo cuando ya está
-  // descargado: el resto del flujo lo lleva el proceso principal.
+  // descargado: el resto del flujo lo lleva el proceso principal. Sin nada
+  // descargado, quitAndInstall acaba en un error que el aviso enseñaría.
+  let downloaded = false;
   ipcMain.handle(INSTALL_CHANNEL, () => {
+    if (!downloaded) {
+      logWarn(CODES.UPDATE_STATE, null, { detail: "install requested before download" });
+      return;
+    }
     // Fuera del handler: quitAndInstall cierra la app y dejaría el IPC colgado
     setImmediate(() => autoUpdater.quitAndInstall());
   });
@@ -89,6 +95,7 @@ function initAutoUpdate(getWindow) {
     send({ status: "downloading", percent: Math.round(p?.percent || 0) });
   });
   autoUpdater.on("update-downloaded", (info) => {
+    downloaded = true;
     version = info?.version || version;
     send({ status: "ready" });
   });

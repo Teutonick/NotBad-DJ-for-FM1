@@ -19,6 +19,12 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { initAutoUpdate } = require("./updater.cjs");
 const {
+  createLineLimiter,
+  isExternalHttp,
+  isSameOrigin,
+  resolveDistPath,
+} = require("./security.cjs");
+const {
   CODES,
   logInfo,
   logWarn,
@@ -99,14 +105,9 @@ protocol.registerSchemesAsPrivileged([
 // --- Servidor del bundle ---------------------------------------------------
 function registerAppProtocol(ses) {
   ses.protocol.handle(APP_SCHEME, async (request) => {
-    const url = new URL(request.url);
-    const relative = decodeURIComponent(url.pathname).replace(/^\/+/, "");
-    const target = path.resolve(DIST_DIR, relative || "index.html");
-
-    // Nada fuera de dist/
-    if (target !== DIST_DIR && !target.startsWith(DIST_DIR + path.sep)) {
-      return new Response("Forbidden", { status: 403 });
-    }
+    // Nada fuera de dist/; una URL que no se entiende tampoco
+    const target = resolveDistPath(DIST_DIR, request.url);
+    if (!target) return new Response("Forbidden", { status: 403 });
 
     try {
       const body = await fs.readFile(target);
@@ -190,14 +191,14 @@ function createWindow() {
 
   // Enlaces externos al navegador del sistema; nada abre ventanas nuevas
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^https?:$/.test(new URL(url).protocol)) shell.openExternal(url);
+    if (isExternalHttp(url)) shell.openExternal(url);
     return { action: "deny" };
   });
 
   // La app es de una sola página: no debe navegar fuera de su propio origen
   win.webContents.on("will-navigate", (event, url) => {
     const allowed = useDevServer ? DEV_SERVER_URL : APP_ORIGIN;
-    if (!url.startsWith(allowed)) event.preventDefault();
+    if (!isSameOrigin(url, allowed)) event.preventDefault();
   });
 
   if (useDevServer) {
@@ -234,9 +235,15 @@ if (!app.requestSingleInstanceLock()) {
 
     // El registro de la página va al mismo fichero que el del proceso
     // principal: un solo sitio donde mirar cuando algo falla en un equipo
-    // ajeno. Solo se aceptan cadenas, y writeLine ya recorta y aplana.
+    // ajeno. Solo se aceptan cadenas, y writeLine ya recorta y aplana. Con
+    // límite: se escribe de forma síncrona y un bucle de errores en la página
+    // no puede bloquear el proceso principal.
+    const pageLog = createLineLimiter({ max: 50, windowMs: 1000 });
     ipcMain.on("minidj:log", (_event, line) => {
-      if (typeof line === "string") writeLine(line);
+      if (typeof line !== "string" || !pageLog.take()) return;
+      const dropped = pageLog.takeDropped();
+      if (dropped) logWarn(CODES.LOG_DROPPED, null, { lines: dropped });
+      writeLine(line);
     });
     ipcMain.handle("minidj:log-path", () => logFilePath());
 
