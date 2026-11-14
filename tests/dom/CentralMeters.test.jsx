@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { fireEvent, screen } from '@testing-library/react'
+import { act, fireEvent, screen } from '@testing-library/react'
 import CentralMeters from '../../src/components/CentralMeters'
 import { renderWithI18n, t } from '../helpers/render.jsx'
 
@@ -44,12 +44,15 @@ describe('CentralMeters · REC', () => {
   it('el reloj de la grabación cuenta segundos', async () => {
     pintar()
     fireEvent.click(screen.getByTitle(t('recTitle')))
-    // La grabación arranca tras un await (engine.resume): hasta que no se ve
-    // el reloj en 00:00, su intervalo aún no existe y no hay nada que contar
-    await vi.advanceTimersByTimeAsync(0)
-    expect(screen.getByTitle(t('recTitle')).textContent).toContain('■ 00:00')
-    await vi.advanceTimersByTimeAsync(3000)
-    expect(screen.getByTitle(t('recTitle')).textContent).toContain('00:03')
+    // La grabación arranca tras un await (engine.resume): hasta que no existe
+    // el intervalo del reloj no hay nada que contar. (El texto «■ 00:00» no
+    // sirve para saberlo: va siempre en el botón, oculto, reservando ancho.)
+    // act: React pinta el último segundo antes de la aserción, no en una
+    // tarea suelta que con la máquina cargada llegaba tarde.
+    await act(() => vi.advanceTimersByTimeAsync(0))
+    expect(vi.getTimerCount()).toBeGreaterThan(0)
+    await act(() => vi.advanceTimersByTimeAsync(3000))
+    expect(screen.getByTitle(t('recTitle')).textContent).toContain('■ 00:03')
   })
 
   it('si el componente se va mientras graba, su reloj se para', async () => {
