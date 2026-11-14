@@ -8,16 +8,26 @@ import { useEffect, useRef } from "react";
 // se rampa cuando el salto es grande (SYNC, reset...).
 const RAMP_MS = 120;
 const BIG_JUMP = 0.01; // 1 % de tempo
+const INAUDIBLE = 0.0002; // 0,02 %
+// Lo que se ignore por inaudible se escribe EXACTO cuando el tempo lleva este
+// rato quieto: si no, el último paso de la rampa del bend (o de un arrastre)
+// dejaba el deck hasta un 0,02 % desviado, ~12 ms por minuto de deriva
+// contra el otro. Mientras se mueve no añade escrituras.
+const SETTLE_MS = 150;
 
 export function usePlaybackRate(audioRef, tempoPct) {
   const targetRef = useRef(1);
   const rafRef = useRef(null);
+  const settleRef = useRef(null);
+
+  useEffect(() => () => clearTimeout(settleRef.current), []);
 
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
     const target = 1 + tempoPct / 100;
     targetRef.current = target;
+    clearTimeout(settleRef.current);
 
     // Salto pequeño (arrastre normal): un único write, agrupado por frame
     if (Math.abs(target - el.playbackRate) < BIG_JUMP) {
@@ -27,9 +37,16 @@ export function usePlaybackRate(audioRef, tempoPct) {
         const elNow = audioRef.current;
         if (!elNow) return;
         const want = targetRef.current;
-        // ignorar cambios inaudibles (< 0.02 %)
-        if (Math.abs(want - elNow.playbackRate) > 0.0002) {
+        // ignorar cambios inaudibles (< 0.02 %)... hasta que se quede quieto
+        if (Math.abs(want - elNow.playbackRate) > INAUDIBLE) {
           elNow.playbackRate = want;
+        } else if (want !== elNow.playbackRate) {
+          settleRef.current = setTimeout(() => {
+            const elLast = audioRef.current;
+            if (elLast && elLast.playbackRate !== targetRef.current) {
+              elLast.playbackRate = targetRef.current;
+            }
+          }, SETTLE_MS);
         }
       });
       return;

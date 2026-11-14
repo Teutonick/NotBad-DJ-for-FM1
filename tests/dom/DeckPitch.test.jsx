@@ -115,11 +115,10 @@ afterEach(() => {
 // Las rampas son de ~120 ms, pero con la máquina cargada 1 s de espera se
 // quedaba corto y el test fallaba a veces: margen amplio.
 const ESPERA = { timeout: 3000 }
-// usePlaybackRate ignora a propósito los cambios de menos de 0,02 % (son
-// inaudibles y cada escritura de playbackRate cuesta): tras soltar un bend el
-// tempo puede quedarse a menos de eso del objetivo. Se comprueba con ese margen.
+// usePlaybackRate se salta los retoques inaudibles mientras el tempo se mueve,
+// pero al quedarse quieto escribe el valor exacto: se espera ese (T34)
 const casi = (esperado) => {
-  expect(Math.abs(velocidad - esperado)).toBeLessThanOrEqual(0.0002 + 1e-9)
+  expect(velocidad).toBeCloseTo(esperado, 9)
 }
 
 describe('pitch del deck', () => {
