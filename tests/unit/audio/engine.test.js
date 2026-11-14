@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { AudioEngine } from '../../../src/audio/engine'
 import { installFakeAudio, pathExists, targetsOf } from '../../helpers/fakeAudio'
 
@@ -105,10 +105,25 @@ describe('ruteo', () => {
     expect(engine.getMeterAnalyser('master')).toBe(engine.masterMeter)
   })
 
-  it('el analizador que realimenta al AGC cuelga ANTES del trim', () => {
-    // Si midiera su propia salida, el lazo del auto-nivel se cerraría sobre sí mismo
-    expect(targetsOf(fake.ctx, engine.masterGain)).toContain(engine.mixAnalyser)
-    expect(pathExists(fake.ctx, engine.masterTrim, engine.mixAnalyser)).toBe(false)
+  it('del master a la salida no hay nada más que el limitador', () => {
+    expect(targetsOf(fake.ctx, engine.masterGain)).toEqual([engine.limiter])
+    expect(targetsOf(fake.ctx, engine.limiter)).toContain(fake.ctx.destination)
+  })
+
+  it('salida dedicada por deck (mezcla externa): el deck sale por su stream y no por el master', () => {
+    const { xfGain } = engine.deckA
+    engine.setDeckOutput('A', true)
+    const stream = engine.getDeckStream('A')
+    expect(stream).toBeTruthy()
+    expect(pathExists(fake.ctx, xfGain, engine.deckA.directDest)).toBe(true)
+    expect(pathExists(fake.ctx, xfGain, engine.masterGain)).toBe(false)
+    // El otro deck sigue yendo al master
+    expect(pathExists(fake.ctx, engine.deckB.xfGain, engine.masterGain)).toBe(true)
+
+    // Y de vuelta al master, sin quedarse colgado también del stream
+    engine.setDeckOutput('A', false)
+    expect(pathExists(fake.ctx, xfGain, engine.masterGain)).toBe(true)
+    expect(pathExists(fake.ctx, xfGain, engine.deckA.directDest)).toBe(false)
   })
 
   it('cada deck llega a la salida pasando por EQ, fader y crossfader', () => {
@@ -140,48 +155,5 @@ describe('EQ', () => {
   it('los cortes no disparan el auto-trim', () => {
     engine.setDeckEQ('A', { gain: 0, low: -26, mid: -26, high: -26 })
     expect(engine.deckA.eqPreGain.gain.value).toBeCloseTo(1, 6)
-  })
-})
-
-describe('auto-nivel del master (AGC)', () => {
-  beforeEach(() => vi.useFakeTimers())
-  afterEach(() => vi.useRealTimers())
-
-  it('desactivarlo para de verdad el lazo', () => {
-    engine.setMasterAutoLevel(true, { tickMs: 50 })
-    expect(vi.getTimerCount()).toBe(1)
-
-    engine.setMasterAutoLevel(false)
-    expect(vi.getTimerCount()).toBe(0)
-    const congelada = engine.masterTrim.gain.value
-    vi.advanceTimersByTime(1000)
-    expect(engine.masterTrim.gain.value).toBe(congelada)
-  })
-
-  it('activarlo dos veces no deja dos temporizadores (StrictMode)', () => {
-    engine.setMasterAutoLevel(true, { tickMs: 50 })
-    engine.setMasterAutoLevel(true, { tickMs: 50 })
-    expect(vi.getTimerCount()).toBe(1)
-  })
-
-  it('en silencio no sube la ganancia', () => {
-    engine.mixAnalyser.setSignal([0, 0, 0, 0])
-    engine.setMasterAutoLevel(true, { tickMs: 50 })
-    vi.advanceTimersByTime(500)
-    // Sin señal solo hay una deriva mínima hacia 1, nunca un refuerzo
-    expect(engine.masterTrim.gain.value).toBeLessThanOrEqual(1.02)
-  })
-
-  it('se mantiene dentro de los topes de ganancia', () => {
-    // Mix muy flojo: pide subir, pero no más allá de maxGain
-    engine.mixAnalyser.setSignal([0.005, -0.005])
-    engine.setMasterAutoLevel(true, { tickMs: 50, maxGain: 1.4 })
-    vi.advanceTimersByTime(20000)
-    expect(engine.masterTrim.gain.value).toBeLessThanOrEqual(1.4)
-
-    // Y mix muy alto: baja, pero no por debajo de minGain
-    engine.mixAnalyser.setSignal([1, -1])
-    vi.advanceTimersByTime(60000)
-    expect(engine.masterTrim.gain.value).toBeGreaterThanOrEqual(0.05)
   })
 })

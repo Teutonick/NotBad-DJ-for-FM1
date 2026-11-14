@@ -7,16 +7,14 @@ export class AudioEngine {
     this.masterGain = this.ctx.createGain();
     this.masterGain.gain.value = 1;
 
-    // Trim de master (AGC fuerte) y analizador del mix
-    this.masterTrim = this.ctx.createGain();
-    this.masterTrim.gain.value = 1;
-
-    this.mixAnalyser = this.ctx.createAnalyser();
-    this.mixAnalyser.fftSize = 1024;
-    this.mixAnalyser.smoothingTimeConstant = 0.85;
-
     // Ruteo final (sin duplicados, sin conexiones huérfanas):
-    // decks -> masterGain -> (tap a analyser) -> masterTrim -> destination
+    // decks -> masterGain -> limitador -> destination (+ medidor y grabación)
+    //
+    // Aquí hubo un auto-nivel (AGC) dinámico del master con su trim y su
+    // analizador. Se quitó porque subía el nivel en las partes flojas y lo
+    // bajaba al entrar el groove: la nivelación es ahora la ganancia estática
+    // por pista que se calcula una vez al cargar (utils.js).
+    //
     // Limitador de seguridad: atrapa los picos antes de la salida para que
     // el mix nunca clipee (es lo que se oía como distorsión con auto-gain)
     this.limiter = this.ctx.createDynamicsCompressor();
@@ -27,16 +25,12 @@ export class AudioEngine {
     this.limiter.release.value = 0.05;
 
     // Medidor del master: cuelga DESPUÉS del limitador, así que mide la
-    // señal que sale de verdad por la tarjeta (con el trim del AGC y el
-    // recorte del limitador ya aplicados). El mixAnalyser de arriba sigue
-    // colgando antes del trim porque es el que realimenta al propio AGC:
-    // si midiera su salida, el lazo se cerraría sobre sí mismo.
+    // señal que sale de verdad por la tarjeta (con el recorte del limitador
+    // ya aplicado).
     this.masterMeter = this.ctx.createAnalyser();
     this.masterMeter.fftSize = 2048; // ~43 ms: ventanas solapadas a 30 fps
 
-    this.masterGain.connect(this.mixAnalyser);
-    this.masterGain.connect(this.masterTrim);
-    this.masterTrim.connect(this.limiter);
+    this.masterGain.connect(this.limiter);
     this.limiter.connect(this.ctx.destination);
     this.limiter.connect(this.masterMeter);
 
@@ -84,7 +78,9 @@ export class AudioEngine {
       // Fader y mezcla
       preGain: this.ctx.createGain(), // volumen del deck (slider)
       xfGain: this.ctx.createGain(), // coeficiente del crossfader
-      analyser: this.ctx.createAnalyser(),
+      // Salida del canal: el punto que se engancha al master o a la salida
+      // dedicada del deck (setDeckOutput). Ganancia 1: no toca la señal.
+      out: this.ctx.createGain(),
       meter: this.ctx.createAnalyser(), // VU del canal (pre-fader)
       cueGain: this.ctx.createGain(), // envío a auriculares (PFL)
     };
@@ -95,7 +91,7 @@ export class AudioEngine {
       ...mkEQ(),
       preGain: this.ctx.createGain(),
       xfGain: this.ctx.createGain(),
-      analyser: this.ctx.createAnalyser(),
+      out: this.ctx.createGain(),
       meter: this.ctx.createAnalyser(),
       cueGain: this.ctx.createGain(),
     };
@@ -110,8 +106,8 @@ export class AudioEngine {
     this.deckA.high.connect(this.deckA.filter);
     this.deckA.filter.connect(this.deckA.preGain);
     this.deckA.preGain.connect(this.deckA.xfGain);
-    this.deckA.xfGain.connect(this.deckA.analyser);
-    this.deckA.analyser.connect(this.masterGain);
+    this.deckA.xfGain.connect(this.deckA.out);
+    this.deckA.out.connect(this.masterGain);
     this.deckA.filter.connect(this.deckA.cueGain); // PFL pre-fader, post-EQ/filtro
     this.deckA.cueGain.connect(this.cueBus);
     this.deckA.filter.connect(this.deckA.meter); // VU del canal: mismo punto que el PFL
@@ -123,17 +119,12 @@ export class AudioEngine {
     this.deckB.high.connect(this.deckB.filter);
     this.deckB.filter.connect(this.deckB.preGain);
     this.deckB.preGain.connect(this.deckB.xfGain);
-    this.deckB.xfGain.connect(this.deckB.analyser);
-    this.deckB.analyser.connect(this.masterGain);
+    this.deckB.xfGain.connect(this.deckB.out);
+    this.deckB.out.connect(this.masterGain);
     this.deckB.filter.connect(this.deckB.cueGain);
     this.deckB.cueGain.connect(this.cueBus);
     this.deckB.filter.connect(this.deckB.meter);
 
-    // Ajuste de analyser (ligero)
-    [this.deckA.analyser, this.deckB.analyser].forEach((a) => {
-      a.fftSize = 1024;
-      a.smoothingTimeConstant = 0.8;
-    });
     // Los medidores leen la onda cruda (getFloatTimeDomainData no usa el
     // suavizado), con ventana de 2048 muestras para no perderse picos cortos
     [this.deckA.meter, this.deckB.meter].forEach((a) => {
@@ -143,7 +134,7 @@ export class AudioEngine {
 
   // Analizador para los VU. "A"/"B" = canal post-EQ y pre-fader (como el PFL,
   // así el nivel del canal no depende del fader ni del crossfader);
-  // cualquier otra cosa = salida real del master (post-trim, post-limitador).
+  // cualquier otra cosa = salida real del master (post-limitador).
   getMeterAnalyser(which) {
     if (which === "A") return this.deckA.meter;
     if (which === "B") return this.deckB.meter;
@@ -203,12 +194,12 @@ export class AudioEngine {
     const deck = which === "A" ? this.deckA : this.deckB;
     this._ensureDirectDest(deck);
     try {
-      deck.analyser.disconnect();
+      deck.out.disconnect();
     } catch {
       // sin conexiones previas
     }
-    if (direct) deck.analyser.connect(deck.directDest);
-    else deck.analyser.connect(this.masterGain);
+    if (direct) deck.out.connect(deck.directDest);
+    else deck.out.connect(this.masterGain);
   }
 
   getDeckStream(which) {
@@ -266,18 +257,6 @@ export class AudioEngine {
     this.deckB.xfGain.gain.value = Math.cos(tB * Math.PI * 0.5);
   }
 
-  getRMS(which) {
-    const an = which === "A" ? this.deckA.analyser : this.deckB.analyser;
-    const arr = new Uint8Array(an.frequencyBinCount);
-    an.getByteTimeDomainData(arr);
-    let sum = 0;
-    for (let i = 0; i < arr.length; i++) {
-      const v = (arr[i] - 128) / 128; // -1..1
-      sum += v * v;
-    }
-    return Math.sqrt(sum / arr.length); // 0..1 aprox
-  }
-
   // Conversión dB → ganancia lineal
   _dbToGain(db) {
     return Math.pow(10, db / 20);
@@ -306,80 +285,5 @@ export class AudioEngine {
     d.low.gain.value = low;
     d.mid.gain.value = mid;
     d.high.gain.value = high;
-  }
-
-  // === Auto Level (AGC) para master ===
-  _enableAGC = false;
-  _agcTimer = null;
-
-  // Devuelve RMS del mix 0..1
-  _getMixRMS() {
-    const an = this.mixAnalyser;
-    const arr = new Uint8Array(an.frequencyBinCount);
-    an.getByteTimeDomainData(arr);
-    let sum = 0;
-    for (let i = 0; i < arr.length; i++) {
-      const v = (arr[i] - 128) / 128;
-      sum += v * v;
-    }
-    return Math.sqrt(sum / arr.length);
-  }
-
-  // Activa/desactiva AGC
-  setMasterAutoLevel(enabled, opts = {}) {
-    this._enableAGC = !!enabled;
-
-    // Siempre limpiamos el timer anterior: evita timers duplicados
-    // (p.ej. StrictMode) y hace que enabled=false apague de verdad el AGC
-    if (this._agcTimer) {
-      clearInterval(this._agcTimer);
-      this._agcTimer = null;
-    }
-    if (!enabled) return;
-
-    const {
-      targetRMS = 0.12, // objetivo de RMS del mix
-      deadband = 0.01, // si estoy cerca, no toco
-      upRate = 0.03, // sube despacio
-      downRate = 0.02, // y baja con la misma soltura (antes: casi nunca)
-      tickMs = 50,
-      minGain = 0.05, // no caigas por debajo de X
-      maxGain = 1.4, // sin refuerzos grandes: el limitador hace el resto
-      silenceGate = 0.02, // no subas en silencio
-    } = opts;
-
-    this._agcTimer = setInterval(() => {
-      const rms = this._getMixRMS();
-      const cur = this.masterTrim.gain.value;
-      let next = cur;
-
-      if (rms < silenceGate) {
-        // En silencio: no bostear; leve drift hacia 1.0 si está muy bajo
-        next = cur < 1 ? cur * 1.002 : cur;
-      } else {
-        const hi = targetRMS * (1 + deadband);
-        const lo = targetRMS * (1 - deadband);
-
-        if (rms < lo) {
-          // Por debajo: sube rápido (proporcional al error)
-          const ratio = targetRMS / Math.max(1e-6, rms); // >1
-          const boost = Math.min(1.0, (ratio - 1) * 0.3); // suaviza
-          next = cur * (1 + Math.max(upRate, boost * upRate));
-        } else if (rms > hi) {
-          // Por encima: baja muy, muy lento
-          next = cur * (1 - downRate);
-        } else {
-          // Dentro de banda: tírate muy despacio hacia 1.0 si quedó por debajo
-          if (cur < 1.0) next = cur * 1.005;
-        }
-      }
-
-      next = Math.min(maxGain, Math.max(minGain, next));
-
-      const now = this.ctx.currentTime;
-      this.masterTrim.gain.cancelScheduledValues(now);
-      this.masterTrim.gain.setValueAtTime(this.masterTrim.gain.value, now);
-      this.masterTrim.gain.linearRampToValueAtTime(next, now + tickMs / 1000);
-    }, tickMs);
   }
 }
