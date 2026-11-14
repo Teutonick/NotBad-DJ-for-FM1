@@ -58,6 +58,8 @@ import { readTrackMetadata } from "../audio/metadata";
 import { ERRORS, logError, logWarn } from "../lib/log";
 import { formatClock, stripExtension } from "../lib/format";
 import { useTrackStructure } from "../hooks/useTrackStructure";
+import { useBend } from "../hooks/useBend";
+import { usePlaybackRate } from "../hooks/usePlaybackRate";
 
 // Redondeo de la fila de transporte (play, stop, sync, key): uno solo para
 // los cuatro, que antes no coincidían entre ellos.
@@ -128,7 +130,6 @@ function Deck({
   ref,
 }) {
   const { t } = useI18n();
-  const pitchRafRef = useRef(null);
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -221,9 +222,7 @@ function Deck({
   // Fase de análisis para feedback en UI: null | "wave" | "bpm" | "regrid"
   const [analyzing, setAnalyzing] = useState(null);
 
-  const [bendPct, setBendPct] = useState(0);
-  const bendHoldRef = useRef(false);
-  const bendRafRef = useRef(null);
+  const { bendPct, startBend, releaseBend, nudge: onNudge } = useBend(bendRange);
 
   const [reverseAdvancedTime, setReverseAdvancedTime] = useState(true);
 
@@ -705,15 +704,6 @@ function Deck({
     setCueIfPaused(time);
   };
 
-  // Arrastre de la onda en play: nudge temporal tipo pitch bend. Da más
-  // margen que los botones (es un gesto continuo), pero sigue atado al ajuste.
-  const onNudge = (pct) => {
-    const tope = (bendRange > 0 ? bendRange : 2) * 3;
-    bendHoldRef.current = true;
-    if (bendRafRef.current) cancelAnimationFrame(bendRafRef.current);
-    setBendPct(Math.max(-tope, Math.min(tope, pct)));
-  };
-
   // Handlers del canvas con identidad estable: así WaveformCanvas (memo) no
   // se re-renderiza en cada movimiento del fader de pitch
   const waveHandlersRef = useRef({});
@@ -1103,58 +1093,8 @@ function Deck({
     nudgeEnd: () => releaseBend(),
   }));
 
-  // Pitch / tempo.
-  // Arrastrar el fader genera decenas de cambios por segundo: escribir
-  // playbackRate en cada uno (y peor, mantener una rampa por rAF viva)
-  // provoca microcortes en el audio. Aquí se agrupa en un solo write por
-  // frame y solo se rampa cuando el salto es grande (SYNC, reset...).
-  const pitchTargetRef = useRef(1);
-  useEffect(() => {
-    const el = audioRef.current;
-    if (!el) return;
-    const target = 1 + (pitchPct + bendPct) / 100;
-    pitchTargetRef.current = target;
-
-    const RAMP_MS = 120;
-    const BIG_JUMP = 0.01; // 1% de tempo
-
-    // Salto pequeño (arrastre normal): un único write, agrupado por frame
-    if (Math.abs(target - el.playbackRate) < BIG_JUMP) {
-      if (pitchRafRef.current) return; // ya hay un write programado
-      pitchRafRef.current = requestAnimationFrame(() => {
-        pitchRafRef.current = null;
-        const elNow = audioRef.current;
-        if (!elNow) return;
-        const want = pitchTargetRef.current;
-        // ignorar cambios inaudibles (< 0.02 %)
-        if (Math.abs(want - elNow.playbackRate) > 0.0002) {
-          elNow.playbackRate = want;
-        }
-      });
-      return;
-    }
-
-    // Salto grande: rampa suave
-    if (pitchRafRef.current) cancelAnimationFrame(pitchRafRef.current);
-    const startRate = el.playbackRate || 1;
-    const start = performance.now();
-    const step = (now) => {
-      const k0 = Math.min(1, (now - start) / RAMP_MS);
-      const k = k0 < 0.5 ? 2 * k0 * k0 : -1 + (4 - 2 * k0) * k0;
-      el.playbackRate = startRate + (pitchTargetRef.current - startRate) * k;
-      if (k0 < 1) {
-        pitchRafRef.current = requestAnimationFrame(step);
-      } else {
-        pitchRafRef.current = null;
-        el.playbackRate = pitchTargetRef.current;
-      }
-    };
-    pitchRafRef.current = requestAnimationFrame(step);
-    return () => {
-      if (pitchRafRef.current) cancelAnimationFrame(pitchRafRef.current);
-      pitchRafRef.current = null;
-    };
-  }, [pitchPct, bendPct]);
+  // Pitch / tempo: pitch + bend al playbackRate del <audio>
+  usePlaybackRate(audioRef, pitchPct + bendPct);
 
   // El fader emite muchos eventos por frame al arrastrarlo; agrupamos la
   // actualización de estado en uno por frame para no re-renderizar de más
@@ -1178,35 +1118,6 @@ function Deck({
     []
   );
 
-  // Cuánto estira el bend, en % de tempo. Sale de la configuración: cada
-  // quien lo quiere de una manera y en makina un 2 % ya es mucho.
-  const BEND_MAX = bendRange > 0 ? bendRange : 2;
-  const BEND_RELEASE_MS = 120;
-
-  function startBend(sign) {
-    bendHoldRef.current = true;
-    if (bendRafRef.current) cancelAnimationFrame(bendRafRef.current);
-    setBendPct(sign * BEND_MAX);
-  }
-
-  function releaseBend() {
-    bendHoldRef.current = false;
-    const start = performance.now();
-    const startVal = bendPct;
-
-    const step = (now) => {
-      const p = Math.min(1, (now - start) / BEND_RELEASE_MS);
-      const k = 1 - p;
-      const v = startVal * k;
-      setBendPct(v);
-      if (p < 1 && !bendHoldRef.current) {
-        bendRafRef.current = requestAnimationFrame(step);
-      } else if (!bendHoldRef.current) {
-        setBendPct(0);
-      }
-    };
-    bendRafRef.current = requestAnimationFrame(step);
-  }
 
   waveHandlersRef.current = {
     onSeek: (time) => {
