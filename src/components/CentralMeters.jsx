@@ -8,6 +8,7 @@ import LanguageSelector from "./LanguageSelector";
 import { useI18n } from "../i18n/context";
 import { ERRORS, logError } from "../lib/log";
 import { formatClock } from "../lib/format";
+import { downloadBlob } from "../lib/download";
 
 const formatRecTime = (s) => formatClock(s, { hours: false });
 
@@ -48,13 +49,8 @@ function CentralMeters({
     rec.onstop = () => {
       const blob = new Blob(chunksRef.current, { type: mimeType });
       chunksRef.current = [];
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
       const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, "-");
-      a.href = url;
-      a.download = `mix-${stamp}.webm`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      downloadBlob(blob, `mix-${stamp}.webm`);
     };
     rec.start(1000);
     recorderRef.current = rec;

@@ -17,6 +17,7 @@ import {
 import { PHRASE_SIZES } from "../audio/structure";
 import { BEND_RANGES, PITCH_RANGES } from "../lib/constants";
 import { resolveConfig } from "../lib/config";
+import { downloadBlob } from "../lib/download";
 import {
   END_WARN_MODES,
   LCD_FONTS,
@@ -136,12 +137,7 @@ export default function ConfigDialog({ open, onClose, config, onConfigChange }) 
   // En la app de escritorio esto abre el diálogo nativo de guardado.
   const downloadLog = () => {
     const blob = new Blob([formatLog()], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `mini-dj-log-${new Date().toISOString().slice(0, 10)}.txt`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    downloadBlob(blob, `mini-dj-log-${new Date().toISOString().slice(0, 10)}.txt`);
   };
 
   const copyLog = () => {

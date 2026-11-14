@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../i18n/context";
 import { GLOSS, PRESS, SKIN } from "./PadButton";
 import { csvLine } from "../lib/csv";
+import { downloadBlob } from "../lib/download";
 import { formatClock, formatSize } from "../lib/format";
 import {
   camelotSortIndex,
@@ -167,12 +168,7 @@ function TrackList({
     const blob = new Blob(["﻿" + [header, ...rows].join("\n")], {
       type: "text/csv;charset=utf-8",
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tracklist.csv";
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    downloadBlob(blob, "tracklist.csv");
   };
 
   const badgeClasses = {
