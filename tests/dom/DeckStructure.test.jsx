@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import Deck from '../../src/components/Deck'
 import { renderWithI18n, t } from '../helpers/render.jsx'
+import { esperarCargada } from '../helpers/deck.jsx'
 import { makeAudioBuffer, sine } from '../helpers/signals'
 
 // La onda va a un canvas y aquí solo estorba; el detector de tempo real
@@ -87,7 +88,7 @@ const montar = async (props = {}) => {
       {...props}
     />
   )
-  await waitFor(() => expect(document.querySelector('audio')?.src).toBeTruthy())
+  await esperarCargada(utils.container)
   // Las herramientas del deck van por pestañas: hay que abrir la suya
   fireEvent.click(screen.getByRole('tab', { name: t('toolsBpm') }))
   return utils

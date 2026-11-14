@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import Deck from '../../src/components/Deck'
 import { renderWithI18n, t } from '../helpers/render.jsx'
+import { esperarCargada } from '../helpers/deck.jsx'
 import { makeAudioBuffer, sine } from '../helpers/signals'
 
 // Igual que en DeckLoad: la onda va a un canvas y aquí solo estorba, y el
@@ -58,12 +59,10 @@ const deckEl = (file, token, props) => (
 const pestaña = (clave) =>
   fireEvent.click(screen.getByRole('tab', { name: t(clave) }))
 
-// Monta el deck y espera a que la pista esté cargada (hay <audio src>)
+// Monta el deck y espera a que la pista esté cargada
 const montar = async (props = {}) => {
   const utils = renderWithI18n(deckEl(pista(), 1, props))
-  await waitFor(() =>
-    expect(utils.container.querySelector('audio')).toHaveAttribute('src')
-  )
+  await esperarCargada(utils.container)
   return utils
 }
 

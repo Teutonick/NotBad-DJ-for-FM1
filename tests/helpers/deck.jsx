@@ -120,25 +120,29 @@ export const deckEl = ({ motor, file, token = 1, track, ...props }) => (
   />
 )
 
-// Monta el deck con una pista y espera a que esté cargada. Devuelve también la
-// API de los atajos (`api`), que es la misma que usan las teclas: loopIn,
-// loopOut, rollStart…
-//
-// «Cargada» = el pad 1 de hot cue (pestaña Posición, la que abre por defecto)
-// se puede pulsar, o sea, React ya tiene el objectUrl. El `src` del <audio>
-// NO vale: se escribe directamente un instante antes, y con la máquina
-// cargada el test empezaba en ese hueco y las acciones no hacían nada.
-export async function montarDeck(opts) {
-  const ref = createRef()
-  const props = { file: pista(), ...opts, ref }
-  const utils = renderWithI18n(deckEl(props))
+// Espera a que el deck montado en `container` tenga la pista cargada: el pad 1
+// de hot cue (pestaña Posición, la que abre por defecto) se puede pulsar, o
+// sea, React ya tiene el objectUrl. El `src` del <audio> NO vale: se escribe
+// directamente un instante antes, y con la máquina cargada el test empezaba
+// en ese hueco y las acciones no hacían nada.
+export async function esperarCargada(container) {
   await waitFor(() => {
-    const pad = utils.container.querySelector(
+    const pad = container.querySelector(
       `button[title="${t('hotCueSetTitle', { n: 1 })}"], button[title^="Hot cue 1:"]`
     )
     expect(pad).not.toBeNull()
     expect(pad).not.toBeDisabled()
   })
+}
+
+// Monta el deck con una pista y espera a que esté cargada. Devuelve también la
+// API de los atajos (`api`), que es la misma que usan las teclas: loopIn,
+// loopOut, rollStart…
+export async function montarDeck(opts) {
+  const ref = createRef()
+  const props = { file: pista(), ...opts, ref }
+  const utils = renderWithI18n(deckEl(props))
+  await esperarCargada(utils.container)
   return { ...utils, api: () => ref.current, props }
 }
 
