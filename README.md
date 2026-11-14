@@ -71,6 +71,7 @@ Two‑deck DJ app built with React, Vite and Tailwind — everything runs locall
 - `npm run build` – production build.
 - `npm run preview` – preview the production build locally.
 - `npm run lint` – run ESLint.
+- `npm run format` – format the repo with Prettier (default style); `npm run format:check` only checks, as CI does.
 
 ### Tests
 
@@ -96,6 +97,8 @@ Browser (end-to-end) tests live apart in `vitest.e2e.config.js`:
   downloaded); set `MINI_DJ_CHROME` if it lives somewhere unusual. With no
   Chrome around they skip themselves instead of failing, and `npm test` never
   runs them, so CI cannot go flaky because of them.
+- They read each deck's BPM from its `data-bpm` / `data-running-bpm` attributes, not from
+  the LCD, which draws it rounded and in segments.
 - `AudioContext.resume()` never settles without an audio device, so the harness
   replaces it with a resolved promise before the app loads.
 
@@ -132,8 +135,9 @@ How it is wired:
   a 403), the window only navigates within the app's own origin, only `http(s)` links open in
   the system browser, and the page can write at most 50 log lines a second (the dropped ones
   are counted in the log).
-- Media permission is granted in the session. Without it `enumerateDevices()` returns
-  outputs with empty labels and the ⚙ Config device pickers come up blank.
+- Media permission is granted in the session, only to the app's own origin. Without it
+  `enumerateDevices()` returns outputs with empty labels and the ⚙ Config device pickers
+  come up blank.
 - `backgroundThrottling` is disabled so waveforms and background analysis keep running
   when the window loses focus.
 - Downloads (the recorded `.webm`, the tracklist CSV) open the native save dialog,
@@ -240,7 +244,7 @@ Three things worth knowing:
 - `src/lib/` – IndexedDB track store and the per‑event track update rules, ⚙ config, shared constants, structure/warning preferences, sync maths, waveform palettes, CSV, error log, smooth playhead, device glass.
 - `src/components/*` – decks (LCD panel, wave screen, structure readout), mixer, meters, track list, config dialog, the reusable `Fader`, `PadButton` and knobs; `deck/` holds the deck's tool tabs.
 - `tests/` – `unit/` (pure logic, Node), `dom/` (components, jsdom), `e2e/` (Chrome + puppeteer-core), `helpers/` (Web Audio double, synthetic signals, WAV generator, a deck mount with a fake `<audio>`).
-- `.github/workflows/ci.yml` – lint, tests and build on every push and PR to main; `release.yml` – desktop builds on a `v*` tag.
+- `.github/workflows/ci.yml` – lint, format check, tests and build on every push and PR to main; `release.yml` – desktop builds on a `v*` tag.
 - `electron/` – desktop wrapper (main process, preload, updater, logger, security rules).
 - `scripts/electron-dev.mjs` – starts Vite and launches Electron against the resolved URL.
 - `electron-builder.yml` – packaging targets and installer options.
