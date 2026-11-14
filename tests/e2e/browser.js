@@ -83,18 +83,32 @@ export async function loadTrackIntoDeck(page, side, ruta) {
   await inputs[side === 'A' ? 0 : 1].uploadFile(ruta)
 }
 
-/** Espera a que el deck muestre un BPM y lo devuelve como número. */
-export async function waitForBpm(page, side, timeout = 40000) {
-  const index = side === 'A' ? 0 : 1
-  return page.waitForFunction(
-    (i) => {
-      const textos = [...document.querySelectorAll('[data-testid="deck-bpm"]')]
-      const el = textos[i]
-      if (!el) return false
-      const n = parseFloat(el.textContent)
-      return Number.isFinite(n) && n > 0 ? n : false
+// BPM de un deck, sin redondear: el deck lo deja en data-bpm (el de la
+// pista) y data-running-bpm (con el pitch). El LCD lo pinta redondeado y
+// en segmentos, así que leerlo de la pantalla no vale.
+export function readBpm(page, side, { running = false } = {}) {
+  return page.evaluate(
+    (s, r) => {
+      const d = document.querySelector(`[data-testid="deck"][data-side="${s}"]`)
+      const n = parseFloat(r ? d?.dataset.runningBpm : d?.dataset.bpm)
+      return Number.isFinite(n) && n > 0 ? n : null
     },
-    { timeout, polling: 300 },
-    index
-  ).then((h) => h.jsonValue())
+    side,
+    running
+  )
+}
+
+/** Espera a que el deck tenga BPM y lo devuelve como número. */
+export async function waitForBpm(page, side, timeout = 40000) {
+  return page
+    .waitForFunction(
+      (s) => {
+        const d = document.querySelector(`[data-testid="deck"][data-side="${s}"]`)
+        const n = parseFloat(d?.dataset.bpm)
+        return Number.isFinite(n) && n > 0 ? n : false
+      },
+      { timeout, polling: 300 },
+      side
+    )
+    .then((h) => h.jsonValue())
 }

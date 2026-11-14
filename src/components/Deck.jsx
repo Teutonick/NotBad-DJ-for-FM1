@@ -702,6 +702,12 @@ function Deck({
   return (
     <div
       onPointerDown={() => onActivate?.(side)}
+      // Para las pruebas de navegador: el BPM exacto (el LCD lo redondea) sin
+      // depender de cómo se pinta
+      data-testid="deck"
+      data-side={side}
+      data-bpm={bpm ?? ""}
+      data-running-bpm={runningBpm ?? ""}
       className={`rounded-2xl border bg-neutral-900/70 p-4 sm:p-5 shadow-xl relative overflow-hidden min-w-0 ${
         isActive ? "border-sky-500/60 ring-1 ring-sky-500/40" : "border-neutral-800"
       }`}
