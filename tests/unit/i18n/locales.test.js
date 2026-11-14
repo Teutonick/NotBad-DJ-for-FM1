@@ -1,15 +1,36 @@
-import { describe, it, expect } from 'vitest'
-import { LOCALES, DEFAULT_LOCALE } from '../../../src/i18n/locales'
+import { describe, it, expect, beforeAll } from 'vitest'
+import { LOCALES, LOCALE_CODES, DEFAULT_LOCALE, loadLocale } from '../../../src/i18n/locales'
 import { LANGUAGES, translate } from '../../../src/i18n/context'
 
-const codes = Object.keys(LOCALES)
+const codes = [...LOCALE_CODES]
 const reference = LOCALES[DEFAULT_LOCALE]
 const referenceKeys = Object.keys(reference).sort()
 // Parámetros de una cadena: "Deck {side}" → ["side"]
 const placeholders = (str) =>
   [...String(str).matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort()
 
+// Este bloque va primero: mira la caché antes de que nadie cargue nada
+describe('carga bajo demanda', () => {
+  it('solo el inglés (la reserva de todas las claves) viene de serie', () => {
+    expect(Object.keys(LOCALES)).toEqual([DEFAULT_LOCALE])
+  })
+
+  it('un idioma se carga al pedirlo, una vez, y queda en la caché', async () => {
+    const es = await loadLocale('es')
+    expect(es.deck).toBe('Deck {side}')
+    expect(LOCALES.es).toBe(es)
+    expect(await loadLocale('es')).toBe(es)
+  })
+
+  it('un idioma que no existe da el inglés y no ensucia la caché', async () => {
+    expect(await loadLocale('xx')).toBe(LOCALES.en)
+    expect(LOCALES).not.toHaveProperty('xx')
+  })
+})
+
 describe('traducciones', () => {
+  beforeAll(() => Promise.all(codes.map(loadLocale)))
+
   it('el selector de idioma ofrece exactamente los idiomas que existen', () => {
     expect(LANGUAGES.map((l) => l.code).sort()).toEqual(codes.sort())
     expect(codes).toHaveLength(11)
@@ -39,6 +60,8 @@ describe('traducciones', () => {
 })
 
 describe('translate', () => {
+  beforeAll(() => loadLocale('es'))
+
   it('sustituye los parámetros', () => {
     expect(translate('es', 'deck', { side: 'A' })).toBe('Deck A')
   })
