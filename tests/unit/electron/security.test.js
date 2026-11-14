@@ -5,6 +5,7 @@ import {
   isSameOrigin,
   isExternalHttp,
   createLineLimiter,
+  allowPermission,
 } from "../../../electron/security.cjs";
 
 // Las reglas del proceso principal que no necesitan Electron: qué fichero se
@@ -87,5 +88,62 @@ describe("createLineLimiter", () => {
     expect(limiter.take()).toBe(true);
     expect(limiter.takeDropped()).toBe(2);
     expect(limiter.takeDropped()).toBe(0);
+  });
+});
+
+// T35: los permisos (salida de audio, nombres de los dispositivos…) solo para
+// la propia app, no para cualquier contenido que acabe dentro de la ventana
+describe("allowPermission", () => {
+  const PERMITIDOS = new Set(["media", "speaker-selection"]);
+  const APP = "app://mini-dj";
+  const pide = (permission, origin, pageUrl = "app://mini-dj/index.html") =>
+    allowPermission({
+      permission,
+      origin,
+      pageUrl,
+      allowed: PERMITIDOS,
+      appOrigin: APP,
+    });
+
+  it("concede los de la lista a la propia app", () => {
+    expect(pide("media", "app://mini-dj")).toBe(true);
+    expect(pide("media", "app://mini-dj/")).toBe(true);
+    expect(pide("speaker-selection", "app://mini-dj/index.html")).toBe(true);
+  });
+
+  it("nunca los que no están en la lista", () => {
+    expect(pide("geolocation", "app://mini-dj")).toBe(false);
+  });
+
+  it("a otro origen, no (aunque se parezca)", () => {
+    expect(pide("media", "https://evil.example")).toBe(false);
+    expect(pide("media", "app://mini-dj.evil")).toBe(false);
+  });
+
+  it("si Electron no dice el origen, vale el de la página (siempre la app)", () => {
+    expect(pide("media", "")).toBe(true);
+    expect(pide("media", undefined)).toBe(true);
+    expect(pide("media", "", "https://evil.example/")).toBe(false);
+  });
+
+  it("en desarrollo, el origen es el del servidor de Vite", () => {
+    expect(
+      allowPermission({
+        permission: "media",
+        origin: "http://localhost:5173",
+        pageUrl: "",
+        allowed: PERMITIDOS,
+        appOrigin: "http://localhost:5173",
+      }),
+    ).toBe(true);
+    expect(
+      allowPermission({
+        permission: "media",
+        origin: "http://localhost:51730",
+        pageUrl: "",
+        allowed: PERMITIDOS,
+        appOrigin: "http://localhost:5173",
+      }),
+    ).toBe(false);
   });
 });

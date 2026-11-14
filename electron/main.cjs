@@ -19,6 +19,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { initAutoUpdate } = require("./updater.cjs");
 const {
+  allowPermission,
   createLineLimiter,
   isExternalHttp,
   isSameOrigin,
@@ -127,11 +128,34 @@ function registerAppProtocol(ses) {
 
 // --- Sesión ----------------------------------------------------------------
 function configureSession(ses) {
-  ses.setPermissionRequestHandler((_wc, permission, callback) => {
-    callback(ALLOWED_PERMISSIONS.has(permission));
+  // Solo los de la lista y solo para la propia app (security.cjs)
+  const appOrigin = useDevServer ? DEV_SERVER_URL : APP_ORIGIN;
+  const pageUrlOf = (wc) => {
+    try {
+      return wc?.getURL?.() || "";
+    } catch {
+      return "";
+    }
+  };
+  ses.setPermissionRequestHandler((wc, permission, callback, details) => {
+    callback(
+      allowPermission({
+        permission,
+        origin: details?.requestingUrl,
+        pageUrl: pageUrlOf(wc),
+        allowed: ALLOWED_PERMISSIONS,
+        appOrigin,
+      }),
+    );
   });
-  ses.setPermissionCheckHandler((_wc, permission) =>
-    ALLOWED_PERMISSIONS.has(permission),
+  ses.setPermissionCheckHandler((wc, permission, requestingOrigin) =>
+    allowPermission({
+      permission,
+      origin: requestingOrigin,
+      pageUrl: pageUrlOf(wc),
+      allowed: ALLOWED_PERMISSIONS,
+      appOrigin,
+    }),
   );
 
   // Descargas (grabación .webm, CSV del tracklist): diálogo nativo de guardado.

@@ -76,9 +76,20 @@ function createLineLimiter({ max, windowMs, now = Date.now }) {
   };
 }
 
+// ¿Se concede un permiso de la sesión? Solo los de la lista (`allowed`) y
+// solo a la propia app. `origin` es quien lo pide según Electron; si no lo
+// dice (algunas comprobaciones llegan sin él), vale la URL de la página, que
+// en esta ventana es siempre la de la app. Sin este respaldo, un origen vacío
+// dejaría el selector de salidas de ⚙ con los nombres en blanco.
+function allowPermission({ permission, origin, pageUrl, allowed, appOrigin }) {
+  if (!allowed.has(permission)) return false;
+  return isSameOrigin(origin || pageUrl || "", appOrigin);
+}
+
 module.exports = {
   resolveDistPath,
   isSameOrigin,
   isExternalHttp,
   createLineLimiter,
+  allowPermission,
 };
