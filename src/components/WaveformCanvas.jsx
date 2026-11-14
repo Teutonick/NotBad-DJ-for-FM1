@@ -3,6 +3,7 @@ import { HOT_CUE_COLORS } from "../lib/constants";
 import { PALETTE_SIZE, reduceColumn, WAVE_PALETTE } from "../lib/waveColors";
 import { createSmoothTime } from "../lib/smoothTime";
 import { fitCanvas } from "../lib/canvas";
+import { computeWaveWindow } from "../lib/waveWindow";
 
 function WaveformCanvas({
   waveData,
@@ -186,38 +187,16 @@ function WaveformCanvas({
       const cur = smoothTimeRef.current(audioEl); // playhead interpolado
       const curFrac = dur > 0 ? cur / dur : 0; // 0..1
 
-      // Ventana visible (en "muestras")
-      const visible = Math.max(1, Math.floor(total / zoom));
-      const windowFrac = visible / total; // fracción del tema que cabe en el canvas
-
-      let leftFrac; // 0..1, inicio de la ventana
-      let rightFrac; // 0..1, fin de la ventana
-      let start; // índice float en waveData donde empieza la ventana
-
-      // La ventana sigue SIEMPRE a la reproducción. Para mirar otro punto del
-      // tema está el resumen de abajo; arrastrar la onda mueve la pista bajo
-      // la línea de reproducción, no la ventana. (Hubo un modo de scroll
-      // manual que ya no activaba nada y se quitó.)
-      if (dur > 0) {
-        // El playhead va a ~1/3 de la ventana
-        const cursorFracInWindow = 1 / 3;
-
-        // Queremos: curFrac ≈ leftFrac + cursorFracInWindow * windowFrac
-        let desiredLeft = curFrac - cursorFracInWindow * windowFrac;
-
-        // Clamps para inicio/fin de la pista
-        if (desiredLeft < 0) desiredLeft = 0;
-        if (desiredLeft > 1 - windowFrac) desiredLeft = 1 - windowFrac;
-
-        leftFrac = desiredLeft;
-        rightFrac = leftFrac + windowFrac;
-        start = leftFrac * total;
-      } else {
-        // Sin duración todavía: la ventana empieza en el principio
-        start = 0;
-        leftFrac = 0;
-        rightFrac = visible / total;
-      }
+      // Ventana visible: sigue SIEMPRE a la reproducción. Para mirar otro
+      // punto del tema está el resumen de abajo; arrastrar la onda mueve la
+      // pista bajo la línea de reproducción, no la ventana.
+      const { visible, leftFrac, rightFrac } = computeWaveWindow({
+        total,
+        zoom,
+        curFrac,
+        hasDuration: dur > 0,
+      });
+      const start = leftFrac * total; // índice (fraccionario) en waveData
 
       if (windowRef) {
         windowRef.current.from = leftFrac;
@@ -444,25 +423,13 @@ function WaveformCanvas({
 
   // Ventana visible actual (mismo cálculo que drawFrame) para convertir px ↔ tiempo
   const getWindow = (audioEl) => {
-    const total = waveData.length;
-    const visible = Math.max(1, Math.floor(total / zoom));
-    const windowFrac = visible / total;
-    let leftFrac;
-    let rightFrac;
-
     const dur = audioEl.duration || 0;
-    if (dur > 0) {
-      const curFrac = (audioEl.currentTime || 0) / dur;
-      let desiredLeft = curFrac - (1 / 3) * windowFrac;
-      if (desiredLeft < 0) desiredLeft = 0;
-      if (desiredLeft > 1 - windowFrac) desiredLeft = 1 - windowFrac;
-      leftFrac = desiredLeft;
-      rightFrac = leftFrac + windowFrac;
-    } else {
-      leftFrac = 0;
-      rightFrac = windowFrac;
-    }
-    return { leftFrac, rightFrac, windowFrac };
+    return computeWaveWindow({
+      total: waveData.length,
+      zoom,
+      curFrac: dur > 0 ? (audioEl.currentTime || 0) / dur : 0,
+      hasDuration: dur > 0,
+    });
   };
 
   const clickSeek = (clientX) => {
