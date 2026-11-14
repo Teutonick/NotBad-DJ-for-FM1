@@ -10,8 +10,6 @@ import { ERRORS, logError } from "../lib/log";
 import { formatClock } from "../lib/format";
 import { downloadBlob } from "../lib/download";
 
-const formatRecTime = (s) => formatClock(s, { hours: false });
-
 function CentralMeters({
   engine,
   master,
@@ -104,10 +102,10 @@ function CentralMeters({
                 className="col-start-1 row-start-1 invisible h-0"
                 aria-hidden
               >
-                ■ 00:00
+                {recSeconds >= 3600 ? "■ 00:00:00" : "■ 00:00"}
               </span>
               <span className="col-start-1 row-start-1 whitespace-nowrap">
-                {recording ? `■ ${formatRecTime(recSeconds)}` : t("rec")}
+                {recording ? `■ ${formatClock(recSeconds)}` : t("rec")}
               </span>
             </button>
           )}

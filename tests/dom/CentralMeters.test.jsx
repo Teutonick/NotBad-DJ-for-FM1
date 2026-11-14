@@ -55,6 +55,17 @@ describe("CentralMeters · REC", () => {
     expect(screen.getByTitle(t("recTitle")).textContent).toContain("■ 00:03");
   });
 
+  // T33: con horas pasada la hora, como el deck («75:00» antes)
+  it("una grabación de más de una hora cuenta con horas", async () => {
+    pintar();
+    fireEvent.click(screen.getByTitle(t("recTitle")));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+    await act(() => vi.advanceTimersByTimeAsync(3600 * 1000));
+    expect(screen.getByTitle(t("recTitle")).textContent).toContain(
+      "■ 01:00:00",
+    );
+  });
+
   it("si el componente se va mientras graba, su reloj se para", async () => {
     const { unmount } = pintar();
     fireEvent.click(screen.getByTitle(t("recTitle")));

@@ -26,14 +26,10 @@ describe("formatClock", () => {
     expect(formatClock(599)).toBe("09:59");
   });
 
-  it("con horas (por defecto) pasa a hh:mm:ss desde la hora", () => {
+  it("pasa a hh:mm:ss desde la hora", () => {
     expect(formatClock(3599)).toBe("59:59");
     expect(formatClock(3600)).toBe("01:00:00");
     expect(formatClock(4500)).toBe("01:15:00");
-  });
-
-  it("sin horas sigue contando minutos (lista y grabación, como antes)", () => {
-    expect(formatClock(4500, { hours: false })).toBe("75:00");
   });
 
   it("sin un número usa el texto de reserva; lo negativo cuenta como cero", () => {

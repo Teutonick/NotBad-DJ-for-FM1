@@ -103,6 +103,15 @@ describe("búsqueda", () => {
   });
 });
 
+// T33: el mismo formato que el deck. Antes la lista decía «75:00» y el deck
+// «01:15:00» para la misma pista.
+describe("duración", () => {
+  it("pasada la hora se escribe con horas, como en el deck", () => {
+    pintar({ tracks: [pista({ name: "sesion.mp3", duration: 4500 })] });
+    expect(screen.getByText("01:15:00")).toBeInTheDocument();
+  });
+});
+
 describe("ordenación", () => {
   const ordenarPor = async (valor) => {
     const user = userEvent.setup();

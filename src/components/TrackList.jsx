@@ -7,8 +7,7 @@ import { formatClock, formatSize } from "../lib/format";
 import { camelotSortIndex, harmonicRelation, keyLabel } from "../lib/camelot";
 
 // La lista cuenta minutos aunque pase de la hora, y «--:--» si no hay dato
-const formatDuration = (s) =>
-  formatClock(s, { fallback: "--:--", hours: false });
+const formatDuration = (s) => formatClock(s, { fallback: "--:--" });
 
 // Nombre a mostrar: título de las etiquetas si lo hay, si no el archivo
 function displayTitle(track) {
@@ -298,7 +297,7 @@ function TrackList({
           >
             <span className="w-12 shrink-0" />
             <span
-              className="w-14 shrink-0 text-right truncate"
+              className="w-16 shrink-0 text-right truncate"
               title={t("csvDuration")}
             >
               {t("csvDuration")}
@@ -354,7 +353,7 @@ function TrackList({
                       );
                     })}
                   </div>
-                  <span className="w-14 text-right text-xs text-neutral-400 tabular-nums shrink-0">
+                  <span className="w-16 text-right text-xs text-neutral-400 tabular-nums shrink-0">
                     {formatDuration(track.duration)}
                   </span>
                   <span className="w-24 shrink-0 text-center">
