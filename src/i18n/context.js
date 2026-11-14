@@ -44,7 +44,9 @@ export function translate(lang, key, params) {
   let str = dict[key] ?? LOCALES[DEFAULT_LOCALE][key] ?? key;
   if (params) {
     for (const [k, v] of Object.entries(params)) {
-      str = str.replaceAll(`{${k}}`, v);
+      // Con función: un "$&" o "$$" en el valor (lo que escribe el usuario en
+      // la búsqueda, una ruta…) se mete tal cual y no como patrón.
+      str = str.replaceAll(`{${k}}`, () => String(v));
     }
   }
   return str;

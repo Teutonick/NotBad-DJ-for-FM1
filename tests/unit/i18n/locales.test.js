@@ -47,4 +47,10 @@ describe('translate', () => {
     expect(translate('xx', 'bpm')).toBe(LOCALES.en.bpm)
     expect(translate('es', 'clave-que-no-existe')).toBe('clave-que-no-existe')
   })
+
+  it('mete el valor del parámetro tal cual, aunque lleve $ (búsqueda «a$&b»)', () => {
+    for (const query of ['a$&b', '$$', "x$'y", '$1']) {
+      expect(translate('en', 'noMatch', { query })).toBe(`No song matches "${query}".`)
+    }
+  })
 })
