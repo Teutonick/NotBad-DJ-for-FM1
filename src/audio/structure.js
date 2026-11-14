@@ -14,10 +14,16 @@
 // pista y el resultado se guarda por pista; durante la reproducción solo se
 // consulta (`structureAt`), que es una búsqueda binaria y cuatro restas.
 
+import { mod } from "./dsp";
+
 // Tamaños de frase que se ofrecen. 16 kicks (4 compases) es lo normal en
 // electrónica; 32 en tramos largos y 4/8 para música más picada.
 export const PHRASE_SIZES = [4, 8, 16, 32];
 export const DEFAULT_PHRASE_SIZE = 16;
+
+// Tamaño de frase usable: el que se pida, redondeado, o el de reserva
+const normPhraseSize = (v, fallback = DEFAULT_PHRASE_SIZE) =>
+  v > 0 ? Math.round(v) : fallback;
 
 // Un tramo más corto que esto no se considera un cambio de estructura, sino
 // un hueco del propio ritmo (un beat sin bombo, un break de caja de un
@@ -198,7 +204,7 @@ function refineEdge(strengths, at, toKick, search) {
  * @param phraseSize tamaño de frase en kicks
  */
 export function fitPhraseOffset(boundaries, phraseSize) {
-  const size = phraseSize > 0 ? Math.round(phraseSize) : DEFAULT_PHRASE_SIZE;
+  const size = normPhraseSize(phraseSize);
   if (!boundaries?.length) return 0;
   const marks = boundaries.map((b) =>
     typeof b === "number" ? { beat: b, weight: 1 } : { beat: b.beat, weight: b.weight ?? 1 }
@@ -219,7 +225,7 @@ export function fitPhraseOffset(boundaries, phraseSize) {
   for (let o = 0; o < size; o++) {
     let score = 0;
     for (const m of marks) {
-      const d = ((m.beat - o) % size + size) % size;
+      const d = mod(m.beat - o, size);
       const dist = Math.min(d, size - d);
       if (dist < tol) score += m.weight * (1 - dist / tol);
     }
@@ -345,7 +351,7 @@ export function detectStructure({
  */
 export function refitPhrase(structure, phraseSize) {
   if (!structure?.sections?.length) return structure;
-  const size = phraseSize > 0 ? Math.round(phraseSize) : DEFAULT_PHRASE_SIZE;
+  const size = normPhraseSize(phraseSize);
   if (structure.phraseSize === size) return structure;
   const boundaries = structure.sections
     .slice(1)
@@ -374,7 +380,7 @@ export function refitPhrase(structure, phraseSize) {
 export function alignStructure(structure, beats) {
   if (!structure?.sections?.length || !beats?.length) return structure;
   const index = (time) => {
-    const i = nearestBeatIndex(beats, time);
+    const i = floorBeatIndex(beats, time);
     if (i < 0) return 0;
     // El beat más cercano, no el anterior: el límite se guardó justo encima
     // de un beat y el redondeo del tiempo no debe correrlo uno hacia atrás.
@@ -425,13 +431,17 @@ export function sanitizeStructure(raw) {
 
 /** Mueve el desplazamiento de frase n kicks, dando la vuelta por el tamaño. */
 export function shiftPhraseOffset(offset, delta, phraseSize) {
-  const size = phraseSize > 0 ? Math.round(phraseSize) : DEFAULT_PHRASE_SIZE;
+  const size = normPhraseSize(phraseSize);
   const base = Number.isFinite(offset) ? Math.round(offset) : 0;
-  return ((base + Math.round(delta)) % size + size) % size;
+  return mod(base + Math.round(delta), size);
 }
 
-/** Índice del último beat que cae en o antes de `time` (búsqueda binaria). */
-export function nearestBeatIndex(beats, time) {
+/**
+ * Índice del último beat que cae en o antes de `time` (búsqueda binaria), o
+ * -1 si `time` va antes del primero. OJO: el de ANTES, no el más cercano
+ * (antes se llamaba nearestBeatIndex y engañaba).
+ */
+export function floorBeatIndex(beats, time) {
   if (!beats?.length) return -1;
   if (time < beats[0]) return -1;
   let lo = 0;
@@ -459,17 +469,14 @@ export function structureAt({ structure, beats, time, phraseSize, phraseOffset }
   if (!beats?.length || !Number.isFinite(time)) return null;
   // Antes del primer beat se cuenta como si ya estuviéramos en él: al cargar
   // una pista el playhead está en 0 y el indicador tiene que decir algo.
-  const beatIndex = Math.max(0, nearestBeatIndex(beats, time));
+  const beatIndex = Math.max(0, floorBeatIndex(beats, time));
 
-  const size =
-    phraseSize > 0
-      ? Math.round(phraseSize)
-      : structure?.phraseSize || DEFAULT_PHRASE_SIZE;
+  const size = normPhraseSize(phraseSize, structure?.phraseSize || DEFAULT_PHRASE_SIZE);
   const offset = Number.isFinite(phraseOffset)
     ? phraseOffset
     : structure?.phraseOffset || 0;
 
-  const phrasePos = ((beatIndex - offset) % size + size) % size + 1;
+  const phrasePos = mod(beatIndex - offset, size) + 1;
 
   // Kicks que quedan hasta el final de la pista. Es lo que se enseña cuando ya
   // no hay más cambios por delante: la mitad de las pistas se pasan el último

@@ -1,3 +1,5 @@
+import { dbToGain } from "./dsp";
+
 export class AudioEngine {
   constructor() {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -257,11 +259,6 @@ export class AudioEngine {
     this.deckB.xfGain.gain.value = Math.cos(tB * Math.PI * 0.5);
   }
 
-  // Conversión dB → ganancia lineal
-  _dbToGain(db) {
-    return Math.pow(10, db / 20);
-  }
-
   // Aplicar EQ por deck: {gain, low, mid, high} en dB
   setDeckEQ(which, { gain = 0, low = 0, mid = 0, high = 0 } = {}) {
     const d = which === "A" ? this.deckA : this.deckB;
@@ -275,7 +272,7 @@ export class AudioEngine {
     const trimDb = boostSum > 9 ? -(boostSum - 9) * 0.4 : 0;
     const effectiveGainDb = gain + trimDb;
 
-    const target = this._dbToGain(effectiveGainDb);
+    const target = dbToGain(effectiveGainDb);
 
     // 👉 Cambio importante: nada de cancelScheduledValues ni linearRamp
     // Ajuste directo, súper barato:

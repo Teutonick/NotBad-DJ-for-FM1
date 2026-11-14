@@ -5,7 +5,7 @@ import {
   detectStructure,
   fitPhraseOffset,
   kickStrengths,
-  nearestBeatIndex,
+  floorBeatIndex,
   refitPhrase,
   sanitizeStructure,
   shiftPhraseOffset,
@@ -322,21 +322,21 @@ describe('kickStrengths', () => {
   })
 })
 
-describe('nearestBeatIndex', () => {
+describe('floorBeatIndex', () => {
   const beats = [0, 0.5, 1, 1.5, 2]
 
   it('da el beat que está sonando, no el más cercano por delante', () => {
-    expect(nearestBeatIndex(beats, 0.5)).toBe(1)
-    expect(nearestBeatIndex(beats, 0.9)).toBe(1)
-    expect(nearestBeatIndex(beats, 1.0)).toBe(2)
+    expect(floorBeatIndex(beats, 0.5)).toBe(1)
+    expect(floorBeatIndex(beats, 0.9)).toBe(1)
+    expect(floorBeatIndex(beats, 1.0)).toBe(2)
   })
 
   it('antes del primer beat y después del último no se sale', () => {
-    expect(nearestBeatIndex(beats, -3)).toBeLessThanOrEqual(0)
-    expect(nearestBeatIndex(beats, 99)).toBe(beats.length - 1)
+    expect(floorBeatIndex(beats, -3)).toBeLessThanOrEqual(0)
+    expect(floorBeatIndex(beats, 99)).toBe(beats.length - 1)
   })
 
   it('sin rejilla devuelve -1', () => {
-    expect(nearestBeatIndex([], 1)).toBe(-1)
+    expect(floorBeatIndex([], 1)).toBe(-1)
   })
 })

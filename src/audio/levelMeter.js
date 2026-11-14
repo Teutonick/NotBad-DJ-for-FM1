@@ -1,6 +1,7 @@
 // Medición de nivel para los VU: escala en dBFS, balística de mesa y
 // detección de saturación. Sin dependencias de React: lo usa el canvas del
 // VUBar, pero vale para cualquier consumidor.
+import { gainToDb } from "./dsp";
 
 // Rango visible del medidor. 0 dBFS es el techo digital: por encima el
 // convertidor recorta, así que ahí es donde va la zona roja.
@@ -71,7 +72,7 @@ export function createLevelMeter(analyser) {
       const a = v < 0 ? -v : v;
       if (a > peak) peak = a;
     }
-    const sampleDb = peak > 0 ? 20 * Math.log10(peak) : METER_MIN_DB;
+    const sampleDb = peak > 0 ? gainToDb(peak) : METER_MIN_DB;
 
     // dt real: si la pestaña se queda dormida no queremos una caída enorme
     const dt = lastMs ? Math.min(0.25, (nowMs - lastMs) / 1000) : 0;

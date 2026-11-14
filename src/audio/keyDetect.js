@@ -10,6 +10,7 @@
 //      evita que el ruido de banda ancha emborrone el perfil.
 //   4. Correlación de Pearson del chroma con los 24 perfiles tonales
 //      rotados. Gana el máximo.
+import { getChannels, mod, onePoleAlpha } from "./dsp";
 
 const TARGET_RATE = 5512.5; // 44100 / 8
 const FRAME = 2048;
@@ -100,9 +101,7 @@ function decimate(channels, sampleRate, factor) {
   const out = new Float32Array(outLen);
 
   const cutoff = 2000;
-  const dt = 1 / sampleRate;
-  const rc = 1 / (2 * Math.PI * cutoff);
-  const alpha = dt / (rc + dt);
+  const alpha = onePoleAlpha(cutoff, sampleRate);
 
   const chCount = channels.length;
   const inv = 1 / chCount;
@@ -200,7 +199,7 @@ export function detectKeyFromChannels(channels, sampleRate) {
       if (freq < F_MIN || freq > F_MAX) continue;
 
       const midi = 69 + 12 * Math.log2(freq / 440);
-      const pc = ((Math.round(midi) % 12) + 12) % 12;
+      const pc = mod(Math.round(midi), 12);
       chroma[pc] += m * binGain[b];
     }
   }
@@ -257,8 +256,5 @@ export function detectKeyFromChannels(channels, sampleRate) {
 /** Igual que detectKeyFromChannels pero desde un AudioBuffer del navegador. */
 export function detectKey(audioBuffer) {
   if (!audioBuffer) return null;
-  const channels = [];
-  const n = Math.min(2, audioBuffer.numberOfChannels);
-  for (let c = 0; c < n; c++) channels.push(audioBuffer.getChannelData(c));
-  return detectKeyFromChannels(channels, audioBuffer.sampleRate);
+  return detectKeyFromChannels(getChannels(audioBuffer), audioBuffer.sampleRate);
 }

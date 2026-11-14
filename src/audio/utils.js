@@ -1,9 +1,8 @@
 import { bandColorIndex } from "../lib/waveColors";
+import { gainToDb, getChannels, onePoleAlpha } from "./dsp";
 
 export function analyzeTrackLoudness(audioBuffer) {
-  const ch0 = audioBuffer.getChannelData(0);
-  const hasStereo = audioBuffer.numberOfChannels > 1;
-  const ch1 = hasStereo ? audioBuffer.getChannelData(1) : null;
+  const [ch0, ch1] = getChannels(audioBuffer);
 
   const len = ch0.length;
 
@@ -50,8 +49,8 @@ export function analyzeTrackLoudness(audioBuffer) {
   const p90Idx = Math.min(usable.length - 1, Math.floor(usable.length * 0.9));
   const loudRms = usable[p90Idx];
 
-  const db = 20 * Math.log10(medianRms + 1e-9);
-  const loudDb = 20 * Math.log10(loudRms + 1e-9);
+  const db = gainToDb(medianRms + 1e-9);
+  const loudDb = gainToDb(loudRms + 1e-9);
 
   return { rms: medianRms, db, loudRms, loudDb };
 }
@@ -62,9 +61,7 @@ export function analyzeTrackLoudness(audioBuffer) {
 // auto-gain). Antes esto eran dos recorridos completos del buffer; al
 // fusionarlos, el coste de los filtros de banda casi se compensa solo.
 export function analyzeWaveform(audioBuffer, { withBands = true } = {}) {
-  const ch0 = audioBuffer.getChannelData(0);
-  const ch1 =
-    audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : null;
+  const [ch0, ch1] = getChannels(audioBuffer);
 
   const len = ch0.length;
   const duration = audioBuffer.duration;
@@ -86,13 +83,8 @@ export function analyzeWaveform(audioBuffer, { withBands = true } = {}) {
   // Dos filtros de un polo en cascada por banda (12 dB/oct): suficiente para
   // separar graves/medios/agudos a ojo y cuesta cuatro multiplicaciones por
   // muestra, que es lo que nos podemos permitir aquí.
-  const alphaFor = (freq) => {
-    const rc = 1 / (2 * Math.PI * freq);
-    const dt = 1 / sampleRate;
-    return dt / (rc + dt);
-  };
-  const aLow = alphaFor(200);
-  const aMid = alphaFor(2500);
+  const aLow = onePoleAlpha(200, sampleRate);
+  const aMid = onePoleAlpha(2500, sampleRate);
   let lo1 = 0;
   let lo2 = 0;
   let mi1 = 0;
@@ -215,7 +207,7 @@ export function computeAutoGainDb({ loudDb, peak }) {
   gainDb = Math.max(AUTO_GAIN_MIN_DB, Math.min(AUTO_GAIN_MAX_DB, gainDb));
 
   if (peak > 0) {
-    const peakDb = 20 * Math.log10(peak);
+    const peakDb = gainToDb(peak);
     gainDb = Math.min(gainDb, AUTO_GAIN_PEAK_CEILING_DB - peakDb);
   }
   return Math.max(AUTO_GAIN_MIN_DB, gainDb);
