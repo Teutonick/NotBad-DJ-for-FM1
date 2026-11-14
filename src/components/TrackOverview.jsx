@@ -52,6 +52,11 @@ function TrackOverview({
     const canvas = canvasRef.current;
     if (!canvas) return;
     let timer = null;
+    // Este efecto solo se vuelve a montar cuando cambian los datos de la
+    // capa fija (ver dependencias): entonces se rehace sí o sí. Resumirlos en
+    // la clave («cuántos tramos») dejaba sin repintar un reajuste de frase
+    // con el mismo número de tramos, o un cambio de bandas o de confianza.
+    cacheKeyRef.current = "";
 
     // === Capa fija: onda + tramos + rejilla ===
     const pintarCache = (w, h) => {
@@ -173,10 +178,8 @@ function TrackOverview({
         cacheKeyRef.current = "";
       }
 
-      // ¿Hay que rehacer la capa fija?
-      const clave = `${w}x${h}|${waveData?.length || 0}|${beats?.length || 0}|${
-        structure?.sections?.length || 0
-      }|${duration}|${palette[0]}`;
+      // ¿Hay que rehacer la capa fija? Aquí ya solo puede cambiar el tamaño
+      const clave = `${w}x${h}`;
       if (clave !== cacheKeyRef.current) {
         cacheKeyRef.current = clave;
         pintarCache(w, h);

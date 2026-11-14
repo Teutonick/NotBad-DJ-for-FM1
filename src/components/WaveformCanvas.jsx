@@ -41,7 +41,7 @@ function WaveformCanvas({
   // píxeles por color deja el dibujado en <=36 rellenos en vez de uno por píxel
   const bandPathsRef = useRef(new Array(PALETTE_SIZE).fill(null));
   // Tira de onda ya pintada (tres anchos de pantalla) que se va bliteando
-  const stripRef = useRef({ canvas: null, key: "", start: 0 });
+  const stripRef = useRef({ canvas: null, key: "", start: 0, data: null });
   if (!smoothTimeRef.current) smoothTimeRef.current = createSmoothTime();
 
   useEffect(() => {
@@ -261,11 +261,23 @@ function WaveformCanvas({
       const colored = bandIndex && bandIndex.length === total;
       const strip = stripRef.current;
       const stripW = w * 3;
-      // Clave de lo que hace que la tira deje de valer: datos, colores,
-      // tamaño y escala. El desplazamiento no entra: para eso está la tira.
-      const stripKey = `${total}|${colored}|${palette[0]}|${palette[35]}|${w}|${h}|${samplesPerPixel}|${dur}|${beats?.length || 0}|${beats?.[0] || 0}`;
+      // Clave de lo que hace que la tira deje de valer: tamaño, escala y
+      // duración. El desplazamiento no entra: para eso está la tira.
+      const stripKey = `${colored}|${w}|${h}|${samplesPerPixel}|${dur}`;
+      // Los datos se comparan por IDENTIDAD, no resumidos en la clave: con
+      // «cuántos beats y dónde cae el primero», un ±0,01 BPM (que pivota
+      // sobre el ancla) no cambiaba ninguno de los dos y la rejilla vieja se
+      // quedaba pintada.
+      const stripData = strip.data;
+      const dataChanged =
+        !stripData ||
+        stripData.waveData !== waveData ||
+        stripData.bandIndex !== bandIndex ||
+        stripData.palette !== palette ||
+        stripData.beats !== beats;
       const stripEnd = strip.start + stripW * samplesPerPixel;
       if (
+        dataChanged ||
         strip.key !== stripKey ||
         start < strip.start ||
         start + visible > stripEnd
@@ -279,6 +291,7 @@ function WaveformCanvas({
         // delante que hacia atrás (un seek, un loop)
         strip.start = start - w * samplesPerPixel;
         strip.key = stripKey;
+        strip.data = { waveData, bandIndex, palette, beats };
         drawWave(
           strip.canvas.getContext("2d"),
           stripW,

@@ -101,4 +101,53 @@ describe('TrackOverview', () => {
     // loop y cues, un puñado por vuelta.
     expect(barras() - antes).toBeLessThan(60)
   })
+
+  it('rehace la capa fija si cambian los tramos, aunque sean los mismos en número', () => {
+    // La capa fija acaba con el relieve (un degradado): contar degradados es
+    // contar cuántas veces se ha repintado
+    let capas = 0
+    const original = HTMLCanvasElement.prototype.getContext
+    HTMLCanvasElement.prototype.getContext = function (type) {
+      const ctx = original.call(this, type)
+      if (ctx && !ctx._contado) {
+        const crear = ctx.createLinearGradient
+        ctx.createLinearGradient = (...a) => {
+          capas += 1
+          return crear(...a)
+        }
+        ctx._contado = true
+      }
+      return ctx
+    }
+    try {
+      const tramos = (corte) => ({
+        confident: true,
+        sections: [
+          { start: 0, end: corte, kick: false },
+          { start: corte, end: 200, kick: true },
+        ],
+      })
+      const props = {
+        waveData: onda(),
+        bandIndex: null,
+        palette: ['#0f0'],
+        beats: [0, 0.5, 1, 1.5],
+        duration: 200,
+        audioRef: { current: { currentTime: 50, duration: 200 } },
+        windowRef: { current: { from: 0.2, to: 0.4 } },
+        onSeek: () => {},
+        title: 'resumen',
+      }
+      const { rerender } = render(<TrackOverview {...props} structure={tramos(32)} />)
+      vi.advanceTimersByTime(300)
+      expect(capas).toBe(1)
+
+      // Mismos dos tramos, con el corte en otro sitio (reajuste de frase)
+      rerender(<TrackOverview {...props} structure={tramos(64)} />)
+      vi.advanceTimersByTime(300)
+      expect(capas).toBe(2)
+    } finally {
+      HTMLCanvasElement.prototype.getContext = original
+    }
+  })
 })
