@@ -11,11 +11,10 @@ import LcdDisplay from "./LcdDisplay";
 import WaveScreen from "./WaveScreen";
 import StructureIndicator from "./StructureIndicator";
 import PadButton, { GLOSS, PRESS } from "./PadButton";
-import {
-  CUE_NAME_MAX,
-  HOT_CUE_COLORS,
-  MAX_SAVED_LOOPS,
-} from "../lib/constants";
+import PositionTools from "./deck/PositionTools";
+import BpmTools from "./deck/BpmTools";
+import LoopTools from "./deck/LoopTools";
+import { MAX_SAVED_LOOPS } from "../lib/constants";
 import {
   emptyHotCues,
   hotCuesToSlots,
@@ -26,8 +25,6 @@ import {
   slotsToHotCues,
 } from "../lib/cuePoints";
 import {
-  AUTO_LOOP_SIZES,
-  ROLL_SIZES,
   autoLoop as computeAutoLoop,
   beatsLabel,
   loopLengthBeats,
@@ -52,13 +49,8 @@ import {
   tapInterval,
   scaleBpm,
   stretchBpm,
-  GRID_NUDGE_FINE,
-  GRID_NUDGE_COARSE,
-  GRID_BPM_FINE,
-  GRID_BPM_COARSE,
 } from "../audio/beatGrid";
 import {
-  PHRASE_SIZES,
   alignStructure,
   detectStructure,
   refitPhrase,
@@ -1644,505 +1636,69 @@ function Deck({
                 `relative` porque el editor de nombre flota sobre el panel. */}
             <div className="relative mt-1 flex min-h-[5.25rem] flex-wrap items-stretch gap-2 rounded-lg border border-neutral-800 bg-neutral-900/40 p-1.5 text-xs">
               {tool === "position" && (
-                <>
-                <Group label={t("hotCuesLabel")} className="relative">
-                <div className="grid grid-cols-4 gap-0.5">
-                  {hotCues.map((cue, i) => (
-                    <PadButton
-                      key={i}
-                      size="cue"
-                      led
-                      active={Boolean(cue)}
-                      color={HOT_CUE_COLORS[i]}
-                      sub={cue?.name || ""}
-                      disabled={!objectUrl}
-                      onClick={(e) =>
-                        e.shiftKey ? clearHotCue(i) : triggerHotCue(i)
-                      }
-                      onDoubleClick={(e) => {
-                        e.preventDefault();
-                        if (cue) {
-                          setNaming({ kind: "cue", index: i, value: cue.name || "" });
-                        }
-                      }}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                        clearHotCue(i);
-                      }}
-                      title={
-                        cue
-                          ? t("hotCueGoTitle", {
-                              n: i + 1,
-                              time: formatClock(cue.t),
-                            })
-                          : t("hotCueSetTitle", { n: i + 1 })
-                      }
-                    >
-                      {i + 1}
-                    </PadButton>
-                  ))}
-                </div>
-                {naming?.kind === "cue" && (
-                  <NameEditor
-                    label={t("hotCueNameLabel", { n: naming.index + 1 })}
-                    value={naming.value}
-                    okTitle={t("nameSaveTitle")}
-                    cancelTitle={t("nameCancelTitle")}
-                    placeholder={t("namePlaceholder")}
-                    onChange={(value) => setNaming((n) => ({ ...n, value }))}
-                    onCommit={() => {
-                      renameHotCue(naming.index, naming.value);
-                      setNaming(null);
-                    }}
-                    onCancel={() => setNaming(null)}
-                  />
-                )}
-                </Group>
-                <Group label={t("jump")}>
-                <PadButton
-                  size="sm"
-                  onClick={() => beatJump(-1)}
-                  disabled={!objectUrl || !bpm}
-                  title={t("jumpBackTitle", { n: jumpBeats })}
-                >
-                  «
-                </PadButton>
-                <select
-                  value={jumpBeats}
-                  onChange={(e) => setJumpBeats(Number(e.target.value))}
-                  disabled={!objectUrl || !bpm}
-                  className="h-7 bg-neutral-800 border border-neutral-700 rounded-lg px-1 disabled:opacity-40"
-                  title={t("jumpSizeTitle")}
-                >
-                  {[1, 2, 4, 8, 16, 32].map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-                <PadButton
-                  size="sm"
-                  onClick={() => beatJump(+1)}
-                  disabled={!objectUrl || !bpm}
-                  title={t("jumpFwdTitle", { n: jumpBeats })}
-                >
-                  »
-                </PadButton>
-                </Group>
-                </>
+                <PositionTools
+                  objectUrl={objectUrl}
+                  bpm={bpm}
+                  hotCues={hotCues}
+                  triggerHotCue={triggerHotCue}
+                  clearHotCue={clearHotCue}
+                  renameHotCue={renameHotCue}
+                  naming={naming}
+                  setNaming={setNaming}
+                  jumpBeats={jumpBeats}
+                  setJumpBeats={setJumpBeats}
+                  beatJump={beatJump}
+                />
               )}
               {tool === "bpm" && (
-                <>
-                <Group label={t("gridLabel")}>
-                <div className="flex flex-col gap-1">
-                  {/* Fila 1: TAP · quantize · octava · reanálisis guiado.
-                      A la derecha, el BPM BASE de la pista: es el que define
-                      la rejilla y NO es el pitch (el pitch va en el fader). */}
-                  <div className="flex items-center gap-0.5">
-                    <PadButton
-                      size="text"
-                      onClick={onTapBeat}
-                      disabled={!objectUrl}
-                      className="active:bg-orange-400 active:text-black"
-                      title={t("tapTitle")}
-                    >
-                      {t("tap")}
-                    </PadButton>
-                    <PadButton
-                      size="sm"
-                      led
-                      active={quantize}
-                      color="#a78bfa"
-                      onClick={() => setQuantize((q) => !q)}
-                      disabled={!objectUrl}
-                      title={t("quantizeTitle")}
-                    >
-                      Q
-                    </PadButton>
-                    <span className="w-px h-5 bg-neutral-800 mx-0.5" />
-                    <PadButton
-                      onClick={() => scaleGrid(0.5)}
-                      disabled={!bpm}
-                      title={t("gridHalveTitle")}
-                    >
-                      ÷2
-                    </PadButton>
-                    <PadButton
-                      onClick={() => scaleGrid(2)}
-                      disabled={!bpm}
-                      title={t("gridDoubleTitle")}
-                    >
-                      ×2
-                    </PadButton>
-                    <PadButton
-                      onClick={regridFromManual}
-                      disabled={!bpm || !!analyzing}
-                      title={t("gridRegridTitle")}
-                      className={
-                        analyzing === "regrid"
-                          ? "bg-orange-400 border-orange-300 text-black animate-pulse"
-                          : ""
-                      }
-                    >
-                      ⟳
-                    </PadButton>
-                    <span
-                      className="ml-auto pl-1 w-10 shrink-0 text-right text-[10px] text-neutral-400 tabular-nums"
-                      title={t("gridBaseBpmTitle")}
-                    >
-                      {bpm ? `${bpm.toFixed(2)}` : "—"}
-                    </span>
-                  </div>
-                  {/* Fila 2: los dos ejes del ajuste manual.
-                      Izquierda: mover la rejilla (fase). Derecha: separar o
-                      juntar los beats (BPM base de la pista). */}
-                  <div className="flex items-end gap-1.5">
-                    <Cluster
-                      label={t("gridPhaseLabel")}
-                      title={t("gridPhaseTitle")}
-                    >
-                      <PadButton
-                        onClick={() => nudgeGrid(-GRID_NUDGE_COARSE)}
-                        disabled={!bpm}
-                        title={t("gridPhaseBackCoarseTitle")}
-                      >
-                        «
-                      </PadButton>
-                      <PadButton
-                        onClick={() => nudgeGrid(-GRID_NUDGE_FINE)}
-                        disabled={!bpm}
-                        title={t("gridPhaseBackFineTitle")}
-                      >
-                        ‹
-                      </PadButton>
-                      <PadButton
-                        onClick={() => nudgeGrid(GRID_NUDGE_FINE)}
-                        disabled={!bpm}
-                        title={t("gridPhaseFwdFineTitle")}
-                      >
-                        ›
-                      </PadButton>
-                      <PadButton
-                        onClick={() => nudgeGrid(GRID_NUDGE_COARSE)}
-                        disabled={!bpm}
-                        title={t("gridPhaseFwdCoarseTitle")}
-                      >
-                        »
-                      </PadButton>
-                    </Cluster>
-                    <Cluster
-                      label={t("gridTempoLabel")}
-                      title={t("gridTempoTitle")}
-                    >
-                      <PadButton
-                        onClick={() => stretchGrid(-GRID_BPM_COARSE)}
-                        disabled={!bpm}
-                        title={t("gridTempoDownCoarseTitle")}
-                        className="tracking-tighter"
-                      >
-                        −−
-                      </PadButton>
-                      <PadButton
-                        onClick={() => stretchGrid(-GRID_BPM_FINE)}
-                        disabled={!bpm}
-                        title={t("gridTempoDownFineTitle")}
-                      >
-                        −
-                      </PadButton>
-                      <PadButton
-                        onClick={() => stretchGrid(GRID_BPM_FINE)}
-                        disabled={!bpm}
-                        title={t("gridTempoUpFineTitle")}
-                      >
-                        +
-                      </PadButton>
-                      <PadButton
-                        onClick={() => stretchGrid(GRID_BPM_COARSE)}
-                        disabled={!bpm}
-                        title={t("gridTempoUpCoarseTitle")}
-                        className="tracking-tighter"
-                      >
-                        ++
-                      </PadButton>
-                    </Cluster>
-                  </div>
-                </div>
-                </Group>
-                <Group label={t("structureLabel")}>
-                <div className="flex flex-col gap-1">
-                  {/* Fila 1: desplazar la frase + tamaño de frase */}
-                  <div className="flex items-center gap-0.5">
-                    <PadButton
-                      onClick={() => shiftPhrase(-Math.max(1, phraseSize / 2))}
-                      disabled={!structure}
-                      title={t("phraseBackCoarseTitle", {
-                        n: Math.max(1, phraseSize / 2),
-                      })}
-                    >
-                      «
-                    </PadButton>
-                    <PadButton
-                      onClick={() => shiftPhrase(-1)}
-                      disabled={!structure}
-                      title={t("phraseBackFineTitle")}
-                    >
-                      ‹
-                    </PadButton>
-                    <PadButton
-                      onClick={() => shiftPhrase(1)}
-                      disabled={!structure}
-                      title={t("phraseFwdFineTitle")}
-                    >
-                      ›
-                    </PadButton>
-                    <PadButton
-                      onClick={() => shiftPhrase(Math.max(1, phraseSize / 2))}
-                      disabled={!structure}
-                      title={t("phraseFwdCoarseTitle", {
-                        n: Math.max(1, phraseSize / 2),
-                      })}
-                    >
-                      »
-                    </PadButton>
-                    <span className="w-px h-5 bg-neutral-800 mx-0.5" />
-                    <select
-                      value={phraseSize}
-                      onChange={(e) => onPhraseSize?.(Number(e.target.value))}
-                      className="h-7 w-11 shrink-0 bg-neutral-800 border border-neutral-700 rounded-lg px-0.5"
-                      title={t("phraseSizeTitle")}
-                    >
-                      {PHRASE_SIZES.map((n) => (
-                        <option key={n} value={n}>
-                          {n}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {/* Fila 2: relanzar la detección, volver a lo detectado y
-                      el desplazamiento actual (ancho fijo) */}
-                  <div className="flex items-center gap-0.5">
-                    <PadButton
-                      onClick={redetectStructure}
-                      disabled={!bandLow || !beats.length}
-                      title={t("structureRedetectTitle")}
-                    >
-                      ⟳
-                    </PadButton>
-                    <PadButton
-                      onClick={resetPhrase}
-                      disabled={!structure?.manual}
-                      title={t("phraseResetTitle")}
-                    >
-                      ↺
-                    </PadButton>
-                    <span
-                      className={`ml-auto pl-1 w-10 shrink-0 text-right text-[10px] tabular-nums ${
-                        structure?.manual ? "text-amber-300" : "text-neutral-400"
-                      }`}
-                      title={t("phraseOffsetTitle")}
-                    >
-                      {structure ? `+${structure.phraseOffset}` : "—"}
-                    </span>
-                  </div>
-                </div>
-                </Group>
-                </>
+                <BpmTools
+                  objectUrl={objectUrl}
+                  bpm={bpm}
+                  analyzing={analyzing}
+                  quantize={quantize}
+                  setQuantize={setQuantize}
+                  onTapBeat={onTapBeat}
+                  scaleGrid={scaleGrid}
+                  regridFromManual={regridFromManual}
+                  nudgeGrid={nudgeGrid}
+                  stretchGrid={stretchGrid}
+                  structure={structure}
+                  phraseSize={phraseSize}
+                  onPhraseSize={onPhraseSize}
+                  shiftPhrase={shiftPhrase}
+                  redetectStructure={redetectStructure}
+                  resetPhrase={resetPhrase}
+                  bandLow={bandLow}
+                  beats={beats}
+                />
               )}
               {tool === "loops" && (
-                <>
-                <Group label={t("loop")}>
-                <div className="flex flex-col gap-1">
-                  {/* Fila 1: marcar el loop a mano y loops automáticos */}
-                  <div className="flex items-center gap-0.5">
-                    <PadButton
-                      size="md"
-                      led
-                      active={loopIn != null}
-                      color="#38bdf8"
-                      onClick={setLoopInNow}
-                      disabled={!objectUrl}
-                      title={t("loopInTitle")}
-                    >
-                      {t("loopIn")}
-                    </PadButton>
-                    <PadButton
-                      size="md"
-                      led
-                      active={loopOut != null}
-                      color="#38bdf8"
-                      onClick={setLoopOutNow}
-                      disabled={!objectUrl || loopIn == null}
-                      title={t("loopOutTitle")}
-                    >
-                      {t("loopOut")}
-                    </PadButton>
-                    <PadButton
-                      size="sm"
-                      led
-                      active={loopOn}
-                      onClick={toggleLoop}
-                      disabled={loopIn == null || loopOut == null}
-                      title={t("loopToggleTitle")}
-                    >
-                      ⟳
-                    </PadButton>
-                    <span className="w-px h-5 bg-neutral-800 mx-0.5" />
-                    {AUTO_LOOP_SIZES.map((n) => (
-                      <PadButton
-                        key={n}
-                        onClick={() => autoLoop(n)}
-                        disabled={!objectUrl || !bpm}
-                        title={t("loopAutoTitle", { n })}
-                      >
-                        {n}
-                      </PadButton>
-                    ))}
-                  </div>
-                  {/* Fila 2: mover el loop y doblar/partir su longitud.
-                      A la derecha, la longitud actual en beats. */}
-                  <div className="flex items-center gap-0.5">
-                    <PadButton
-                      onClick={() => moveLoopBy(-1)}
-                      disabled={!loopOut}
-                      title={t("loopMoveBackTitle")}
-                    >
-                      «
-                    </PadButton>
-                    <PadButton
-                      onClick={() => moveLoopBy(1)}
-                      disabled={!loopOut}
-                      title={t("loopMoveFwdTitle")}
-                    >
-                      »
-                    </PadButton>
-                    <span className="w-px h-5 bg-neutral-800 mx-0.5" />
-                    <PadButton
-                      onClick={() => resizeLoopBy(0.5)}
-                      disabled={!loopOut}
-                      title={t("loopHalveTitle")}
-                    >
-                      ÷2
-                    </PadButton>
-                    <PadButton
-                      onClick={() => resizeLoopBy(2)}
-                      disabled={!loopOut}
-                      title={t("loopDoubleTitle")}
-                    >
-                      ×2
-                    </PadButton>
-                    <span
-                      className="ml-auto pl-1 w-10 shrink-0 text-right text-[10px] text-neutral-400 tabular-nums"
-                      title={t("loopLengthTitle")}
-                    >
-                      {loopLabel}
-                    </span>
-                  </div>
-                </div>
-                </Group>
-                <Group label={t("savedLoopsLabel")} className="relative">
-                <PadButton
-                  onClick={saveCurrentLoop}
-                  disabled={
-                    loopIn == null ||
-                    loopOut == null ||
-                    savedLoops.length >= MAX_SAVED_LOOPS
-                  }
-                  title={t("savedLoopSaveTitle")}
-                >
-                  +
-                </PadButton>
-                <select
-                  value={savedLoops.length ? savedLoopIdx : ""}
-                  onChange={(e) => setSavedLoopIdx(Number(e.target.value))}
-                  disabled={!savedLoops.length}
-                  className="h-7 w-20 shrink-0 bg-neutral-800 border border-neutral-700 rounded-lg px-1 disabled:opacity-40"
-                  title={t("savedLoopSelectTitle")}
-                >
-                  {savedLoops.length === 0 ? (
-                    <option value="">{t("savedLoopsNone")}</option>
-                  ) : (
-                    savedLoops.map((l, i) => (
-                      <option key={l.id} value={i}>
-                        {l.name || `L${i + 1}`}
-                      </option>
-                    ))
-                  )}
-                </select>
-                <PadButton
-                  onClick={() => recallSavedLoop()}
-                  disabled={!savedLoops.length}
-                  title={t("savedLoopRecallTitle")}
-                >
-                  ⟳
-                </PadButton>
-                <PadButton
-                  onClick={() =>
-                    setNaming({
-                      kind: "loop",
-                      index: savedLoopIdx,
-                      value: savedLoops[savedLoopIdx]?.name || "",
-                    })
-                  }
-                  disabled={!savedLoops.length}
-                  title={t("savedLoopRenameTitle")}
-                >
-                  ✎
-                </PadButton>
-                <PadButton
-                  onClick={() => deleteSavedLoop(savedLoopIdx)}
-                  disabled={!savedLoops.length}
-                  title={t("savedLoopDeleteTitle")}
-                >
-                  ✕
-                </PadButton>
-                {naming?.kind === "loop" && (
-                  <NameEditor
-                    label={t("savedLoopNameLabel")}
-                    value={naming.value}
-                    okTitle={t("nameSaveTitle")}
-                    cancelTitle={t("nameCancelTitle")}
-                    placeholder={t("namePlaceholder")}
-                    onChange={(value) => setNaming((n) => ({ ...n, value }))}
-                    onCommit={() => {
-                      renameSavedLoop(naming.index, naming.value);
-                      setNaming(null);
-                    }}
-                    onCancel={() => setNaming(null)}
-                  />
-                )}
-                </Group>
-                <Group label={t("rollLabel")}>
-                {ROLL_SIZES.map((n) => (
-                  <PadButton
-                    key={n}
-                    size="md"
-                    led
-                    active={rolling?.beats === n}
-                    color="#fbbf24"
-                    className="text-[10px]"
-                    onPointerDown={(e) => {
-                      e.preventDefault();
-                      // La captura garantiza recibir el "soltar" aunque el
-                      // puntero se salga del pad. Si el navegador no la da,
-                      // el roll funciona igual.
-                      try {
-                        e.currentTarget.setPointerCapture?.(e.pointerId);
-                      } catch {
-                        // puntero no capturable
-                      }
-                      startRoll(n);
-                    }}
-                    onPointerUp={endRoll}
-                    onPointerCancel={endRoll}
-                    onLostPointerCapture={endRoll}
-                    disabled={!objectUrl || !bpm}
-                    title={t("rollSizeTitle", { n: beatsLabel(n) })}
-                  >
-                    {beatsLabel(n)}
-                  </PadButton>
-                ))}
-                </Group>
-                </>
+                <LoopTools
+                  objectUrl={objectUrl}
+                  bpm={bpm}
+                  loopIn={loopIn}
+                  loopOut={loopOut}
+                  loopOn={loopOn}
+                  loopLabel={loopLabel}
+                  setLoopInNow={setLoopInNow}
+                  setLoopOutNow={setLoopOutNow}
+                  toggleLoop={toggleLoop}
+                  autoLoop={autoLoop}
+                  moveLoopBy={moveLoopBy}
+                  resizeLoopBy={resizeLoopBy}
+                  savedLoops={savedLoops}
+                  savedLoopIdx={savedLoopIdx}
+                  setSavedLoopIdx={setSavedLoopIdx}
+                  saveCurrentLoop={saveCurrentLoop}
+                  recallSavedLoop={recallSavedLoop}
+                  deleteSavedLoop={deleteSavedLoop}
+                  renameSavedLoop={renameSavedLoop}
+                  naming={naming}
+                  setNaming={setNaming}
+                  rolling={rolling}
+                  startRoll={startRoll}
+                  endRoll={endRoll}
+                />
               )}              </div>
           </div>
         <audio
@@ -2157,91 +1713,3 @@ function Deck({
 }
 
 export default memo(Deck);
-
-// Caja de herramientas dentro de una pestaña: etiqueta pequeña + sus botones.
-// Cada pestaña agrupa dos o tres de estas.
-function Group({ label, className = "", children }) {
-  return (
-    <div
-      className={`flex flex-col gap-1 rounded-lg border border-neutral-800 bg-neutral-900/40 px-1.5 py-1 min-w-0 ${className}`}
-    >
-      <Tiny className="text-[9px]">{label}</Tiny>
-      {/* flex-1 + items-center: en una pestaña con cajas de distinto alto, las
-          bajitas centran sus botones en vez de quedarse pegadas arriba */}
-      <div className="flex flex-1 items-center gap-1">{children}</div>
-    </div>
-  );
-}
-
-// Sub-grupo dentro de una caja: una etiqueta diminuta sobre su fila de botones
-function Cluster({ label, title, children }) {
-  return (
-    <div className="flex flex-col gap-0.5 min-w-0" title={title}>
-      <Tiny className="text-[8px]">{label}</Tiny>
-      <div className="flex items-center gap-0.5">{children}</div>
-    </div>
-  );
-}
-
-// Etiqueta de caja. El truco de width:0 + minWidth:100% hace que NO cuente
-// para el ancho intrínseco: así una traducción larga no ensancha la caja ni
-// mueve el resto de la interfaz al cambiar de idioma.
-function Tiny({ className = "", children }) {
-  return (
-    <span
-      className={`uppercase tracking-wide text-neutral-500 truncate ${className}`}
-      style={{ width: 0, minWidth: "100%" }}
-    >
-      {children}
-    </span>
-  );
-}
-
-// Editor de etiqueta de un cue o de un loop guardado. Va FLOTANDO sobre su
-// caja (absolute), así abrirlo no empuja el resto de la interfaz.
-// Enter confirma, Esc cancela.
-function NameEditor({
-  label,
-  value,
-  placeholder,
-  okTitle,
-  cancelTitle,
-  onChange,
-  onCommit,
-  onCancel,
-}) {
-  return (
-    <div className="absolute left-0 top-full z-20 mt-1 flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900 p-1 shadow-xl">
-      <span className="text-[9px] whitespace-nowrap text-neutral-400">
-        {label}
-      </span>
-      <input
-        autoFocus
-        value={value}
-        maxLength={CUE_NAME_MAX}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          e.stopPropagation();
-          if (e.key === "Enter") onCommit();
-          else if (e.key === "Escape") onCancel();
-        }}
-        className="w-24 rounded border border-neutral-700 bg-neutral-800 px-1 py-0.5 text-[11px]"
-      />
-      <button
-        onClick={onCommit}
-        title={okTitle}
-        className="w-6 h-6 shrink-0 grid place-items-center rounded border border-emerald-500/60 bg-emerald-500/20 text-[11px] text-emerald-300"
-      >
-        ✓
-      </button>
-      <button
-        onClick={onCancel}
-        title={cancelTitle}
-        className="w-6 h-6 shrink-0 grid place-items-center rounded border border-neutral-700 bg-neutral-800 text-[11px] text-neutral-300"
-      >
-        ✕
-      </button>
-    </div>
-  );
-}
