@@ -1,0 +1,4 @@
+# Commits de solo formato: git blame los salta
+# (git config blame.ignoreRevsFile .git-blame-ignore-revs; GitHub lo usa solo)
+# style: format the whole repo with Prettier
+057e9a5111af147405383ab905eeb918c7efe0a3
