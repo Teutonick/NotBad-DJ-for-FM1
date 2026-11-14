@@ -1,8 +1,5 @@
-import { readFileSync } from 'node:fs'
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
-
-const { version } = JSON.parse(readFileSync('./package.json', 'utf8'))
+import { defineConfig, mergeConfig } from 'vitest/config'
+import viteConfig from './vite.config.js'
 
 // Dos proyectos con entornos distintos:
 //   unit → Node pelado, para la lógica pura (audio, lib, i18n). Arranca en
@@ -10,9 +7,10 @@ const { version } = JSON.parse(readFileSync('./package.json', 'utf8'))
 //   dom  → jsdom + Testing Library, solo para los componentes de React.
 // Las pruebas de navegador (tests/e2e) viven en vitest.e2e.config.js aparte:
 // dependen de tener Chrome en la máquina y no deben tumbar el CI.
-export default defineConfig({
-  plugins: [react()],
-  define: { __APP_VERSION__: JSON.stringify(version) },
+//
+// Plugins y `define` (__APP_VERSION__) salen de vite.config.js: los tests ven
+// el mismo código que la app, sin repetirlos aquí.
+export default mergeConfig(viteConfig, defineConfig({
   test: {
     projects: [
       {
@@ -42,4 +40,4 @@ export default defineConfig({
       exclude: ['src/main.jsx', 'src/i18n/locales/**', 'src/**/*.worker.js'],
     },
   },
-})
+}))

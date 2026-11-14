@@ -1,7 +1,8 @@
 name: Release
 
-# Se dispara al empujar un tag de versión (v1.2.3). Compila en los tres
-# sistemas y sube los binarios a un release en borrador de GitHub.
+# Se dispara al empujar un tag de versión (v1.2.3). Comprueba una vez (job
+# check) y luego compila en los tres sistemas y sube los binarios a un
+# release en borrador de GitHub.
 on:
   push:
     tags:
@@ -12,8 +13,44 @@ permissions:
   contents: write
 
 jobs:
+  # Una sola vez, en Linux, antes de compilar en ningún sistema: lint, tests y
+  # que el tag diga la misma versión que package.json. Si algo falla, no se
+  # compila ni se publica nada (antes se repetía en los tres sistemas).
+  check:
+    name: Lint + tests + versión
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # El instalador sale con la versión de package.json: un tag v1.7.0 sobre
+      # un package.json que dice 1.6.0 publicaría un 1.6.0 que el updater no
+      # ofrecería a nadie. Solo al empujar un tag (no al lanzarlo a mano).
+      - name: Tag y package.json dicen la misma versión
+        if: github.ref_type == 'tag'
+        run: |
+          expected="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$expected" ]; then
+            echo "::error::El tag es $GITHUB_REF_NAME pero package.json dice $expected"
+            exit 1
+          fi
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
   build:
     name: ${{ matrix.name }}
+    needs: check
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -39,13 +76,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      # Si los tests fallan, no se publica nada
-      - name: Tests
-        run: npm test
 
       - name: Build web bundle
         run: npm run build
