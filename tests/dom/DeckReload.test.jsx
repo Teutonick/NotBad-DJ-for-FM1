@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, fireEvent, waitFor } from '@testing-library/react'
 import { readTrackMetadata } from '../../src/audio/metadata'
+import { computeOnsetEnvelope, detectTempoAsync } from '../../src/audio/beatGrid'
+import { t } from '../helpers/render.jsx'
 import { audio, deckEl, esperar, instalarAudioFalso, montarDeck, pista, ponerEn, posicion } from '../helpers/deck.jsx'
 
 // Caracterización de la CARGA de una pista encima de otra, tal y como va hoy,
@@ -95,6 +97,8 @@ describe('cargar otra pista encima', () => {
     await r.cargar('otra.mp3')
     expect(audio.desde).toBeNull()
     expect(posicion()).toBe(0)
+    // y el deck lo sabe: el botón vuelve a ser Play
+    await waitFor(() => expect(r.getByRole('button', { name: t('play') })).toBeInTheDocument())
   })
 
   it('un roll que se estaba manteniendo no mueve la pista nueva al soltarlo', async () => {
@@ -145,5 +149,45 @@ describe('cargar desde el botón del propio deck', () => {
     fireEvent.change(input, { target: { files: [pista('local.mp3')] } })
     expect(onLocalLoad).toHaveBeenCalledWith('A')
     await waitFor(() => expect(titulo(r.container)).toBe('local'))
+  })
+})
+
+// El ⟳ de la pestaña BPM: reanaliza ALREDEDOR del ajuste manual sobre la
+// envolvente que dejó la carga, sin volver a decodificar
+describe('reanálisis guiado de la rejilla', () => {
+  const preparar = async () => {
+    computeOnsetEnvelope.mockResolvedValueOnce(new Float32Array(8))
+    const r = await montar({ track: { bpm: 120, gridAnchor: 0.5, gridManual: true } })
+    fireEvent.click(r.getByRole('tab', { name: t('toolsBpm') }))
+    const boton = () => r.container.querySelector(`button[title="${t('gridRegridTitle')}"]`)
+    // Habilitado cuando acaba el análisis de la carga (y ya hay envolvente)
+    await waitFor(() => expect(boton()).not.toBeDisabled())
+    return { ...r, boton }
+  }
+
+  it('aplica lo que encuentra, redondeado a centésimas y como ajuste manual', async () => {
+    const r = await preparar()
+    detectTempoAsync.mockResolvedValueOnce({ bpm: 121.234, anchor: 0.52 })
+    fireEvent.click(r.boton())
+    await waitFor(() =>
+      expect(r.onBpmDetected).toHaveBeenLastCalledWith('A', 121.23, { anchor: 0.52, manual: true })
+    )
+    expect(detectTempoAsync).toHaveBeenLastCalledWith(expect.anything(), {
+      seedBpm: 120,
+      seedAnchor: 0.5,
+      bpmTolerance: 6,
+    })
+  })
+
+  it('si mientras tanto se carga otra pista, su resultado se tira', async () => {
+    const r = await preparar()
+    let soltar
+    detectTempoAsync.mockImplementationOnce(() => new Promise((res) => (soltar = res)))
+    fireEvent.click(r.boton())
+    await waitFor(() => expect(soltar).toBeDefined())
+    await r.cargar('otra.mp3')
+    await act(async () => soltar({ bpm: 125, anchor: 0.1 }))
+    await esperar(20)
+    expect(r.onBpmDetected).not.toHaveBeenCalledWith('A', 125, expect.anything())
   })
 })

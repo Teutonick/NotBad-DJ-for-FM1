@@ -27,14 +27,7 @@ import {
 import { beatsLabel, nearestBeat } from "../audio/loops";
 import { useI18n } from "../i18n/context";
 import {
-  analyzeTrackLoudness,
-  analyzeWaveform,
-  computeAutoGainDb,
-} from "../audio/utils";
-import {
   buildBeatGrid,
-  computeOnsetEnvelope,
-  detectTempoAsync,
   nudgeAnchor,
   tapInterval,
   scaleBpm,
@@ -42,15 +35,14 @@ import {
 } from "../audio/beatGrid";
 import { sanitizeStructure } from "../audio/structure";
 import { endWarnSeconds, resolveStructurePrefs } from "../lib/structurePrefs";
-import { detectKey } from "../audio/keyDetect";
 import { keyLabel } from "../lib/camelot";
-import { readTrackMetadata } from "../audio/metadata";
-import { ERRORS, logError, logWarn } from "../lib/log";
+import { ERRORS, logError } from "../lib/log";
 import { formatClock, stripExtension } from "../lib/format";
 import { useTrackStructure } from "../hooks/useTrackStructure";
 import { useBend } from "../hooks/useBend";
 import { usePlaybackRate } from "../hooks/usePlaybackRate";
 import { useLoopEngine } from "../hooks/useLoopEngine";
+import { useTrackLoader } from "../hooks/useTrackLoader";
 
 // Redondeo de la fila de transporte (play, stop, sync, key): uno solo para
 // los cuatro, que antes no coincidían entre ellos.
@@ -73,18 +65,6 @@ const TOOL_TABS = [
 // Ajustes de estructura por defecto, para cuando el deck se monta suelto
 // (tests) y no le llegan los del diálogo ⚙. Identidad estable a propósito.
 const DEFAULT_STRUCTURE_PREFS = resolveStructurePrefs({});
-
-// Ejecuta algo cuando el navegador esté ocioso (con tope), devolviendo un
-// cancelador. Se usa para el análisis de tonalidad, que es síncrono y no debe
-// competir con el pintado inicial de la onda.
-function deferIdle(fn) {
-  if (typeof window.requestIdleCallback === "function") {
-    const id = window.requestIdleCallback(fn, { timeout: 4000 });
-    return () => window.cancelIdleCallback(id);
-  }
-  const id = setTimeout(fn, 250);
-  return () => clearTimeout(id);
-}
 
 function Deck({
   colorClass,
@@ -124,12 +104,31 @@ function Deck({
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // === Forma de onda / análisis ===
-  const [waveData, setWaveData] = useState(null);
-  const [bandIndex, setBandIndex] = useState(null);
-  // Energía de graves por muestra: sale de la MISMA pasada que la onda y es
-  // de donde salen los kicks del análisis de estructura.
-  const [bandLow, setBandLow] = useState(null);
+  // === Pista cargada y su análisis ===
+  // Lo que es del deck (rejilla, cues, loops, estructura) lo deja el hook en
+  // manos de `loaderEvents`, que se rellena más abajo en cada render.
+  const loaderEvents = useRef({});
+  const {
+    fileName,
+    objectUrl,
+    waveData,
+    bandIndex,
+    bandLow,
+    bufferDuration,
+    tags,
+    musicalKey,
+    analyzing,
+    onFile,
+    regrid,
+  } = useTrackLoader({
+    engine,
+    audioRef,
+    side,
+    keyLock,
+    lockLoadWhilePlaying,
+    externalTrack,
+    events: loaderEvents,
+  });
   // === Estructura (tramos con ritmo / sin ritmo + frase) ===
   // Se calcula una sola vez, al cargar, y se guarda con la pista. Lo que
   // ajuste el usuario a mano (`manual`) no lo pisa el análisis.
@@ -143,26 +142,6 @@ function Deck({
   // La rejilla la ha tocado el usuario: el análisis automático ya no la pisa
   // y el ajuste se guarda en IndexedDB.
   const [gridManual, setGridManual] = useState(false);
-  // Duración según el buffer decodificado: está disponible antes que la del
-  // <audio>, y así la rejilla se puede dibujar en cuanto acaba el análisis.
-  const [bufferDuration, setBufferDuration] = useState(0);
-  // Envolvente de onsets de la pista (~200 KB). Se guarda para poder
-  // reanalizar sobre el ajuste manual sin volver a decodificar el audio.
-  const envelopeRef = useRef(null);
-  // La pista llegó con una rejilla ajustada a mano: no la sobreescribimos
-  const cachedGridRef = useRef(false);
-
-  // Etiquetas ID3 y tonalidad de la pista cargada
-  const [tags, setTags] = useState(null); // {artist, title, album}
-  const [musicalKey, setMusicalKey] = useState(null); // {pitchClass, mode, confidence}
-  const keyIdleRef = useRef(null);
-  // Datos que ya venían analizados desde la lista: evitan repetir el trabajo
-  const cachedKeyRef = useRef(null);
-  // Token de carga: descarta los resultados asíncronos de una pista anterior
-  // si mientras tanto se ha cargado otra en este deck
-  const loadIdRef = useRef(0);
-  const onTrackMetaRef = useRef(onTrackMeta);
-  onTrackMetaRef.current = onTrackMeta;
   const onPlayingChangeRef = useRef(onPlayingChange);
   onPlayingChangeRef.current = onPlayingChange;
 
@@ -171,8 +150,6 @@ function Deck({
 
   const [zoom, setZoom] = useState(64);
 
-  const [fileName, setFileName] = useState("");
-  const [objectUrl, setObjectUrl] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [current, setCurrent] = useState(0);
@@ -190,9 +167,6 @@ function Deck({
   const [savedLoopIdx, setSavedLoopIdx] = useState(0);
   // Editor de nombre abierto: { kind: "cue" | "loop", index, value }
   const [naming, setNaming] = useState(null);
-
-  // Fase de análisis para feedback en UI: null | "wave" | "bpm" | "regrid"
-  const [analyzing, setAnalyzing] = useState(null);
 
   const { bendPct, startBend, releaseBend, nudge: onNudge } = useBend(bendRange);
 
@@ -272,57 +246,6 @@ function Deck({
   };
 
 
-  // === Waveform + bandas + loudness (una sola pasada por el buffer) ===
-  // `name` solo se usa para el registro: el estado fileName todavía tiene
-  // el de la pista anterior cuando esto corre
-  async function extractWaveform(arrayBuffer, loadId, name) {
-    const audioBuffer = await engine.ctx.decodeAudioData(arrayBuffer);
-
-    const duration = audioBuffer.duration;
-    setBufferDuration(duration);
-    const { waveData: norm, bandIndex: bands, bandLow: low, peak } =
-      analyzeWaveform(audioBuffer);
-
-    setWaveData(norm);
-    setBandIndex(bands);
-    setBandLow(low);
-    if (typeof onAnalysis === "function") {
-      onAnalysis(side, { waveData: norm, duration });
-    }
-
-    // Auto-cue provisional: inicio del sonido (primer bloque no silencioso)
-    const onsetIdx = norm.findIndex((v) => v > 0.05);
-    if (onsetIdx > -1) {
-      const onsetTime = (onsetIdx / norm.length) * duration;
-      applyAutoCue(onsetTime);
-    }
-
-    // Loudness de TODA la pista, calculado una sola vez al cargarla: nunca se
-    // vuelve a mover durante la reproducción
-    const { loudDb } = analyzeTrackLoudness(audioBuffer);
-    const gainDb = computeAutoGainDb({ loudDb, peak });
-
-    if (typeof onAutoGainComputed === "function") {
-      onAutoGainComputed(side, gainDb);
-    }
-    setAnalyzing("bpm");
-    detectBeats({ audioBuffer, loadId });
-
-    // Tonalidad: aprovecha el MISMO AudioBuffer, sin otro fetch ni otro
-    // decode. Bloquea el hilo principal unos cientos de ms, así que se deja
-    // para un hueco libre y solo si la pista no la traía ya analizada.
-    if (!cachedKeyRef.current) {
-      keyIdleRef.current = deferIdle(() => {
-        try {
-          const detected = detectKey(audioBuffer);
-          if (detected && loadIdRef.current === loadId) setMusicalKey(detected);
-        } catch (err) {
-          logWarn(ERRORS.ANALYSIS_KEY, err, { deck: side, track: name });
-        }
-      });
-    }
-  }
-
   // Auto-cue: solo si el usuario no ha fijado un cue manual.
   // Si el deck está parado, colocamos también la pista en el cue.
   const applyAutoCue = (time) => {
@@ -334,38 +257,6 @@ function Deck({
       setCurrent(time);
     }
   };
-
-  // === Detección de BPM y rejilla ===
-  // Trabaja sobre el AudioBuffer YA decodificado: nada de volver a leer el
-  // blob que está reproduciendo el <audio> (eso congelaba la reproducción si
-  // se pulsaba Play durante el análisis).
-  async function detectBeats({ audioBuffer, loadId }) {
-    try {
-      // La envolvente se calcula siempre, aunque la rejilla venga ajustada a
-      // mano: es lo que necesita después el reanálisis guiado.
-      const envelope = await computeOnsetEnvelope(audioBuffer);
-      if (loadIdRef.current !== loadId) return;
-      envelopeRef.current = envelope;
-
-      if (cachedGridRef.current) return; // rejilla manual guardada: no se toca
-
-      const info = envelope ? await detectTempoAsync(envelope) : null;
-      if (loadIdRef.current !== loadId) return;
-
-      if (!info?.bpm) {
-        applyGrid(null, 0, false);
-        return;
-      }
-      applyGrid(round2(info.bpm), info.anchor, false);
-      // Auto-cue definitivo: primer beat detectado
-      applyAutoCue(info.anchor);
-    } catch (err) {
-      logError(ERRORS.ANALYSIS_BEATS, err, { deck: side });
-      if (loadIdRef.current === loadId) applyGrid(null, 0, false);
-    } finally {
-      if (loadIdRef.current === loadId) setAnalyzing(null);
-    }
-  }
 
   // === TAP de rejilla (estilo Traktor) ===
   // Pulsando al ritmo mientras suena: cada tap reancla la rejilla de beats a
@@ -418,24 +309,8 @@ function Deck({
   // ha dejado el usuario, no desde cero. Reutiliza la envolvente de onsets,
   // así que no hay ni fetch ni decode.
   const regridFromManual = async () => {
-    const envelope = envelopeRef.current;
-    if (!envelope || !bpm || analyzing) return;
-    const loadId = loadIdRef.current;
-    setAnalyzing("regrid");
-    try {
-      const info = await detectTempoAsync(envelope, {
-        seedBpm: bpm,
-        seedAnchor: gridAnchor,
-        bpmTolerance: 6,
-      });
-      // Si mientras tanto se ha cargado otra pista, el resultado no vale
-      if (loadIdRef.current !== loadId) return;
-      if (info?.bpm) applyGrid(round2(info.bpm), info.anchor, true);
-    } catch (err) {
-      logError(ERRORS.ANALYSIS_REGRID, err, { deck: side, bpm });
-    } finally {
-      if (loadIdRef.current === loadId) setAnalyzing(null);
-    }
+    const info = await regrid(bpm, gridAnchor);
+    if (info) applyGrid(round2(info.bpm), info.anchor, true);
   };
 
   // conectar el mediaElement al engine + listeners básicos del <audio>
@@ -471,152 +346,49 @@ function Deck({
     el.preservesPitch = !!keyLock;
   }, [keyLock]);
 
-  // limpiar URL de archivo
-  useEffect(
-    () => () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    },
-    [objectUrl]
-  );
-
-  useEffect(() => () => keyIdleRef.current?.(), []);
-
-  // La tonalidad de la pista cargada sube al padre (venga del análisis o de
-  // la caché de la lista): la usa la lista para marcar compatibilidades
-  useEffect(() => {
-    onTrackMetaRef.current?.(side, { musicalKey });
-  }, [musicalKey, side]);
-
   // Bloqueo de carga: con la opción puesta, un deck que está sonando no
-  // admite otra pista. Se comprueba aquí, el único punto por el que pasan
-  // TODAS las vías de carga (botón del deck y lista de canciones).
-  const lockLoadRef = useRef(lockLoadWhilePlaying);
-  lockLoadRef.current = lockLoadWhilePlaying;
+  // admite otra pista (lo hace cumplir useTrackLoader; aquí solo se pinta)
   const loadBlocked = Boolean(lockLoadWhilePlaying && isPlaying);
 
-  const loadTrack = (f, cached) => {
-    if (!f) return;
-    const playingNow = audioRef.current && !audioRef.current.paused;
-    if (lockLoadRef.current && playingNow) return;
-    keyIdleRef.current?.();
-    keyIdleRef.current = null;
-    cachedKeyRef.current = cached?.musicalKey || null;
-    const loadId = ++loadIdRef.current;
-
-    // Rejilla guardada por el usuario: se restaura tal cual y el análisis
-    // automático no la vuelve a pisar.
-    const hasManualGrid = Boolean(
-      cached?.gridManual && cached?.bpm > 0 && Number.isFinite(cached?.gridAnchor)
-    );
-    cachedGridRef.current = hasManualGrid;
-    envelopeRef.current = null;
-    setBufferDuration(0);
-
-    setFileName(f.name);
-    setWaveData(null);
-    setBandIndex(null);
-    setBandLow(null);
-    // Estructura guardada de ESTA pista: se restaura tal cual y el análisis
-    // no la vuelve a calcular (ni pisa el ajuste manual de frase).
-    restoreStructure(sanitizeStructure(cached?.structure));
-    setMusicalKey(cached?.musicalKey || null);
-    setTags(
-      cached?.artist || cached?.title
-        ? { artist: cached.artist, title: cached.title, album: cached.album }
-        : null
-    );
-    applyGrid(hasManualGrid ? cached.bpm : null, hasManualGrid ? cached.gridAnchor : 0, hasManualGrid);
-    setCuePoint(0);
-    // Hot cues y loops guardados de ESTA pista. Son del usuario: se restauran
-    // tal cual y el análisis no los toca nunca.
-    setHotCues(hotCuesToSlots(cached?.hotCues));
-    setSavedLoops(sanitizeSavedLoops(cached?.savedLoops));
-    setSavedLoopIdx(0);
-    // El último loop marcado vuelve donde estaba, pero APAGADO
-    resetLoop(sanitizeLoopRegion(cached?.activeLoop));
-    setNaming(null);
-    cueManualRef.current = false;
-    setAnalyzing("wave");
-    if (typeof onAnalysis === "function") {
-      onAnalysis(side, { waveData: null, duration: 0 });
-    }
-
-    // Etiquetas ID3: no dependen del decode, así que se leen en paralelo y
-    // aparecen en cuanto están (normalmente antes que la onda)
-    if (!cached?.title && !cached?.artist) {
-      readTrackMetadata(f).then((meta) => {
-        if (loadIdRef.current !== loadId) return; // ya hay otra pista cargada
-        if (meta.artist || meta.title) {
-          setTags({ artist: meta.artist, title: meta.title, album: meta.album });
-        }
-        onTrackMetaRef.current?.(side, meta);
-      });
-    }
-
-    (async () => {
-      // Copia propia de los bytes: si el mismo archivo se carga en los dos
-      // decks, dos <audio> leyendo el MISMO File en streaming se atascan
-      // (la reproducción se congela); con una copia por deck no
-      const arrayBuffer = await f.arrayBuffer();
-      const blobCopy = new Blob([arrayBuffer], {
-        type: f.type || "audio/mpeg",
-      });
-      const url = URL.createObjectURL(blobCopy);
-      setObjectUrl(url);
-
-      const el = audioRef.current;
-      if (el) {
-        el.src = url;
-        el.load();
-        el.preservesPitch = !!keyLock;
-      }
+  // Lo que el cargador deja en manos del deck
+  loaderEvents.current = {
+    onAnalysis,
+    onAutoGainComputed,
+    onTrackMeta,
+    onLocalLoad,
+    // Al cargar: rejilla, cues y loops de ESTA pista (o nada). Son del
+    // usuario: se restauran tal cual y el análisis no los pisa.
+    onReset: (cached, { manualGrid }) => {
+      restoreStructure(sanitizeStructure(cached?.structure));
+      applyGrid(
+        manualGrid ? cached.bpm : null,
+        manualGrid ? cached.gridAnchor : 0,
+        manualGrid
+      );
+      setCuePoint(0);
+      setHotCues(hotCuesToSlots(cached?.hotCues));
+      setSavedLoops(sanitizeSavedLoops(cached?.savedLoops));
+      setSavedLoopIdx(0);
+      // El último loop marcado vuelve donde estaba, pero APAGADO
+      resetLoop(sanitizeLoopRegion(cached?.activeLoop));
+      setNaming(null);
+      cueManualRef.current = false;
+    },
+    onSourceReady: () => {
       setIsPlaying(false);
       setCurrent(0);
       setDuration(0);
-
-      // decodeAudioData "consume" (detach) el arrayBuffer, por eso la copia
-      // del blob se hace antes
-      await extractWaveform(arrayBuffer, loadId, f.name);
-    })().catch((err) => {
-      logError(ERRORS.TRACK_LOAD, err, { deck: side, file: f.name });
-      setAnalyzing(null);
-    });
-  };
-
-  const loadTrackRef = useRef(loadTrack);
-  loadTrackRef.current = loadTrack;
-
-  // Carga desde la lista de canciones (crate)
-  const externalTrackRef = useRef(externalTrack);
-  externalTrackRef.current = externalTrack;
-  useEffect(() => {
-    const tr = externalTrackRef.current;
-    if (!tr?.file) return;
-    // Lo que la lista ya tenga analizado se reutiliza tal cual
-    loadTrackRef.current(tr.file, {
-      musicalKey: tr.musicalKey,
-      artist: tr.artist,
-      title: tr.title,
-      album: tr.album,
-      bpm: tr.bpm,
-      gridAnchor: tr.gridAnchor,
-      gridManual: tr.gridManual,
-      hotCues: tr.hotCues,
-      savedLoops: tr.savedLoops,
-      activeLoop: tr.activeLoop,
-      structure: tr.structure,
-    });
-  }, [externalTrack?.loadToken, externalTrack?.file]);
-
-  const onFile = (e) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    // Este archivo no viene de la lista: se avisa al padre para que suelte el
-    // vínculo con la pista que hubiera cargada y no le escriba encima cues,
-    // loops ni rejilla de otra canción.
-    onLocalLoad?.(side);
-    loadTrack(f);
-    e.target.value = ""; // permite volver a elegir el mismo archivo
+    },
+    onAutoCue: applyAutoCue,
+    // Sin BPM no hay rejilla; con él, el auto-cue pasa al primer beat
+    onBeatsDetected: (info) => {
+      if (!info) {
+        applyGrid(null, 0, false);
+        return;
+      }
+      applyGrid(round2(info.bpm), info.anchor, false);
+      applyAutoCue(info.anchor);
+    },
   };
 
   const play = async () => {
