@@ -16,8 +16,10 @@ asar: true
 # No hay dependencias nativas: no hace falta recompilar nada
 npmRebuild: false
 
-# Publicación en GitHub Releases (lo usa el workflow de Actions).
-# electron-updater no está activado: ver README ("Auto-update").
+# Publicación en GitHub Releases (lo usa el workflow de Actions). De aquí
+# lee también electron-updater (activo en Windows y AppImage) dónde buscar
+# versiones nuevas. Se sube como BORRADOR a propósito, y un borrador no lo
+# ve el updater: hay que publicarlo. Ver README ("Auto-update").
 publish:
   - provider: github
     owner: Wincha
