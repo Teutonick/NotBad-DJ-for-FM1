@@ -30,6 +30,7 @@ import {
   ROLL_SIZES,
   autoLoop as computeAutoLoop,
   beatsLabel,
+  loopLengthBeats,
   moveLoop,
   nearestBeat,
   resizeLoop,
@@ -48,6 +49,7 @@ import {
   computeOnsetEnvelope,
   detectTempoAsync,
   nudgeAnchor,
+  tapInterval,
   scaleBpm,
   stretchBpm,
   GRID_NUDGE_FINE,
@@ -494,20 +496,7 @@ function Deck({
     const taps = st.taps;
     const anchor = taps[taps.length - 1];
 
-    let interval = bpm ? 60 / bpm : null;
-    if (taps.length >= 2) {
-      const ivs = [];
-      for (let i = 1; i < taps.length; i++) {
-        const d = taps[i] - taps[i - 1];
-        if (d > 0.2 && d < 2.5) ivs.push(d); // 24–300 BPM plausibles
-      }
-      if (ivs.length) {
-        ivs.sort((a, b) => a - b);
-        const mid = Math.floor(ivs.length / 2);
-        interval =
-          ivs.length % 2 ? ivs[mid] : (ivs[mid - 1] + ivs[mid]) / 2;
-      }
-    }
+    const interval = tapInterval(taps, bpm);
     if (!interval) return; // sin BPM previo y con un solo tap no hay rejilla
     applyGrid(round2(60 / interval), anchor, true);
   };
@@ -906,14 +895,9 @@ function Deck({
     // si el snap lo dejaría pegado o antes del IN, usar el punto crudo
     const time = snapped > loopIn + 0.05 ? snapped : raw;
     if (time <= loopIn + 0.05) return;
-    // Longitud en beats solo si cuadra con la rejilla: es lo que permite
-    // después doblar y partir sin salirse de ella.
-    const beat = bpm > 0 ? 60 / bpm : null;
-    const enBeats = beat ? (time - loopIn) / beat : null;
-    const cuadra =
-      enBeats != null && Math.abs(enBeats - Math.round(enBeats * 32) / 32) < 1e-6;
     setLoopOut(time);
-    setLoopBeats(cuadra ? Math.round(enBeats * 32) / 32 : null);
+    // Longitud en beats solo si cuadra con la rejilla (ver loopLengthBeats)
+    setLoopBeats(loopLengthBeats(loopIn, time, bpm));
     setLoopOn(true);
   };
 

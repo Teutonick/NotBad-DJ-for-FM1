@@ -5,6 +5,7 @@ import {
   autoLoop,
   beatSeconds,
   beatsLabel,
+  loopLengthBeats,
   moveLoop,
   nearestBeat,
   previousBeat,
@@ -247,5 +248,23 @@ describe('etiquetas', () => {
 
   it('los tamaños automáticos son los de la interfaz', () => {
     expect(AUTO_LOOP_SIZES).toEqual([4, 8, 16])
+  })
+})
+
+describe('loopLengthBeats: longitud en beats de un loop marcado a mano', () => {
+  it('si cuadra con la rejilla da los beats (también fracciones de 1/32)', () => {
+    // 120 BPM: 0,5 s por beat
+    expect(loopLengthBeats(10, 12, 120)).toBe(4)
+    expect(loopLengthBeats(10, 10.25, 120)).toBe(0.5)
+    expect(loopLengthBeats(10, 10 + 0.5 / 32, 120)).toBe(1 / 32)
+  })
+
+  it('si no cuadra, null: sin longitud no se puede doblar ni partir dentro de la rejilla', () => {
+    expect(loopLengthBeats(10, 11.3, 120)).toBeNull()
+  })
+
+  it('sin BPM, null', () => {
+    expect(loopLengthBeats(10, 12, null)).toBeNull()
+    expect(loopLengthBeats(10, 12, 0)).toBeNull()
   })
 })

@@ -4,6 +4,7 @@ import {
   nudgeAnchor,
   stretchBpm,
   scaleBpm,
+  tapInterval,
   GRID_BPM_MIN,
   GRID_BPM_MAX,
 } from '../../../src/audio/beatGrid'
@@ -84,5 +85,30 @@ describe('×2 y ÷2', () => {
     expect(scaleBpm(30, 0.5)).toBeNull() // 15 < 20
     expect(scaleBpm(220, 2)).toBeNull() // 440 > 400
     expect(scaleBpm(null, 2)).toBeNull()
+  })
+})
+
+describe('TAP: intervalo entre beats a partir de los taps', () => {
+  it('con un solo tap usa el BPM que ya tenía la pista', () => {
+    expect(tapInterval([10], 120)).toBeCloseTo(0.5)
+  })
+
+  it('sin BPM previo y con un solo tap no hay rejilla', () => {
+    expect(tapInterval([10], null)).toBeNull()
+  })
+
+  it('con varios taps manda la MEDIANA de los intervalos (un tap torpe no la mueve)', () => {
+    // 128 BPM = 0,46875 s, con un tap que se fue tarde
+    const taps = [0, 0.46875, 0.9375, 1.5, 1.875]
+    expect(60 / tapInterval(taps, null)).toBeCloseTo(128, 0)
+  })
+
+  it('con un número par de intervalos, la media de los dos centrales', () => {
+    expect(tapInterval([0, 0.5, 1.1], null)).toBeCloseTo(0.55)
+  })
+
+  it('descarta intervalos imposibles (doble toque o una pausa) y si no queda ninguno usa el BPM previo', () => {
+    expect(tapInterval([0, 0.05, 0.55], null)).toBeCloseTo(0.5) // el doble toque fuera
+    expect(tapInterval([0, 3], 128)).toBeCloseTo(60 / 128) // 3 s: fuera
   })
 })

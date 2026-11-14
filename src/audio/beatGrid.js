@@ -541,6 +541,27 @@ export const GRID_BPM_MAX = 400;
 
 const round2 = (v) => Math.round(v * 100) / 100;
 
+/**
+ * Intervalo entre beats (s) a partir de los taps del TAP de rejilla, en
+ * TIEMPO DE PISTA. Manda la MEDIANA de los intervalos plausibles (0,2–2,5 s,
+ * es decir 24–300 BPM): un tap torpe no la mueve. Con un solo tap, o sin
+ * ningún intervalo plausible, se queda el BPM que ya tenía la pista; sin él,
+ * null (no hay rejilla que poner).
+ */
+export function tapInterval(taps, prevBpm) {
+  let interval = prevBpm ? 60 / prevBpm : null;
+  if (taps.length < 2) return interval;
+  const ivs = [];
+  for (let i = 1; i < taps.length; i++) {
+    const d = taps[i] - taps[i - 1];
+    if (d > 0.2 && d < 2.5) ivs.push(d);
+  }
+  if (!ivs.length) return interval;
+  ivs.sort((a, b) => a - b);
+  const mid = Math.floor(ivs.length / 2);
+  return ivs.length % 2 ? ivs[mid] : (ivs[mid - 1] + ivs[mid]) / 2;
+}
+
 /** Mueve la rejilla entera hacia atrás/adelante sin cambiar el BPM. */
 export function nudgeAnchor(anchor, deltaSec) {
   const base = Number.isFinite(anchor) ? anchor : 0;

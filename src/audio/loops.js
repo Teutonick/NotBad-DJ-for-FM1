@@ -26,6 +26,20 @@ export function beatSeconds(bpm) {
   return bpm > 0 ? 60 / bpm : null;
 }
 
+/**
+ * Longitud en beats de un loop [start, end] marcado a mano, redondeada a
+ * 1/32, SOLO si cuadra con la rejilla; si no (o sin BPM), null. Tener la
+ * longitud en beats es lo que permite después doblar y partir el loop sin
+ * salirse de la rejilla.
+ */
+export function loopLengthBeats(start, end, bpm) {
+  const beat = beatSeconds(bpm);
+  if (!beat) return null;
+  const enBeats = (end - start) / beat;
+  const redondeo = Math.round(enBeats * 32) / 32;
+  return Math.abs(enBeats - redondeo) < 1e-6 ? redondeo : null;
+}
+
 /** Índice del primer beat >= time (búsqueda binaria sobre la rejilla). */
 function lowerBound(beats, time) {
   let lo = 0;
