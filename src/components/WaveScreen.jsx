@@ -36,8 +36,6 @@ export default function WaveScreen({
   endWarnAt,
   // Ventana de la onda ampliada
   zoom,
-  scroll,
-  follow,
   // Interacción de la onda ampliada
   onSeek,
   onDragSeek,
@@ -75,8 +73,6 @@ export default function WaveScreen({
           endWarnAt={endWarnAt}
           windowRef={windowRef}
           zoom={zoom}
-          scroll={scroll}
-          follow={follow}
           onSeek={onSeek}
           onDragSeek={onDragSeek}
           onNudge={onNudge}

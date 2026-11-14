@@ -56,8 +56,6 @@ const pintar = (props) =>
       audioRef={audio}
       windowRef={VENTANA}
       zoom={8}
-      scroll={0}
-      follow
       hotCues={[]}
       {...props}
     />
@@ -97,7 +95,7 @@ describe('WaveformCanvas: la tira cacheada', () => {
     // Un cambio que no toca la onda (el loop) tampoco la rehace
     utils.rerender(
       <WaveformCanvas waveData={onda} bandIndex={null} palette={PALETA} audioRef={audio}
-        windowRef={VENTANA} zoom={8} scroll={0} follow hotCues={[]} beats={beats} loopIn={3} />
+        windowRef={VENTANA} zoom={8} hotCues={[]} beats={beats} loopIn={3} />
     )
     frames(5)
     expect(rellenosTira).toBe(1)
@@ -117,8 +115,6 @@ describe('WaveformCanvas: la tira cacheada', () => {
         audioRef={audio}
         windowRef={VENTANA}
         zoom={8}
-        scroll={0}
-        follow
         hotCues={[]}
         beats={rejilla(128.01, 400)}
       />

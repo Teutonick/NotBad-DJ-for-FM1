@@ -24,8 +24,6 @@ function WaveformCanvas({
   // visible (0..1) en cada frame, sin pasar por el estado de React.
   windowRef,
   zoom,
-  scroll,
-  follow,
   onSeek,
   onDragSeek,
   onNudge,
@@ -206,7 +204,7 @@ function WaveformCanvas({
         canvas.height = h;
       }
 
-      // Datos del audio (para follow y cursor)
+      // Datos del audio (para la ventana y el cursor)
       const audioEl = audioRef?.current || null;
       const dur = audioEl?.duration || 0;
       const cur = smoothTimeRef.current(audioEl); // playhead interpolado
@@ -220,8 +218,12 @@ function WaveformCanvas({
       let rightFrac; // 0..1, fin de la ventana
       let start; // índice float en waveData donde empieza la ventana
 
-      if (follow && dur > 0) {
-        // SEGUR FOLLOW: el playhead va a ~1/3 de la ventana
+      // La ventana sigue SIEMPRE a la reproducción. Para mirar otro punto del
+      // tema está el resumen de abajo; arrastrar la onda mueve la pista bajo
+      // la línea de reproducción, no la ventana. (Hubo un modo de scroll
+      // manual que ya no activaba nada y se quitó.)
+      if (dur > 0) {
+        // El playhead va a ~1/3 de la ventana
         const cursorFracInWindow = 1 / 3;
 
         // Queremos: curFrac ≈ leftFrac + cursorFracInWindow * windowFrac
@@ -235,11 +237,10 @@ function WaveformCanvas({
         rightFrac = leftFrac + windowFrac;
         start = leftFrac * total;
       } else {
-        // MODO MANUAL: usamos el scroll que viene de React
-        const maxStart = Math.max(0, total - visible);
-        start = maxStart > 0 ? scroll * maxStart : 0;
-        leftFrac = start / total;
-        rightFrac = (start + visible) / total;
+        // Sin duración todavía: la ventana empieza en el principio
+        start = 0;
+        leftFrac = 0;
+        rightFrac = visible / total;
       }
 
       if (windowRef) {
@@ -462,8 +463,6 @@ function WaveformCanvas({
     endWarnAt,
     windowRef,
     zoom,
-    scroll,
-    follow,
     audioRef,
   ]);
 
@@ -476,7 +475,7 @@ function WaveformCanvas({
     let rightFrac;
 
     const dur = audioEl.duration || 0;
-    if (follow && dur > 0) {
+    if (dur > 0) {
       const curFrac = (audioEl.currentTime || 0) / dur;
       let desiredLeft = curFrac - (1 / 3) * windowFrac;
       if (desiredLeft < 0) desiredLeft = 0;
@@ -484,10 +483,8 @@ function WaveformCanvas({
       leftFrac = desiredLeft;
       rightFrac = leftFrac + windowFrac;
     } else {
-      const maxStart = Math.max(0, total - visible);
-      const start = maxStart > 0 ? scroll * maxStart : 0;
-      leftFrac = start / total;
-      rightFrac = (start + visible) / total;
+      leftFrac = 0;
+      rightFrac = windowFrac;
     }
     return { leftFrac, rightFrac, windowFrac };
   };

@@ -141,7 +141,6 @@ function Deck({
   const { t } = useI18n();
   const pitchRafRef = useRef(null);
   const audioRef = useRef(null);
-  const bpmDisplayRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // === Forma de onda / análisis ===
@@ -192,8 +191,6 @@ function Deck({
   const [tool, setTool] = useState(TOOL_TABS[0].id);
 
   const [zoom, setZoom] = useState(64);
-  const [scroll, setScroll] = useState(0);
-  const [follow, setFollow] = useState(true);
 
   const [fileName, setFileName] = useState("");
   const [objectUrl, setObjectUrl] = useState("");
@@ -718,8 +715,6 @@ function Deck({
       setIsPlaying(false);
       setCurrent(0);
       setDuration(0);
-      setScroll(0);
-      setFollow(true);
 
       // decodeAudioData "consume" (detach) el arrayBuffer, por eso la copia
       // del blob se hace antes
@@ -764,12 +759,6 @@ function Deck({
     onLocalLoad?.(side);
     loadTrack(f);
     e.target.value = ""; // permite volver a elegir el mismo archivo
-  };
-
-  const onLoaded = () => {
-    const el = audioRef.current;
-    if (!el) return;
-    setDuration(el.duration || 0);
   };
 
   const play = async () => {
@@ -819,7 +808,6 @@ function Deck({
     if (!el) return;
     el.currentTime = time;
     setCurrent(time);
-    setFollow(true);
     setCueIfPaused(time);
   };
 
@@ -1337,9 +1325,6 @@ function Deck({
       if (!el) return;
       el.currentTime = time;
       setCurrent(time);
-      // Se sigue siguiendo la reproducción: para mirar otro punto del tema
-      // está el resumen de abajo, que enseña la pista entera.
-      setFollow(true);
       setCueIfPaused(time);
     },
     onDragSeek,
@@ -1347,9 +1332,8 @@ function Deck({
     onNudgeEnd: releaseBend,
     onWheelZoom: (dir) =>
       setZoom((z) => Math.max(1, Math.min(256, dir > 0 ? z * 2 : z / 2))),
-    // Desde el resumen se salta a cualquier punto de la pista. Al saltar se
-    // vuelve a seguir la reproducción: es lo que se espera al usarlo como
-    // mando de desplazamiento.
+    // Desde el resumen se salta a cualquier punto de la pista; la onda grande
+    // va detrás, porque sigue siempre a la reproducción.
     onOverviewSeek: (frac) => {
       const el = audioRef.current;
       const dur = duration || bufferDuration || el?.duration || 0;
@@ -1357,7 +1341,6 @@ function Deck({
       const time = Math.max(0, Math.min(dur - 0.01, frac * dur));
       el.currentTime = time;
       setCurrent(time);
-      setFollow(true);
       setCueIfPaused(time);
     },
   };
@@ -1450,7 +1433,6 @@ function Deck({
               bpmLabel={t("lcdTrackBpm")}
               bpmTitle={t("bpmDisplayTitle")}
               onBpmClick={onTapBeat}
-              bpmRef={bpmDisplayRef}
               runningBpm={runningBpm ? String(Math.round(runningBpm)) : "-"}
               runningLabel={t("bpm")}
               musicalKey={
@@ -1487,8 +1469,6 @@ function Deck({
               loopRolling={Boolean(rolling)}
               endWarnAt={endWarnAt}
               zoom={zoom}
-              scroll={scroll}
-              follow={follow}
               onSeek={stableWave.onSeek}
               onDragSeek={stableWave.onDragSeek}
               onNudge={stableWave.onNudge}
@@ -2196,7 +2176,6 @@ function Deck({
           </div>
         <audio
           ref={audioRef}
-          onLoadedMetadata={onLoaded}
           className="hidden"
           preload="metadata"
           crossOrigin="anonymous"

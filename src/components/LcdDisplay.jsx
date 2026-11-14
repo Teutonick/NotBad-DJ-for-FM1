@@ -235,7 +235,6 @@ function LcdDisplay({
   bpmLabel,
   bpmTitle,
   onBpmClick,
-  bpmRef,
   runningBpm, // BPM efectivo, con el pitch aplicado
   runningLabel,
   // Tonalidad (opcional)
@@ -366,7 +365,7 @@ function LcdDisplay({
         )}
 
         {/* BPM base de la pista y BPM al que va de verdad con el pitch */}
-        <div ref={bpmRef} onClick={onBpmClick}>
+        <div onClick={onBpmClick}>
           <Field
             font={font}
             label={bpmLabel}
