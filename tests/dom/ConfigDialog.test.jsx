@@ -55,6 +55,39 @@ describe("apertura", () => {
     await user.click(screen.getByTitle(t("close")));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  // T31
+  it("Escape cierra, también con el foco en un campo del diálogo", async () => {
+    const user = userEvent.setup();
+    const { onClose } = abrir();
+    await user.keyboard("{Escape}");
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    await user.click(pestaña(t("tabLibrary")));
+    screen.getAllByRole("checkbox")[0].focus();
+    await user.keyboard("{Escape}");
+    expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
+  it("cerrado, Escape no hace nada", async () => {
+    const onClose = vi.fn();
+    renderWithI18n(
+      <ConfigDialog
+        open={false}
+        onClose={onClose}
+        config={{}}
+        onConfigChange={() => {}}
+      />,
+    );
+    await userEvent.setup().keyboard("{Escape}");
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("se anuncia como diálogo modal, con su título de nombre", () => {
+    abrir();
+    const dialogo = screen.getByRole("dialog", { name: t("configHeading") });
+    expect(dialogo).toHaveAttribute("aria-modal", "true");
+  });
 });
 
 describe("pestañas", () => {

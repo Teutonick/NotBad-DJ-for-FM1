@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useI18n } from "../i18n/context";
 import {
   clearLog,
@@ -131,6 +131,20 @@ export default function ConfigDialog({
   useEffect(() => {
     lastTab = tab;
   }, [tab]);
+
+  // Escape cierra, esté donde esté el foco dentro del diálogo. Con ⚙ abierto
+  // los atajos del deck están suspendidos: no hay nada con lo que choque.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") onCloseRef.current?.();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+  const titleId = useId();
 
   useEffect(() => {
     if (!open || tab !== "log") return;
@@ -671,11 +685,16 @@ export default function ConfigDialog({
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         className="w-full max-w-md rounded-2xl border border-neutral-700 bg-neutral-900 p-5 shadow-2xl flex flex-col gap-3 max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{t("configHeading")}</h2>
+          <h2 id={titleId} className="text-lg font-semibold">
+            {t("configHeading")}
+          </h2>
           <button
             onClick={onClose}
             className="px-2 py-1 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-300 text-sm hover:bg-neutral-700"
