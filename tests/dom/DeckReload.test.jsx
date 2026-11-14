@@ -101,6 +101,25 @@ describe('cargar otra pista encima', () => {
     await waitFor(() => expect(r.getByRole('button', { name: t('play') })).toBeInTheDocument())
   })
 
+  // T37: el deck se paraba, pero el padre seguía creyendo que sonaba (y la
+  // lista lo usaba de referencia de tonalidad)
+  it('avisa al padre de que ya no suena', async () => {
+    const onPlayingChange = vi.fn()
+    const r = await montar({ lockLoadWhilePlaying: false, onPlayingChange })
+    await act(async () => r.api().playPause())
+    expect(onPlayingChange).toHaveBeenLastCalledWith('A', true)
+    await r.cargar('otra.mp3')
+    await waitFor(() => expect(onPlayingChange).toHaveBeenLastCalledWith('A', false))
+  })
+
+  it('cargar sobre un deck parado no avisa de nada', async () => {
+    const onPlayingChange = vi.fn()
+    const r = await montar({ onPlayingChange })
+    await r.cargar('otra.mp3')
+    await esperar(50)
+    expect(onPlayingChange).not.toHaveBeenCalled()
+  })
+
   it('un roll que se estaba manteniendo no mueve la pista nueva al soltarlo', async () => {
     const r = await montar({ lockLoadWhilePlaying: false, track: { bpm: 120, gridAnchor: 0, gridManual: true } })
     ponerEn(20)

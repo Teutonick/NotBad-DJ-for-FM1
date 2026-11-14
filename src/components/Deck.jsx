@@ -374,10 +374,11 @@ function Deck({
       setNaming(null);
       cueManualRef.current = false;
     },
-    onSourceReady: () => {
+    onSourceReady: ({ wasPlaying }) => {
       setIsPlaying(false);
       setCurrent(0);
       setDuration(0);
+      if (wasPlaying) onPlayingChangeRef.current?.(side, false);
     },
     onAutoCue: applyAutoCue,
     // Sin BPM no hay rejilla; con él, el auto-cue pasa al primer beat

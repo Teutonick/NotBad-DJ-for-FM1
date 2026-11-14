@@ -52,7 +52,7 @@ const cachedFrom = (tr) => ({
 //   avisa con `events.current`, que el deck rellena en cada render:
 //     onReset(cached, { manualGrid })  al empezar, para dejar el deck limpio
 //                                      o con lo guardado de ESTA pista
-//     onSourceReady()                  el <audio> ya tiene la pista nueva
+//     onSourceReady({ wasPlaying })    el <audio> ya tiene la pista nueva
 //     onAutoCue(time)                  inicio del sonido, y luego primer beat
 //     onBeatsDetected(info | null)     BPM y ancla del análisis automático
 //     onAnalysis, onAutoGainComputed, onTrackMeta, onLocalLoad: los del padre
@@ -232,12 +232,15 @@ export function useTrackLoader({
       setObjectUrl(url);
 
       const el = audioRef.current;
+      // Cambiar de fuente para el <audio>: si sonaba, el deck tiene que
+      // contárselo al padre (que si no lo sigue dando por sonando)
+      const wasPlaying = Boolean(el && !el.paused);
       if (el) {
         el.src = url;
         el.load();
         el.preservesPitch = !!keyLockRef.current;
       }
-      events.current.onSourceReady?.();
+      events.current.onSourceReady?.({ wasPlaying });
 
       // decodeAudioData "consume" (detach) el arrayBuffer, por eso la copia
       // del blob se hace antes
