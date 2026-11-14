@@ -44,6 +44,10 @@ describe('CentralMeters · REC', () => {
   it('el reloj de la grabación cuenta segundos', async () => {
     pintar()
     fireEvent.click(screen.getByTitle(t('recTitle')))
+    // La grabación arranca tras un await (engine.resume): hasta que no se ve
+    // el reloj en 00:00, su intervalo aún no existe y no hay nada que contar
+    await vi.advanceTimersByTimeAsync(0)
+    expect(screen.getByTitle(t('recTitle')).textContent).toContain('■ 00:00')
     await vi.advanceTimersByTimeAsync(3000)
     expect(screen.getByTitle(t('recTitle')).textContent).toContain('00:03')
   })
