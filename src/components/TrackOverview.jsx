@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef } from "react";
 import { HOT_CUE_COLORS } from "../lib/constants";
 import { PALETTE_LEVELS, WAVE_PALETTE } from "../lib/waveColors";
+import { fitCanvas } from "../lib/canvas";
 
 // === Resumen de la pista (la tira fina de debajo de la onda) ===
 //
@@ -169,14 +170,8 @@ function TrackOverview({
     };
 
     const dibujar = () => {
-      const rect = canvas.getBoundingClientRect();
-      const w = Math.max(1, Math.round(rect.width));
-      const h = Math.max(1, Math.round(rect.height));
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-        cacheKeyRef.current = "";
-      }
+      const { w, h, resized } = fitCanvas(canvas, canvas.getBoundingClientRect());
+      if (resized) cacheKeyRef.current = "";
 
       // ¿Hay que rehacer la capa fija? Aquí ya solo puede cambiar el tamaño
       const clave = `${w}x${h}`;

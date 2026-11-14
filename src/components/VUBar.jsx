@@ -13,6 +13,7 @@ import {
   ZONE_RED_DB,
 } from "../audio/levelMeter";
 import { glassOverlay } from "../lib/glass";
+import { fitCanvas } from "../lib/canvas";
 
 const SEGMENT_DB = 2; // un LED cada 2 dB → 21 segmentos en todo el recorrido
 const FRAME_MS = 33; // 30 fps, el mismo tope que los canvas de onda
@@ -307,13 +308,7 @@ export default function VUBar({
     let w = 1;
     let h = 1;
     const resize = () => {
-      const r = wrap.getBoundingClientRect();
-      const nw = Math.max(1, Math.round(r.width * dpr));
-      const nh = Math.max(1, Math.round(r.height * dpr));
-      if (nw !== canvas.width) canvas.width = nw;
-      if (nh !== canvas.height) canvas.height = nh;
-      w = canvas.width;
-      h = canvas.height;
+      ({ w, h } = fitCanvas(canvas, wrap.getBoundingClientRect(), { dpr }));
     };
     resize();
 

@@ -6,6 +6,7 @@ import {
   WAVE_PALETTE,
 } from "../lib/waveColors";
 import { createSmoothTime } from "../lib/smoothTime";
+import { fitCanvas } from "../lib/canvas";
 
 function WaveformCanvas({
   waveData,
@@ -191,18 +192,12 @@ function WaveformCanvas({
         return;
       }
       lastDraw = now;
-      const rect = canvas.getBoundingClientRect();
-      // REDONDEADO, y esto importa: `canvas.width` guarda enteros, así que
-      // con un ancho fraccionario (el deck no mide un número redondo) la
-      // comparación de abajo nunca se cumplía y el lienzo se reasignaba —es
-      // decir, se reiniciaba entero— en CADA frame. Costaba más que dibujar.
-      const w = Math.max(1, Math.round(rect.width || 600));
-      const h = Math.max(1, Math.round(rect.height || 80));
-
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-      }
+      // REDONDEADO, y esto importa: con un ancho fraccionario el lienzo se
+      // reasignaba —se reiniciaba entero— en CADA frame. Ver src/lib/canvas.js
+      const { w, h } = fitCanvas(canvas, canvas.getBoundingClientRect(), {
+        fallbackW: 600,
+        fallbackH: 80,
+      });
 
       // Datos del audio (para la ventana y el cursor)
       const audioEl = audioRef?.current || null;

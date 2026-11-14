@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef } from "react";
 import { useI18n } from "../i18n/context";
 import { createSmoothTime } from "../lib/smoothTime";
+import { fitCanvas } from "../lib/canvas";
 
 // Panel de beat-match: las dos ondas alrededor de su playhead (línea central).
 // Con los BPM igualados y los beats alineados, las marcas rojas coinciden.
@@ -75,16 +76,11 @@ function BeatMatchPanel({ analysis, audioElsRef }) {
         return;
       }
       lastDraw = now;
-      const rect = canvas.getBoundingClientRect();
-      // Redondeado: `canvas.width` guarda enteros, y con un ancho fraccionario
-      // la comparación de abajo no se cumple nunca y el lienzo se reasigna
-      // —se reinicia entero— en cada frame. Cuesta más que dibujarlo.
-      const w = Math.max(1, Math.round(rect.width || 300));
-      const h = Math.max(1, Math.round(rect.height || 72));
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-      }
+      // Redondeado, sin reasignar si no cambia: ver src/lib/canvas.js
+      const { w, h } = fitCanvas(canvas, canvas.getBoundingClientRect(), {
+        fallbackW: 300,
+        fallbackH: 72,
+      });
 
       ctx.fillStyle = "#171717";
       ctx.fillRect(0, 0, w, h);
