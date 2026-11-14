@@ -24,17 +24,7 @@ import {
   sanitizeSavedLoops,
   slotsToHotCues,
 } from "../lib/cuePoints";
-import {
-  autoLoop as computeAutoLoop,
-  beatsLabel,
-  loopLengthBeats,
-  moveLoop,
-  nearestBeat,
-  resizeLoop,
-  rollExitTime,
-  rollLoop,
-  wrapTime,
-} from "../audio/loops";
+import { beatsLabel, nearestBeat } from "../audio/loops";
 import { useI18n } from "../i18n/context";
 import {
   analyzeTrackLoudness,
@@ -60,6 +50,7 @@ import { formatClock, stripExtension } from "../lib/format";
 import { useTrackStructure } from "../hooks/useTrackStructure";
 import { useBend } from "../hooks/useBend";
 import { usePlaybackRate } from "../hooks/usePlaybackRate";
+import { useLoopEngine } from "../hooks/useLoopEngine";
 
 // Redondeo de la fila de transporte (play, stop, sync, key): uno solo para
 // los cuatro, que antes no coincidían entre ellos.
@@ -197,27 +188,8 @@ function Deck({
   // Loops guardados de la pista y cuál está seleccionado en la lista
   const [savedLoops, setSavedLoops] = useState([]);
   const [savedLoopIdx, setSavedLoopIdx] = useState(0);
-  // Loop activo
-  const [loopIn, setLoopIn] = useState(null);
-  const [loopOut, setLoopOut] = useState(null);
-  const [loopOn, setLoopOn] = useState(false);
-  // Longitud del loop en BEATS cuando se conoce (automáticos, roll, doblar y
-  // partir). Con IN/OUT a mano es null y las cuentas van en segundos.
-  const [loopBeats, setLoopBeats] = useState(null);
-  // Loop roll en curso: { beats }. Mientras dura, el loop activo es el del
-  // roll y el que hubiera antes espera en rollRef para volver al soltar.
-  const [rolling, setRolling] = useState(null);
   // Editor de nombre abierto: { kind: "cue" | "loop", index, value }
   const [naming, setNaming] = useState(null);
-
-  // Longitud del loop para la UI: en beats cuando cuadra con la rejilla, en
-  // segundos cuando el IN/OUT se puso a mano fuera de ella.
-  const loopLabel =
-    loopIn != null && loopOut != null
-      ? loopBeats
-        ? `${beatsLabel(loopBeats)} \u266a`
-        : `${(loopOut - loopIn).toFixed(2)} s`
-      : "\u2014";
 
   // Fase de análisis para feedback en UI: null | "wave" | "bpm" | "regrid"
   const [analyzing, setAnalyzing] = useState(null);
@@ -560,16 +532,9 @@ function Deck({
     setHotCues(hotCuesToSlots(cached?.hotCues));
     setSavedLoops(sanitizeSavedLoops(cached?.savedLoops));
     setSavedLoopIdx(0);
-    // El último loop marcado vuelve donde estaba, pero APAGADO: al cargar una
-    // pista nadie espera que empiece a dar vueltas sola.
-    const cachedLoop = sanitizeLoopRegion(cached?.activeLoop);
-    rollRef.current = null;
-    setRolling(null);
+    // El último loop marcado vuelve donde estaba, pero APAGADO
+    resetLoop(sanitizeLoopRegion(cached?.activeLoop));
     setNaming(null);
-    setLoopIn(cachedLoop?.start ?? null);
-    setLoopOut(cachedLoop?.end ?? null);
-    setLoopBeats(cachedLoop?.beats ?? null);
-    setLoopOn(false);
     cueManualRef.current = false;
     setAnalyzing("wave");
     if (typeof onAnalysis === "function") {
@@ -776,162 +741,36 @@ function Deck({
     });
   };
 
-  // === Loop ===
-  // Punto único por el que pasan TODOS los cambios de región del loop: así la
-  // longitud en beats y el motor del salto no se desincronizan nunca.
-  const applyLoop = (region, on) => {
-    setLoopIn(region?.start ?? null);
-    setLoopOut(region?.end ?? null);
-    setLoopBeats(region?.beats ?? null);
-    setLoopOn(Boolean(region && on));
-  };
-
-  const setLoopInNow = () => {
-    const el = audioRef.current;
-    if (!el || !objectUrl) return;
-    setLoopIn(snapToGrid(el.currentTime || 0));
-    setLoopOut(null);
-    setLoopBeats(null);
-    setLoopOn(false);
-  };
-
-  const setLoopOutNow = () => {
-    const el = audioRef.current;
-    if (!el || loopIn == null) return;
-    const raw = el.currentTime || 0;
-    const snapped = snapToGrid(raw);
-    // si el snap lo dejaría pegado o antes del IN, usar el punto crudo
-    const time = snapped > loopIn + 0.05 ? snapped : raw;
-    if (time <= loopIn + 0.05) return;
-    setLoopOut(time);
-    // Longitud en beats solo si cuadra con la rejilla (ver loopLengthBeats)
-    setLoopBeats(loopLengthBeats(loopIn, time, bpm));
-    setLoopOn(true);
-  };
-
-  const toggleLoop = () => {
-    if (loopIn != null && loopOut != null) setLoopOn((v) => !v);
-  };
-
-  // Loop automático de N beats anclado al beat anterior más cercano
-  const autoLoop = (nBeats) => {
-    const el = audioRef.current;
-    if (!el || !objectUrl) return;
-    const region = computeAutoLoop({
-      bpm,
-      beats,
-      time: el.currentTime || 0,
-      lengthBeats: nBeats,
-      duration: gridDuration,
-    });
-    if (region) applyLoop(region, true);
-  };
-
-  // Mueve el loop entero una longitud hacia delante o hacia atrás. Si está
-  // sonando dentro, el playhead se mueve con él y conserva su sitio relativo.
-  const moveLoopBy = (dir) => {
-    if (loopIn == null || loopOut == null) return;
-    const next = moveLoop({
-      start: loopIn,
-      end: loopOut,
-      dir,
-      duration: gridDuration,
-    });
-    if (!next) return;
-    const el = audioRef.current;
-    const cur = el?.currentTime ?? null;
-    setLoopIn(next.start);
-    setLoopOut(next.end);
-    if (el && loopOn && cur != null && cur >= loopIn && cur <= loopOut) {
-      const time = next.start + (cur - loopIn);
-      el.currentTime = time;
-      setCurrent(time);
-    }
-  };
-
-  // Dobla (2) o parte (0,5) la longitud manteniendo el punto de entrada
-  const resizeLoopBy = (factor) => {
-    if (loopIn == null || loopOut == null) return;
-    const next = resizeLoop({
-      start: loopIn,
-      end: loopOut,
-      factor,
-      bpm,
-      lengthBeats: loopBeats,
-      duration: gridDuration,
-    });
-    if (!next) return;
-    setLoopOut(next.end);
-    setLoopBeats(next.beats);
-    // Al partir, el playhead puede quedarse fuera del tramo nuevo: se le mete
-    // dentro por donde le tocaría, sin esperar a la siguiente vuelta.
-    const el = audioRef.current;
-    if (el && loopOn && !el.paused) {
-      const cur = el.currentTime || 0;
-      if (cur >= next.end) {
-        const time = wrapTime({ current: cur, start: next.start, end: next.end });
-        el.currentTime = time;
-        setCurrent(time);
-      }
-    }
-  };
-
-  // === Loop roll ===
-  // Loop momentáneo mientras se mantiene pulsado. Al soltar, la reproducción
-  // sigue DONDE ESTARÍA si el roll no hubiera ocurrido (rollExitTime), no
-  // donde quedó el bucle.
-  const rollRef = useRef(null);
-
-  const startRoll = (lengthBeats) => {
-    const el = audioRef.current;
-    if (!el || !objectUrl || rollRef.current) return;
-    const region = rollLoop({
-      bpm,
-      gridAnchor,
-      time: el.currentTime || 0,
-      lengthBeats,
-      quantize,
-      duration: gridDuration,
-    });
-    if (!region) return;
-    rollRef.current = {
-      prev: { in: loopIn, out: loopOut, on: loopOn, beats: loopBeats },
-      length: region.end - region.start,
-    };
-    loopRef.current.wraps = 0;
-    applyLoop(region, true);
-    setRolling({ beats: lengthBeats });
-  };
-
-  const endRoll = () => {
-    const st = rollRef.current;
-    if (!st) return;
-    rollRef.current = null;
-    // Se apaga el motor a mano ANTES de recolocar el playhead: si no, el
-    // temporizador que aún está armado vería la posición de salida como un
-    // "pasado del OUT" y devolvería la pista al bucle.
-    loopRef.current.on = false;
-    const el = audioRef.current;
-    if (el) {
-      const exit = rollExitTime({
-        current: el.currentTime || 0,
-        wraps: loopRef.current.wraps,
-        loopLength: st.length,
-        duration: gridDuration || el.duration || 0,
-      });
-      el.currentTime = exit;
-      setCurrent(exit);
-    }
-    loopRef.current.wraps = 0;
-    setRolling(null);
-    // Se deja todo como estaba, campo a campo: con applyLoop un IN puesto
-    // sin OUT (loop a medio marcar) se perdía al soltar el roll.
-    const { prev } = st;
-    setLoopIn(prev.in);
-    setLoopOut(prev.out);
-    setLoopBeats(prev.beats);
-    setLoopOn(Boolean(prev.in != null && prev.out != null && prev.on));
-  };
+  // === Loop activo y roll ===
+  const {
+    loopIn,
+    loopOut,
+    loopOn,
+    loopBeats,
+    loopLabel,
+    rolling,
+    applyLoop,
+    resetLoop,
+    setLoopInNow,
+    setLoopOutNow,
+    toggleLoop,
+    turnLoopOff,
+    autoLoop,
+    moveLoopBy,
+    resizeLoopBy,
+    startRoll,
+    endRoll,
+  } = useLoopEngine({
+    audioRef,
+    loaded: Boolean(objectUrl),
+    bpm,
+    beats,
+    gridAnchor,
+    duration: gridDuration,
+    quantize,
+    snapToGrid,
+    setCurrent,
+  });
 
   // === Loops guardados (por pista) ===
   const saveCurrentLoop = () => {
@@ -970,7 +809,7 @@ function Deck({
     const loop = savedLoops[savedLoopIdx];
     if (!loop) return;
     if (loopOn && loopIn === loop.start && loopOut === loop.end) {
-      setLoopOn(false);
+      turnLoopOff();
       return;
     }
     recallSavedLoop(savedLoopIdx);
@@ -997,64 +836,6 @@ function Deck({
       (i) => (i + dir + savedLoops.length) % savedLoops.length
     );
   };
-
-  // === Motor del loop ===
-  // Comprobar la posición una vez por frame deja 17 ms de margen: en un loop
-  // de 1/8 de beat (≈59 ms a 128 BPM) eso es casi un tercio de su longitud y
-  // el tropiezo se oye. Aquí se programa un temporizador para el instante del
-  // salto y solo en los últimos milisegundos se hila fino a base de ticks
-  // cortos. Además el retraso que quede se ARRASTRA al punto de entrada
-  // (wrapTime), así el bucle mantiene la fase aunque el aviso llegue tarde.
-  const loopRef = useRef({ on: false, start: 0, end: 0, wraps: 0, gen: 0 });
-  const loopActive = loopOn && loopIn != null && loopOut != null;
-  {
-    const st = loopRef.current;
-    const start = loopIn ?? 0;
-    const end = loopOut ?? 0;
-    if (st.start !== start || st.end !== end) {
-      st.start = start;
-      st.end = end;
-      st.wraps = 0;
-      st.gen++;
-    }
-    st.on = loopActive;
-  }
-
-  useEffect(() => {
-    if (!loopActive) return;
-    const el = audioRef.current;
-    if (!el) return;
-    const FINE_MS = 12; // tramo final que se apura con ticks cortos
-    const gen = loopRef.current.gen;
-    let timer = null;
-    let cancelled = false;
-
-    const tick = () => {
-      if (cancelled) return;
-      const st = loopRef.current;
-      if (st.gen !== gen) return; // manda otra región: este temporizador sobra
-      if (!st.on || el.paused) {
-        timer = setTimeout(tick, 60); // nada que vigilar por ahora
-        return;
-      }
-      const now = el.currentTime || 0;
-      if (now >= st.end) {
-        el.currentTime = wrapTime({ current: now, start: st.start, end: st.end });
-        st.wraps += 1;
-        timer = setTimeout(tick, 0);
-        return;
-      }
-      const rate = el.playbackRate || 1;
-      const remainMs = ((st.end - now) / rate) * 1000;
-      timer = setTimeout(tick, remainMs > FINE_MS ? remainMs - FINE_MS : 0);
-    };
-
-    tick();
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [loopActive, loopIn, loopOut]);
 
   // Los hot cues y los loops suben al padre, que los refleja en la lista y los
   // guarda en IndexedDB. Sin pista cargada no hay nada que guardar.
