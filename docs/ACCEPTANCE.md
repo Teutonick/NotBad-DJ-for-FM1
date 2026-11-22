@@ -1,20 +1,22 @@
-# Проверки FM-1 DJ 0.1.0
+# FM-1 DJ 0.1.0 acceptance report
 
-Среда локальной проверки: macOS 27.2.1 (26B131), Chrome 157.0.8103.79, Node 24.22.3. Пакет FM-1 DJ имеет идентификатор FM-1_82000100. Локальные проверки Chrome запускались на production-файлах под путём /fm1-dj/. Публичные проверки запускались на GitHub Pages по HTTPS. Для автоматизации использовался тихий аудиовыход Web Audio. Прошли 549 модульных и DOM-тестов и 6 браузерных сценариев.
+[Русская версия](ru/ACCEPTANCE.md)
 
-| Тест ТЗ | Результат |
+The local checks ran on macOS 27.2.1 (26B131), Chrome 157.0.8103.79 and Node 24.22.3. The FM-1 DJ package identifier is `FM-1_82000100`. Local Chrome checks used production files served under `/fm1-dj/`. Public checks ran on GitHub Pages over HTTPS. Automation used a silent Web Audio output. All 549 unit and DOM tests and six browser scenarios passed.
+
+| Acceptance test | Result |
 | --- | --- |
-| 1. Запуск | Опубликованная страница возвращает HTTP 200 и запускается в Chrome без локального сервера. |
-| 2. Подключение | Host-симулятор подтвердил Note On/Off, относительный MIDI CC, обмен SysEx и отрисовку дисплея. Физический FM-1 не обнаружен. |
-| 3. Библиотека | Опубликованная сборка импортировала 10 тестовых файлов WAV, MP3 и FLAC. Записи остались после перезагрузки. Подтверждено определение BPM тестовых треков, включая MP3 и FLAC. |
-| 4. DJ-микс | Chrome подтвердил одновременное воспроизведение двух дек, транспорт и выравнивание BPM. Граф и алгоритм фазы покрыты тестами. Полный микс с FM-1 не проверен. |
-| 5. Независимые выходы | Тест графа подтвердил отсутствие пути PFL → Master, а тест выбора выхода отвергает совпадающие устройства. Физический тест двух выходов и задержки не выполнен. |
-| 6. 60 минут | Требуется физический прогон. |
-| 7. Восстановление | Симулятор подтвердил выключение USB Audio по тайм-ауту, отключение и восстановление после нового SysEx. Требуется отдельный тест с реальным USB. |
-| 8. Качество переходов | Тесты подтвердили управление коэффициентами Equal Power и плавную автоматизацию параметров. Требуется прослушивание. |
-| 9. GitHub Pages | Проверены production-файлы, Web Worker анализа, локальный импорт и воспроизведение на [GitHub Pages](https://teutonick.github.io/fm1-dj/). Нативные Web MIDI и USB Audio требуют FM-1. |
-| 10. Установка прошивки | JieLi собрал .fwsc. SHA-256 скачанного [релиза](https://github.com/Teutonick/fm1-dj/releases/tag/v0.1.0) совпал с локальным пакетом. Физическая установка и возврат штатной прошивки не выполнялись. |
+| 1. Startup | The published page returned HTTP 200 and started in Chrome without a local server. |
+| 2. Connection | The host simulator verified Note On/Off, relative MIDI CC, the SysEx exchange and display rendering. No physical FM-1 was detected. |
+| 3. Library | The published build imported 10 WAV, MP3 and FLAC test files. Library entries persisted after reload. BPM detection was verified on the test tracks, including MP3 and FLAC. |
+| 4. DJ mix | Chrome verified simultaneous playback on both decks, transport controls and BPM matching. Tests cover the audio graph and phase algorithm. A full mix with the FM-1 remains unverified. |
+| 5. Independent outputs | The audio graph test verified that there is no PFL-to-Master path. The output selection test rejected using the same device for both. Physical routing and latency remain unverified. |
+| 6. 60-minute run | Requires a run on physical hardware. |
+| 7. Recovery | The simulator verified USB Audio muting on timeout, disconnect handling and recovery after a new SysEx exchange. A separate test with physical USB is required. |
+| 8. Transition quality | Tests verified Equal Power gain control and smooth parameter automation. Listening tests are pending. |
+| 9. GitHub Pages | Production files, the analysis Web Worker, local import and playback were checked on [GitHub Pages](https://teutonick.github.io/fm1-dj/). Native Web MIDI and USB Audio checks require an FM-1. |
+| 10. Firmware installation | The JieLi toolchain built the `.fwsc` package. The SHA-256 of the downloaded [release](https://github.com/Teutonick/fm1-dj/releases/tag/v0.1.0) matched the local package. Physical installation and restoration of the stock firmware remain unverified. |
 
-При физической приёмке сначала проверьте маршрутизацию A/B и задержку на двух выходах. Затем проведите переход с FM-1, проверьте отключение кабеля и завершите 60-минутным прогоном.
+For hardware acceptance, first verify A/B routing and latency across both outputs. Then perform a transition with the FM-1, check cable disconnection and finish with a 60-minute run.
 
-Подбор MIDI-портов с различающимися суффиксами Windows, ручной выбор, проверка ответа SysEx и повторное подключение покрыты автоматическими тестами с виртуальными портами. Реальное USB MIDI и USB Audio на Windows 11 проверяются по [чек-листу](WINDOWS.md).
+Automated tests with virtual ports cover MIDI port matching with different Windows suffixes, manual port selection, SysEx reply validation and reconnection. Use the [Windows checklist](WINDOWS.md) to verify USB MIDI and USB Audio on Windows 11 hardware.

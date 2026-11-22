@@ -258,5 +258,5 @@ Three things worth knowing:
 
 ## License
 
-MIT — see [LICENSE](LICENSE). All the audio analysis (loudness, waveform, key and BPM/beat grid) is
+MIT — see [LICENSE](../LICENSE). All the audio analysis (loudness, waveform, key and BPM/beat grid) is
 first‑party code; no GPL/AGPL library is bundled.

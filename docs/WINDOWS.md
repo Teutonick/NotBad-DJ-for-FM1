@@ -1,21 +1,23 @@
-# FM‑1 DJ на Windows 11
+# FM‑1 DJ on Windows 11
 
-Для веб-приложения нужен актуальный Google Chrome. Для записи прошивки используется тот же `fm1-dj-0.1.0.fwsc`, что и на macOS. Ниже приведена процедура аппаратной приёмки. Она ещё не проходила на физическом Windows-компьютере с FM-1.
+[Русская версия](ru/WINDOWS.md)
 
-## Проверка прошивки
+Use a current version of Google Chrome for the web app. Firmware installation uses the same `fm1-dj-0.1.0.fwsc` package as on macOS. This hardware acceptance procedure has yet to run on a physical Windows PC with an FM-1.
 
-Используйте **Настройки → Прошивка** и [руководство по безопасности прошивки](FIRMWARE-SAFETY.md). Аппаратную приёмку ниже проводят после допуска соответствующей конфигурации и контролируемой установки на тестовое устройство.
+## Firmware checks
 
-## Аппаратная приёмка
+Use **Settings → Firmware** and follow the [firmware safety guide](FIRMWARE-SAFETY.md). Run the checks below after the configuration has been cleared and the firmware has been installed on a test device under controlled conditions.
 
-| Проверка | Ожидаемый результат |
-|---|---|
-| USB | В **Параметры → Система → Звук → Вывод** появился выход FM-1. В Chrome после **Connect FM-1** доступны MIDI-вход и выход. |
-| MIDI в обе стороны | **MIDI connected** и **Firmware 0.1.0** видны в Hardware diagnostics. Если нужно, выберите MIDI input и MIDI output отдельно. Поворот ALGORITHM меняет Crossfader на экране, а дисплей FM-1 показывает две деки. |
-| Два выхода | В **Audio** явно выбраны динамики ПК для Master и FM-1 для Cue. После **Enable Cue Output** сигнал **Test Master** слышен только из динамиков, а **Test headphones** только в наушниках FM-1. |
-| Cue и микс | Импортируйте **Add demo tracks** и загрузите треки на A/B. Запустите обе деки с FM-1, переведите Crossfader в A и включите PFL B. В динамиках слышна A, в наушниках — B. Повторите зеркально, затем проверьте обе деки в Cue и переход через Crossfader. |
-| Переподключение | Во время воспроизведения отсоедините FM-1. Master продолжает играть, Cue не слышен из динамиков. Подключите кабель обратно. MIDI и дисплей восстанавливаются после ответа прошивки. Для Cue повторно выберите выход при необходимости и нажмите **Enable Cue Output**. |
-| Длительная работа | Проведите 60 минут с реальными треками, повторяя PFL, Sync и переходы. Зафиксируйте паузы, щелчки или отставание Cue, если они слышны. |
-| Откат | Убедитесь, что средство восстановления распознаёт устройство. Полное восстановление выполняйте при необходимости по [руководству](FIRMWARE-SAFETY.md). |
+## Hardware acceptance
 
-Если FM-1 виден в Windows, но скрыт в Audio, проверьте разрешение на микрофон для сайта в Chrome и доступ настольных приложений к микрофону в **Параметры → Конфиденциальность и безопасность → Микрофон**. Для отчёта достаточно версии Windows из `winver`, версии Chrome, результата по строкам таблицы и названий аудио- и MIDI-портов при первом сбое.
+| Check | Expected result |
+| --- | --- |
+| USB | An FM-1 output appears under **Settings → System → Sound → Output**. The MIDI input and output appear in Chrome after selecting **Connect FM-1**. |
+| Bidirectional MIDI | **MIDI connected** and **Firmware 0.1.0** appear in Hardware diagnostics. Select the MIDI input and output separately if needed. Turning ALGORITHM moves the on-screen crossfader, and the FM-1 display shows both decks. |
+| Separate outputs | In **Audio**, select the PC speakers explicitly for Master and the FM-1 for Cue. After selecting **Enable Cue Output**, **Test Master** plays only through the speakers and **Test headphones** plays only through the FM-1 headphones. |
+| Cue and mix | Import the demo tracks with **Add demo tracks** and load decks A and B. Start both decks from the FM-1, move the crossfader to A, and enable PFL B. A plays through the speakers and B through the headphones. Repeat with the decks reversed, then check Cue with both decks and make a crossfader transition. |
+| Reconnection | Unplug the FM-1 during playback. Master keeps playing and Cue remains inaudible through the speakers. Reconnect the cable. MIDI and the display recover after the firmware responds. Select the Cue output again if needed and select **Enable Cue Output**. |
+| Extended run | Play real tracks for 60 minutes and repeat PFL, Sync and transitions. Record any audible gaps, clicks or Cue lag. |
+| Rollback | Verify that the recovery tool recognizes the device. Follow the [firmware safety guide](FIRMWARE-SAFETY.md) if a full restore is needed. |
+
+If Windows sees the FM-1 but it is missing from **Audio**, check the site's microphone permission in Chrome and desktop app microphone access under **Settings → Privacy & security → Microphone**. Include the Windows version from `winver`, the Chrome version, the result of each check, and the audio and MIDI port names at the first failure in the report.

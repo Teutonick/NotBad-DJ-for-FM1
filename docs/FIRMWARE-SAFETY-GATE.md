@@ -1,38 +1,40 @@
 # Firmware Safety Gate
 
-Изменения прошивки, её зависимостей, MIDI-протокола и установщика запускают [проверки GitHub Actions](../.github/workflows/firmware-safety.yml). Общий workflow вызывает их для PR, merge queue, push, тегов и ручного запуска. Если diff затрагивает только файлы вне контура прошивки, этап определения изменений сообщает `not applicable`. Ручная проверка и теги всегда запускают полный набор.
+[Русская версия](ru/FIRMWARE-SAFETY-GATE.md)
 
-## Что проверяется
+Changes to the firmware, its dependencies, the MIDI protocol or the installer trigger [GitHub Actions checks](../.github/workflows/firmware-safety.yml). The shared workflow calls these checks for pull requests, merge queue runs, pushes, tags and manual runs. If the diff only touches files outside the firmware scope, the change detection step reports `not applicable`. Manual runs and tags always run the full suite.
 
-| Этап | Проверка |
+## Checks
+
+| Stage | What it verifies |
 | --- | --- |
-| Целевая сборка | Закреплённые fm1-base и BSP, проверки сборщика, идентификатор пакета, структура, CRC, граница образа и SHA‑256 boot area и OTA-загрузчика относительно принятой карты. |
-| Host Simulator | Clang с `-Werror`, ASan и UBSan, тесты USB MIDI и отключения аудио, детерминированные некорректные SysEx, тесты Flash BSP. |
-| FM1Kit на macOS | Независимые `inspect`, `check --strict --json` и `diff` с сохранённым SHA‑256 прошлой версии. |
-| fm1-emu | Один и тот же `.fwsc` в обычном и строгом режиме на Puya и UCUN. Проверяются ответы USB MIDI, ввод, дисплей и состояние Flash после перезапуска. |
-| Установщик | Проверка диагностики без записи, обработка обрыва USB, негативные тесты пакета и моделирование обмена OTA-пакетами при обрыве, возобновлении и обнаружении чужого загрузчика. |
+| Target build | Pinned fm1-base and BSP revisions, builder checks, package identifier, structure, CRC, image boundary, and SHA-256 hashes of the boot area and OTA loader against the accepted Flash map. |
+| Host Simulator | Clang with `-Werror`, ASan and UBSan, USB MIDI and audio disconnect tests, deterministic malformed SysEx cases, and BSP Flash tests. |
+| FM1Kit on macOS | Independent `inspect`, `check --strict --json` and `diff` checks with the saved SHA-256 of the previous release. |
+| fm1-emu | The same `.fwsc` in normal and strict modes on Puya and UCUN. Checks USB MIDI replies, input, display and Flash state after restart. |
+| Installer | Read-only diagnostics, USB disconnect handling, negative package tests, and simulated OTA packet exchanges for interruptions, resumption and detection of a different bootloader. |
 
-Ревизии FM1Kit и версии инструментов закреплены в [toolchain.json](../scripts/firmware/toolchain.json). FM1Kit собирается на Xcode 26.2 из указанного commit. Для CI используется Linux-архив fm1-emu 0.5.1 с закреплённым SHA‑256. Ревизии fm1-base и BSP сверяются с [манифестом релиза](../src/fm1/updater/releases.json). При изменении инструмента, карты Flash или загрузочной области требуется проверить diff и обновить соответствующий pin отдельным обозримым изменением.
+[toolchain.json](../scripts/firmware/toolchain.json) pins FM1Kit revisions and tool versions. FM1Kit builds from the specified commit using Xcode 26.2. CI uses the Linux archive of fm1-emu 0.5.1 with a pinned SHA-256. The gate checks fm1-base and BSP revisions against the [release manifest](../src/fm1/updater/releases.json). When a tool, Flash map or boot area changes, inspect the diff and update the corresponding pin in a separate, reviewable change.
 
-## Покрытие автоматических проверок
+## Automated coverage
 
-Gate включает `stack_check` fm1-base через `FM1B_STACK_CHECK=1`. К закреплённому fm1-base применяется [патч](../firmware/patches/fm1-base-safety.patch), который генерирует оптимизированный LLVM IR с теми же флагами, что и объектные файлы, и переносит переменные симуляции второго ядра в соответствующую ветку host-сборки. Gate требует результаты для основного стека и стека прерываний. Строгий запуск восстановленных и прерванных образов дополнительно проверяет наблюдаемые флаги ошибок CPU и шины при старте и ответе по USB MIDI. Этот сценарий не покрывает все обращения к MMIO.
+The gate enables fm1-base `stack_check` through `FM1B_STACK_CHECK=1`. A [patch](../firmware/patches/fm1-base-safety.patch) to the pinned fm1-base revision generates optimized LLVM IR with the same flags as the object files and moves second-core simulation variables into the corresponding host build branch. The gate requires results for both the main and interrupt stacks. Strict runs of restored images and images from interrupted writes also check observable CPU and bus error flags at startup and when replying over USB MIDI. This scenario covers only a subset of MMIO accesses.
 
-Задача `recovery_lab` использует настоящий бинарник в CPU и USB моделях fm1-emu и проверяет прерывания подготовки OTA на обеих моделях Flash. После каждого прерывания сравниваются байты за пределами staging и проверяется повторный запуск с сохранённой Flash. Дополнительно тест SPI NOR проходит все 17 точек стирания и программирования сектора на двух границах области приложения и для каждого чипа. Двенадцать полученных образов восстанавливаются через `MockUboot` из FM1 Unbricker с побайтовой сверкой всей Flash. Восстановленный образ затем загружается в строгом режиме.
+The `recovery_lab` job runs the actual binary in fm1-emu's CPU and USB models and tests interrupted OTA preparation on both Flash models. After each interruption, it compares bytes outside staging and checks that the saved Flash can boot again. The SPI NOR test also exercises all 17 erase and program cut points at two application-region boundaries for each chip. Twelve resulting images are restored through FM1 Unbricker's `MockUboot`, with a byte-for-byte comparison of the entire Flash. The restored image then boots in strict mode.
 
-Для второй стадии стенд извлекает настоящий загрузчик из staging, сверяет контрольную сумму и загружает его в RAM по адресу SPL. Он принудительно меняет два сектора приложения, прерывает реальные операции стирания и записи и повторно запускает загрузчик с повреждённой Flash. Допуск сценария требует совпадения всего слота приложения с пакетом и сохранности защищённых областей. Эти же повреждённые образы передаются в `MockUboot` для отдельной проверки пути восстановления.
+For the second stage, the harness extracts the actual loader from staging, checks its checksum and loads it into RAM at the SPL address. It deliberately changes two application sectors, interrupts actual erase and write operations, and restarts the loader with the damaged Flash. The scenario passes only if the entire application slot matches the package and protected regions remain intact. The same damaged images are passed to `MockUboot` to test that recovery path independently.
 
-Стенд также договаривается с настоящим OTA-загрузчиком об ускоренном режиме, как веб-клиент, и отвечает таблицей контрольных сумм секторов. Для сценария с двумя повреждёнными граничными секторами он сначала измеряет количество операций в успешном прогоне, затем моделирует отключение на каждой операции, включая завершение. После каждого отключения заново запускаются загрузчик и прошивка. Проверяются точное содержимое слота, сохранность защищённых областей и полный идентификатор прошивки. Для опубликованного 0.1.0 ожидается 35 точек на каждом чипе. Отчёт выделяет доказательство этого сценария в строку `fast-loader-cut-matrix`.
+The harness also negotiates fast mode with the actual OTA loader as the web client does and replies with a sector checksum table. For the scenario with two damaged boundary sectors, it first counts operations in a successful run, then simulates a disconnect at each operation, including completion. It restarts the loader and firmware after each disconnect and checks the exact slot contents, protected regions and full firmware identifier. The published 0.1.0 package is expected to yield 35 cut points per chip. The report records this evidence in `fast-loader-cut-matrix`.
 
-Автоматическая передача управления от m-bootloader 2.3 к OTA-загрузчику, полная матрица для перезаписи всего слота и вход в настоящий ROM остаются `NOT VERIFIED`. Используемый fm1-emu стартует с приложения и моделирует параметры, переданные SPL. Тест `MockUboot` проверяет алгоритм восстановления и защиту диапазонов в памяти. Вход в ROM и обмен с физическим USB находятся вне сценария. В отдельном эксперименте опубликованный [m-bootloader 2.3](https://github.com/jvitkauskas/m-bootloader/releases/tag/v2.3) был запущен с RAM-адреса SPL и с записью OTA из образа staging. В модели он записал `usb_update_mode` и запросил сброс. Сброс и последующее появление USB Download Mode не наблюдались. Этот запуск не подтверждает поведение загрузчика на физическом FM-1.
+Automatic handoff from m-bootloader 2.3 to the OTA loader, a full-slot rewrite matrix and entry into the actual ROM remain `NOT VERIFIED`. The current fm1-emu starts at the application and models the parameters passed by the SPL. The `MockUboot` test verifies the recovery algorithm and range protection in memory. ROM entry and physical USB communication fall outside this scenario. In a separate experiment, the published [m-bootloader 2.3](https://github.com/jvitkauskas/m-bootloader/releases/tag/v2.3) ran from the SPL RAM address with the OTA record from the staging image. It wrote `usb_update_mode` and requested a reset in the model. The actual reset, subsequent USB Download Mode and behavior on a physical FM-1 remain unverified.
 
-`FAIL`, пропуск или отсутствие результата обязательного этапа дают `SAFETY FAILED`. Изменившийся образ требует новой версии и записи в манифесте со своим SHA‑256. Сборка без записи в манифесте получает `NOT VERIFIED` по целостности релиза. При несовпадении с манифестом этап целостности получает `FAIL`, а корректный по структуре пакет остаётся временным артефактом для FM1Kit и эмуляторов. Оба результата блокируют публикацию. CI собирает один пакет и проверяет его SHA‑256 на каждом runner. `report.json`, `report.md`, журналы этапов и суммы доступны в артефактах GitHub Actions, в том числе при отказе.
+A `FAIL`, skipped required stage or missing required result yields `SAFETY FAILED`. A changed image requires a new version and a manifest entry with its own SHA-256. A build with no manifest entry receives `NOT VERIFIED` for release integrity. A mismatch yields `FAIL` at that stage. If the package structure is valid, the package remains available as a temporary artifact for FM1Kit and the emulators. Both outcomes block publishing. CI builds one package and verifies its SHA-256 on every runner. The GitHub Actions artifacts include `report.json`, `report.md`, stage logs and checksums, including on failure.
 
-На физическом устройстве заявлена только связка **Puya P25Q80H `0x856014` + m-bootloader 2.3** для 0.1.0, по информации владельца. UCUN `0xB36014` включён в эмуляцию. Для выпуска нужен аппаратный отчёт с исходной прошивкой, JEDEC ID, загрузчиком, SHA‑256 именно проверенного пакета и проверенным способом восстановления. Автоматический `PREFLASH CANDIDATE` означает прохождение обязательных проверок CI и разрешает передать артефакт на аппаратную приёмку. Границы эмуляции остаются в отчёте. Результат аппаратной приёмки и решение о публикации фиксирует владелец. [Пользовательская диагностика и восстановление](FIRMWARE-SAFETY.md)
+The owner reports physical testing of 0.1.0 only on **Puya P25Q80H `0x856014` with m-bootloader 2.3**. Emulation also covers UCUN `0xB36014`. A release needs a hardware report that records the original firmware, JEDEC ID, bootloader, SHA-256 of the exact tested package and a verified recovery method. An automated `PREFLASH CANDIDATE` result means the required CI checks passed and the artifact can proceed to hardware acceptance. The report records the limits of emulation. The owner records the hardware acceptance result and the decision to publish. [Diagnostics and recovery guide](FIRMWARE-SAFETY.md)
 
-## Запуск
+## Running the checks
 
-В Linux x86‑64 подготовьте Node.js 24, Python 3.12 с Pillow 12.2.0, Clang и зависимости JieLi и эмулятора, перечисленные в workflow. Выполните `npm ci --ignore-scripts`. На Linux и macOS команда `npm run firmware:safety` запускает этапы данной платформы. Для общего статуса используется CI.
+On Linux x86-64, install Node.js 24, Python 3.12 with Pillow 12.2.0, Clang and the JieLi and emulator dependencies listed in the workflow. Run `npm ci --ignore-scripts`. On Linux and macOS, `npm run firmware:safety` runs the stages for the current platform. Use CI for the overall status.
 
 ```bash
 # Linux
@@ -42,21 +44,20 @@ npm run firmware:safety:host
 bash scripts/firmware/safety.sh prepare-emulator
 npm run firmware:safety:emulator
 bash scripts/firmware/safety.sh installer
-bash scripts/firmware/safety.sh recovery-lab # Rust 1.98.0 и Python 3.12
+bash scripts/firmware/safety.sh recovery-lab # Rust 1.98.0 and Python 3.12
 
-# macOS c Xcode 26.2: укажите путь к тому же пакету из Linux
+# macOS with Xcode 26.2. Point to the same package built on Linux.
 bash scripts/firmware/safety.sh prepare-fm1kit
 FM1_CANDIDATE_FILE=/absolute/path/fm1-dj-0.1.0.fwsc npm run firmware:safety:package
 ```
 
-`npm run firmware:safety:recovery` запускает программный стенд и завершается успешно при прохождении реализованных сценариев. Границы покрытия печатаются в журнале. Переносимый тест правил допуска запускается командой `node --test scripts/firmware/safety.test.mjs`.
+`npm run firmware:safety:recovery` runs the software test harness and succeeds when the implemented scenarios pass. The log shows the limits of its coverage. Run the portable approval-rules test with `node --test scripts/firmware/safety.test.mjs`.
 
-## Публикация и защита ветки
+## Publishing and branch protection
 
-1. В GitHub Rulesets для `main` сделайте обязательным фактический check **firmware-safety / Firmware Safety Gate** после первого прогона и ограничьте обход правила. Защитите изменения workflow, скриптов gate и манифеста ревью.
-2. Настройте environment `firmware-release` с обязательным ревью и разрешёнными тегами релизов. Ограничьте право публикации через GitHub UI и токены теми, кто контролирует выпуск. Проверка в workflow сама по себе не перехватывает публикации вручную в обход workflow.
-3. В успешном прогоне скачайте `firmware-under-test` и сверьте SHA‑256 с `report.md`. После аппаратной приёмки сохраните отчёт под `docs/` и внесите в `verifiedConfigurations` релиза `jedec`, `bootloader`, `sourceFirmware`, `evidence: "hardware-test-report"`, `firmwareSha256`, `recoveryVerified: true` и `reportPath`. В отчёте укажите тот же SHA‑256. Затем создайте версионный тег на защищённой `main`. Для публикации запустите **Web checks and GitHub Pages** на этом теге с `publish_firmware`. Job зависит от gate, проверяет соответствие тега и манифеста, наличие аппаратного отчёта и загружает проверенный CI-артефакт без пересборки. Существующий релиз не перезаписывается.
-4. При отказе просмотрите артефакты и исправьте причину. Pages ждёт успешного gate, поэтому при провале остаётся последняя развёрнутая версия.
+1. After the first run, make the actual **firmware-safety / Firmware Safety Gate** check required in GitHub Rulesets for `main` and restrict bypasses. Require review for changes to workflows, gate scripts and the manifest.
+2. Configure the `firmware-release` environment with required reviewers and permitted release tags. Limit publishing access through the GitHub UI and tokens to the people responsible for releases. The workflow check only applies to releases published through the workflow.
+3. Download `firmware-under-test` from a successful run and compare its SHA-256 with `report.md`. After hardware acceptance, save the report under `docs/` and add `jedec`, `bootloader`, `sourceFirmware`, `evidence: "hardware-test-report"`, `firmwareSha256`, `recoveryVerified: true` and `reportPath` to the release's `verifiedConfigurations`. Record the same SHA-256 in the report. Then create a version tag on protected `main`. To publish, run **Web checks and GitHub Pages** on that tag with `publish_firmware`. The job depends on the gate, checks that the tag matches the manifest and that the hardware report exists, and uploads the verified CI artifact without rebuilding it. Existing releases are kept intact.
+4. If the gate fails, review the artifacts and correct the cause. Pages waits for the gate to pass, so a failed run leaves the last deployment in place.
 
-Настройки branch protection и environment применяются на GitHub. Локальные файлы workflow их не устанавливают.
-
+Configure branch protection and environment rules on GitHub.

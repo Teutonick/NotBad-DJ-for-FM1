@@ -16,7 +16,7 @@
 
 ## Запуск
 
-Откройте [NotBad DJ for FM1 на GitHub Pages](https://teutonick.github.io/NotBad-DJ-for-FM1/) в актуальном Google Chrome на macOS или Windows 11. Для работы сайта локальный сервер, Python и Node.js не требуются. Полный сценарий с FM-1 на Windows ещё предстоит проверить по [чек-листу Windows](docs/WINDOWS.md).
+Откройте [NotBad DJ for FM1 на GitHub Pages](https://teutonick.github.io/NotBad-DJ-for-FM1/) в актуальном Google Chrome на macOS или Windows 11. Для работы сайта локальный сервер, Python и Node.js не требуются. Полный сценарий с FM-1 на Windows ещё предстоит проверить по [чек-листу Windows](docs/ru/WINDOWS.md).
 
 Для локальной сборки выполните `npm ci --ignore-scripts`, затем `npm run build` и `npm run preview`. Workflow **Web checks and GitHub Pages** публикует `dist` из ветки `main`.
 
@@ -45,14 +45,16 @@
 
 ## Прошивка
 
-В **Настройки → Прошивка** можно проверить пакет релиза 0.1.0, сравнить два полных дампа Flash и прочитать идентификатор MIDI. Запись заблокирована до аппаратной проверки и подтверждения способа восстановления для подключённого устройства. Подготовка полного бэкапа и действия при сбое описаны в [руководстве по безопасности прошивки](docs/FIRMWARE-SAFETY.md).
+В **Настройки → Прошивка** можно проверить пакет релиза 0.1.0, сравнить два полных дампа Flash и прочитать идентификатор MIDI. Запись заблокирована до аппаратной проверки и подтверждения способа восстановления для подключённого устройства. Подготовка полного бэкапа и действия при сбое описаны в [руководстве по безопасности прошивки](docs/ru/FIRMWARE-SAFETY.md).
 
 ### Сборка прошивки
 
-Исходники находятся в [firmware/dj](firmware/dj). `firmware/build.sh --host` собирает симулятор. Для сборки пакета используйте Linux x86-64 или macOS с Docker или Podman, Python 3.12 и Pillow с Raqm. После первой host-сборки выполните `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk`, затем `firmware/build.sh --release 0.1.1`. Пакет сохраняется в `firmware/dj/build`. Те же шаги выполняет workflow **Firmware Safety Gate** ([docs](docs/FIRMWARE-SAFETY-GATE.md)).
+Исходники находятся в [firmware/dj](firmware/dj). `firmware/build.sh --host` собирает симулятор. Для сборки пакета используйте Linux x86-64 или macOS с Docker или Podman, Python 3.12 и Pillow с Raqm. После первой host-сборки выполните `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk`, затем `firmware/build.sh --release 0.1.1`. Пакет сохраняется в `firmware/dj/build`. Те же шаги выполняет workflow **Firmware Safety Gate** ([docs](docs/ru/FIRMWARE-SAFETY-GATE.md)).
 
 ## Лицензия и отказ от ответственности
 
-Веб-приложение распространяется под [MIT](LICENSE). Для отдельных компонентов действуют [их собственные лицензии](docs/UPSTREAM.md). Исходники прошивки и модули браузерного установщика fm1-base распространяются под [MPL-2.0](firmware/licenses/MPL-2.0.txt).
+Веб-приложение распространяется под [MIT](LICENSE). Для отдельных компонентов действуют [их собственные лицензии](docs/ru/UPSTREAM.md). Исходники прошивки и модули браузерного установщика fm1-base распространяются под [MPL-2.0](firmware/licenses/MPL-2.0.txt).
 
 Перед использованием и особенно перед записью прошивки прочитайте [отказ от ответственности](DISCLAIMER.md#отказ-от-ответственности).
+
+[Карта управления и протокол](docs/ru/PROTOCOL.md) · [Отчёт о проверках](docs/ru/ACCEPTANCE.md)
