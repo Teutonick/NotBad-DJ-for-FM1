@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { packet } from "./protocol";
+import { firmwareVersion, packet } from "./protocol";
+import { selectInput, selectOutput } from "./midiPorts";
 import { testTone } from "../audio/cueOutput";
 
 export default function Hardware({
@@ -11,11 +12,10 @@ export default function Hardware({
   cueRef,
 }) {
   const [access, setAccess] = useState(null);
-  const [ports, setPorts] = useState([]);
-  const [selected, setSelected] = useState("");
+  const [ports, setPorts] = useState({ inputs: [], outputs: [] });
   const [status, setStatus] = useState("");
   const [monitor, setMonitor] = useState([]);
-  const [firmware, setFirmware] = useState("");
+  const [verified, setVerified] = useState(null);
   const [mapping, setMapping] = useState(() =>
     JSON.stringify(config.noteMap || {}),
   );
@@ -25,7 +25,8 @@ export default function Hardware({
 
   async function connect() {
     try {
-      await engine.resume();
+      // Grant audio activation without making MIDI discovery wait for an audio device.
+      Promise.resolve(engine.resume()).catch(() => {});
       setAccess(await navigator.requestMIDIAccess({ sysex: true }));
       setStatus("");
     } catch (error) {
@@ -35,39 +36,52 @@ export default function Hardware({
 
   useEffect(() => {
     if (!access) return;
+    const connected = (list) =>
+      [...list.values()].filter((port) => port.state === "connected");
     const update = () =>
-      setPorts(
-        [...access.inputs.values()].filter((p) => p.state === "connected"),
-      );
+      setPorts({
+        inputs: connected(access.inputs),
+        outputs: connected(access.outputs),
+      });
     access.addEventListener("statechange", update);
     update();
     return () => access.removeEventListener("statechange", update);
   }, [access]);
 
-  const input =
-    ports.find((port) => port.id === selected) ||
-    (!selected && ports.find((port) => /fm[ -]?1 dj/i.test(port.name || "")));
+  const input = selectInput(ports.inputs, config.midiInput);
+  const output = selectOutput(ports.outputs, input, config.midiOutput);
+  const firmware =
+    verified?.input === input && verified?.output === output
+      ? verified?.version
+      : undefined;
 
   useEffect(() => {
-    if (!access || !input) return;
+    if (!input || !output) return;
     let sequence = 0;
-    let out;
     let nextFrame;
-    const reset = () => {
-      out = [...access.outputs.values()].find(
-        (port) =>
-          port.state === "connected" &&
-          port.name === input.name &&
-          port.manufacturer === input.manufacturer,
-      );
+    let acknowledged = false;
+    let sentGreeting = false;
+    let lastGreeting = -Infinity;
+    const send = (bytes) => {
+      if (input.state !== "connected" || output.state !== "connected")
+        return false;
       try {
-        out?.send(packet(0, 0, []));
+        output.send(bytes);
+        return true;
       } catch {
-        /* disconnected during enumeration */
+        return false;
       }
     };
-    reset();
-    access.addEventListener("statechange", reset);
+    const sendState = () =>
+      send(packet(1, sequence++, latest.current.getPacket()));
+    const tick = () => {
+      if (acknowledged) {
+        sendState();
+      } else if (performance.now() - lastGreeting >= 750) {
+        lastGreeting = performance.now();
+        sentGreeting = send(packet(0, 0, [])) || sentGreeting;
+      }
+    };
     const receive = (event) => {
       const bytes = [...event.data];
       if (latest.current.expanded)
@@ -75,20 +89,15 @@ export default function Hardware({
           ...prev.slice(-11),
           bytes.map((n) => n.toString(16).padStart(2, "0")).join(" "),
         ]);
-      if (bytes[0] === 0xf0) {
-        if (
-          bytes.length === 12 &&
-          bytes[1] === 0x7d &&
-          bytes[2] === 0x46 &&
-          bytes[3] === 0x44 &&
-          bytes[4] === 1 &&
-          bytes[5] === 2 &&
-          bytes.slice(1, -1).reduce((sum, byte) => sum + byte, 0) % 128 === 0
-        ) {
-          setFirmware(bytes.slice(7, 10).join("."));
-        }
+      if (!acknowledged) {
+        const version = sentGreeting && firmwareVersion(bytes);
+        if (!version) return;
+        acknowledged = true;
+        setVerified({ input, output, version });
+        sendState();
         return;
       }
+      if (bytes[0] === 0xf0) return;
       latest.current.onMidi(bytes);
       if (nextFrame == null)
         nextFrame = requestAnimationFrame(() => {
@@ -96,23 +105,17 @@ export default function Hardware({
           sendState();
         });
     };
-    const sendState = () => {
-      try {
-        out?.send(packet(1, sequence++, latest.current.getPacket()));
-      } catch {
-        /* port disconnected */
-      }
-    };
     input.addEventListener("midimessage", receive);
-    const timer = setInterval(sendState, 125);
+    const timer = setInterval(tick, 125);
+    tick();
     return () => {
       input.removeEventListener("midimessage", receive);
-      access.removeEventListener("statechange", reset);
       clearInterval(timer);
       if (nextFrame != null) cancelAnimationFrame(nextFrame);
+      setVerified(null);
       latest.current.onMidi([]);
     };
-  }, [access, input]);
+  }, [input, output]);
 
   function saveMapping() {
     try {
@@ -156,7 +159,7 @@ export default function Hardware({
   return (
     <section className="fm-hardware" aria-label="FM-1 hardware">
       <button type="button" onClick={connect}>
-        {input ? "MIDI connected" : "Connect FM-1"}
+        {firmware ? "MIDI connected" : "Connect FM-1"}
       </button>
       <button
         type="button"
@@ -166,25 +169,47 @@ export default function Hardware({
         Hardware diagnostics
       </button>
       <span role="status">
-        {status || input?.name || (access ? "Waiting for FM-1" : "")}
+        {status ||
+          (firmware
+            ? input.name
+            : access &&
+              (!input
+                ? "Select the FM-1 MIDI input in Hardware diagnostics."
+                : !output
+                  ? "Select the FM-1 MIDI output in Hardware diagnostics."
+                  : "Waiting for FM-1 DJ firmware to confirm the MIDI pair."))}
       </span>
       {expanded && (
         <div className="fm-diagnostics">
-          <label>
-            MIDI device{" "}
-            <select
-              value={selected}
-              onChange={(e) => setSelected(e.target.value)}
-            >
-              <option value="">FM-1 DJ auto-select</option>
-              {ports.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <span>Firmware {input && firmware ? firmware : "—"}</span>
+          {[
+            ["MIDI input", "midiInput", ports.inputs],
+            ["MIDI output", "midiOutput", ports.outputs],
+          ].map(([label, key, devices]) => (
+            <label key={key}>
+              {label}{" "}
+              <select
+                value={config[key] || ""}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setConfig((prev) => ({ ...prev, [key]: value }));
+                }}
+              >
+                <option value="">FM-1 DJ auto-select</option>
+                {config[key] &&
+                  !devices.some((port) => port.id === config[key]) && (
+                    <option value={config[key]}>
+                      Previously selected port unavailable
+                    </option>
+                  )}
+                {devices.map((port) => (
+                  <option key={port.id} value={port.id}>
+                    {port.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <span>Firmware {firmware || "—"}</span>
           <button onClick={() => outputTest(false)}>Test Master</button>
           <button onClick={() => outputTest(true)}>Test headphones</button>
           <span>
