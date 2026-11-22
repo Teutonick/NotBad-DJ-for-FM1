@@ -84,10 +84,22 @@ function gitRevision(path) {
   return result.stdout.trim();
 }
 
+export function inspectReleaseManifest(actual, expected) {
+  if (!expected)
+    return { releaseManifest: "NOT VERIFIED", manifestMismatches: [] };
+  const manifestMismatches = Object.keys(actual).filter(
+    (key) => actual[key] !== expected[key],
+  );
+  return {
+    releaseManifest: manifestMismatches.length ? "FAIL" : "PASS",
+    manifestMismatches,
+  };
+}
+
 function checkCandidate() {
   const release = releases[version];
   const bytes = readFileSync(candidate);
-  const info = inspectPackage(bytes, release);
+  const info = inspectPackage(bytes);
   const parts = version.split(".").map(Number);
   assert.ok(
     parts.length === 3 &&
@@ -101,14 +113,20 @@ function checkCandidate() {
     baseCommit: gitRevision("firmware/base"),
     bspCommit: gitRevision("firmware/base/bsp"),
   };
-  if (release) {
-    for (const [key, pin] of Object.entries(pins))
-      assert.equal(pin, release[key], `Manifest ${key} mismatch`);
+  const { releaseManifest, manifestMismatches } = inspectReleaseManifest(
+    { product: info.product, sha256: info.digest, ...pins },
+    release,
+  );
+  if (manifestMismatches.length) {
+    console.error(
+      `Release manifest mismatch: ${manifestMismatches.join(", ")}. Keeping the artifact for CI diagnostics only.`,
+    );
   }
   save("memory-report.json", {
     ...info,
     ...pins,
-    releaseManifest: release ? "PASS" : "NOT VERIFIED",
+    releaseManifest,
+    manifestMismatches,
   });
   writeFileSync(
     join(reports, "firmware.sha256"),
@@ -116,7 +134,14 @@ function checkCandidate() {
   );
 }
 
-const mandatoryJobs = ["build", "host", "fm1kit", "emulator", "installer", "recovery_lab"];
+const mandatoryJobs = [
+  "build",
+  "host",
+  "fm1kit",
+  "emulator",
+  "installer",
+  "recovery_lab",
+];
 const gaps = {
   "target-stack-mmio":
     "Target stack analysis is enabled. Passing release-build evidence and complete MMIO verification are still needed.",
@@ -200,8 +225,15 @@ function report(jobs) {
   writeFileSync(join(reports, "report.md"), md);
   if (process.env.GITHUB_STEP_SUMMARY)
     writeFileSync(process.env.GITHUB_STEP_SUMMARY, md, { flag: "a" });
-  if (!result.passed)
-    throw new Error("Firmware release blocked. See the safety report.");
+  if (!result.passed) {
+    const blockers = Object.entries(result.checks)
+      .filter(([, value]) => value !== "PASS")
+      .map(([check, value]) => `${check}: ${value}`);
+    console.error(
+      `${status}\n${blockers.join("\n")}\nDetails: ${join(reports, "report.md")}`,
+    );
+    process.exitCode = 1;
+  }
 }
 
 if (

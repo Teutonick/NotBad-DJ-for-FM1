@@ -1,0 +1,42 @@
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -1091,6 +1091,11 @@
+             # output, the backend's input: tools/stack_depth.py resolves the indirect calls on it)
+             cg += [(*c[:-4], "-S", "-emit-llvm", c[-3], "-o", Path(str(c[-1])).with_suffix(".opt.ll")) for c in cg]
+         tc_all(*cg)
++    elif CONF.get("stack_check") or os.environ.get("FM1B_OPT_IR") == "1":
++        # Generate the analyser's input beside the ordinary object build.
++        # Use the same source, flags and optimisation level for each C unit.
++        tc_all(*[(*cmd[:-4], "-S", "-emit-llvm", cmd[-3], "-o", cmd[-1].with_suffix(".opt.ll"))
++                 for cmd in units if cmd[-3].suffix == ".c"])
+     elf = OUT / (NAME + ".elf")
+     # unreferenced functions (each in its own section: -ffunction-sections) are dropped: the DSP keeps
+     # mono reference paths for the host tests that the firmware no longer calls. The BT libraries are LTO
+@@ -1862,6 +1867,8 @@
+     a = ap.parse_args()
+     APP = a.app.resolve()
+     CONF = read_conf(APP / "fm1.toml")
++    if os.environ.get("FM1B_STACK_CHECK") == "1":
++        CONF["stack_check"] = True
+     if CONF.get("conf_gen"):                      # the app's script (cwd APP_DIR) prints fm1.toml lines over the file's own
+         c = CONF["conf_gen"].split()
+         r = subprocess.run([sys.executable, str(APP / c[0]), *c[1:]], cwd=APP, capture_output=True, text=True)
+--- a/host/plat_host.c
++++ b/host/plat_host.c
+@@ -220,7 +220,7 @@
+     }
+     return *cache;
+ }
+-static int host_busy_n = -1, host_bta_n = -1, host_busy_left;
++static int host_bta_n = -1;
+ static uint32_t host_bta_jobs;
+ 
+ uint32_t plat_ms(void);
+@@ -1800,6 +1800,7 @@
+ #if FM1B_CPU2 && !defined(APP_HOST_CPU2)
+ /* the second core, simulated: a job runs at once, in order (the same sums as the device's split); plat_core is 1 in it */
+ static int cpu2_on, cpu2_in_job;
++static int host_busy_n = -1, host_busy_left;
+ int plat_cpu2_set(int on) { cpu2_on = on; return 0; }
+ int plat_cpu2_on(void) { return cpu2_on; }
+ int plat_cpu2_run(void (*fn)(uint32_t), uint32_t arg)

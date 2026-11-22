@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createHash } from "node:crypto";
-import { inspectPackage, releaseDecision, tools } from "./safety.mjs";
+import {
+  inspectPackage,
+  inspectReleaseManifest,
+  releaseDecision,
+  tools,
+} from "./safety.mjs";
 import { ufwCrc16 } from "../../src/fm1/updater/fm1ota.js";
 
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
@@ -130,4 +135,22 @@ test("gate fails closed when any required evidence is missing or fails", () => {
   assert.equal(failed.checks.fm1kit, "FAIL");
   assert.equal(failed.checks.emulator, "NOT VERIFIED");
   assert.equal(failed.checks["release-manifest"], "NOT VERIFIED");
+});
+
+test("valid packages with a different release digest remain diagnostic only", () => {
+  const actual = {
+    product,
+    sha256: sha(fixture()),
+    baseCommit: "base",
+    bspCommit: "bsp",
+  };
+  assert.equal(inspectReleaseManifest(actual, actual).releaseManifest, "PASS");
+  assert.equal(inspectReleaseManifest(actual).releaseManifest, "NOT VERIFIED");
+  assert.deepEqual(
+    inspectReleaseManifest(actual, { ...actual, sha256: "wrong" }),
+    {
+      releaseManifest: "FAIL",
+      manifestMismatches: ["sha256"],
+    },
+  );
 });

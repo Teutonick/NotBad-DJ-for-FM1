@@ -46,7 +46,7 @@ case "${1:-}" in
     [[ "$(uname -s)" == Linux ]] || { echo "Target gate requires Linux with the JieLi toolchain."; exit 1; }
     sh firmware/build.sh --host 2>&1 | tee "$report/build-host.log"
     firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk 2>&1 | tee "$report/sdk.log"
-    sh firmware/build.sh --release "$version" 2>&1 | tee "$report/build.log"
+    FM1B_STACK_CHECK=1 sh firmware/build.sh --release "$version" 2>&1 | tee "$report/build.log"
     grep -E 'main stack: .*at most \(static\)' "$report/build.log" > "$report/target-stack.log"
     grep -E 'interrupt stack: .*at most \(static\)' "$report/build.log" >> "$report/target-stack.log"
     node "$check" package

@@ -7,4 +7,10 @@ if [ ! -d base/.git ]; then
 fi
 git -C base checkout --detach "$base_ref"
 git -C base submodule update --init --recursive
+patch=../patches/fm1-base-safety.patch
+if git -C base apply --check --reverse "$patch" 2>/dev/null; then
+  : # Already applied to this checkout.
+else
+  git -C base apply "$patch"
+fi
 exec "${FM1_PYTHON:-python3}" base/tools/build.py dj "$@"

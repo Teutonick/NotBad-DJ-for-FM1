@@ -6,7 +6,6 @@ usb_audio_in = true
 usb_audio_out = true
 usb_midi_last = true
 ble = false
-stack_check = true
 author = "FM-1 DJ contributors"
 licence = "MPL-2.0"
 tagline = "Two-deck DJ controller"
