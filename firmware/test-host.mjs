@@ -1,0 +1,73 @@
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { fourteen, packet, shortTitle } from "../src/fm1/protocol.js";
+
+const dir = mkdtempSync(join(tmpdir(), "fm1-dj-host-"));
+const script = join(dir, "controller.txt");
+const deck = (title, bpm, flags) => [
+  flags,
+  ...fourteen(bpm * 10),
+  56,
+  32,
+  90,
+  64,
+  64,
+  64,
+  64,
+  45,
+  ...shortTitle(title),
+  ...Array.from({ length: 24 }, (_, i) => 12 + ((i * 17) % 103)),
+];
+const payload = [
+  30,
+  0,
+  0,
+  ...deck("BEACON", 124, 1),
+  ...deck("AFTERGLOW", 128, 6),
+];
+const state = packet(1, 1, payload);
+const hex = (bytes) =>
+  bytes.map((byte) => byte.toString(16).padStart(2, "0")).join(" ");
+const broken = packet(1, 2, payload);
+broken[broken.length - 2] ^= 1;
+writeFileSync(
+  script,
+  [
+    "usb plug",
+    "wait 130",
+    "expect usb_play_gain 0",
+    `sysex ${hex(packet(0, 0, []))}`,
+    "expect_sysex F0 7D 46 44 01 02 00 00 01 00 75 F7",
+    `sysex ${hex(state)}`,
+    "wait 130",
+    "expect usb_play_gain 3072",
+    "tapkey 0",
+    "expect_out USB 90 35 64",
+    "expect_out USB 80 35 00",
+    "spin ALGO -1",
+    "expect_out USB B0 11 7F",
+    "shot panel.png",
+    "wait 1100",
+    `sysex ${hex(state)}`,
+    `sysex ${hex(broken)}`,
+    "wait 350",
+    "expect usb_play_gain 0",
+    "usb unplug",
+    "usb plug",
+    `sysex ${hex(packet(0, 0, []))}`,
+    `sysex ${hex(state)}`,
+    "wait 150",
+    "expect usb_play_gain 3072",
+    "usb unplug",
+    "wait 30",
+    "expect usb_play_gain 0",
+  ].join("\n") + "\n",
+);
+const host = new URL("./dj/build/host/fm1-dj_host", import.meta.url);
+const result = spawnSync(decodeURIComponent(host.pathname), [script, dir], {
+  stdio: "inherit",
+});
+console.log(`Simulator results: ${dir}`);
+process.exitCode = result.status ?? 1;

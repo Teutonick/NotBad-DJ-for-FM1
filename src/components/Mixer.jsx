@@ -93,9 +93,23 @@ function EqColumn({
   );
 }
 
-function Mixer({ engine, eq, setEq, vol, onVolChange, deckAutoGain, vuMode }) {
+function Mixer({
+  engine,
+  eq,
+  setEq,
+  vol,
+  onVolChange,
+  deckAutoGain,
+  vuMode,
+  cross,
+  setCross,
+  filt,
+  onFilt,
+  fx,
+  changeFx,
+}) {
   const { t } = useI18n();
-  const [cross, setCross] = useState(0.5);
+
   // Auto-gain activo por defecto: nivela las pistas al cargarlas
   const [autoGainEnabled, setAutoGainEnabled] = useState({
     A: true,
@@ -106,7 +120,6 @@ function Mixer({ engine, eq, setEq, vol, onVolChange, deckAutoGain, vuMode }) {
     A: { low: false, mid: false, high: false },
     B: { low: false, mid: false, high: false },
   });
-  const [filt, setFilt] = useState({ A: 0, B: 0 });
 
   useEffect(() => {
     engine.setCrossfader(cross);
@@ -156,11 +169,6 @@ function Mixer({ engine, eq, setEq, vol, onVolChange, deckAutoGain, vuMode }) {
       ...prev,
       [side]: { ...prev[side], [band]: !prev[side][band] },
     }));
-  };
-
-  const onFilt = (side, v) => {
-    setFilt((prev) => ({ ...prev, [side]: v }));
-    engine.setDeckFilter(side, v);
   };
 
   return (
@@ -228,6 +236,30 @@ function Mixer({ engine, eq, setEq, vol, onVolChange, deckAutoGain, vuMode }) {
             toggleAutoGain={toggleAutoGain}
           />
         </div>
+      </div>
+      <div className="fm-effects">
+        {["A", "B"].map((side) => (
+          <div key={side}>
+            <button
+              type="button"
+              aria-pressed={fx[side].on}
+              onClick={() => changeFx(side, { on: !fx[side].on })}
+            >
+              Echo {side}
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              aria-label={`Echo amount ${side}`}
+              value={fx[side].amount}
+              onChange={(e) =>
+                changeFx(side, { amount: Number(e.target.value) })
+              }
+            />
+          </div>
+        ))}
       </div>
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4 shadow-xl">
         <div className="flex items-center justify-between text-xs text-neutral-400 mb-2">

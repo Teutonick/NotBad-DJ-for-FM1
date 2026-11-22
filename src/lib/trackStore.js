@@ -73,6 +73,7 @@ export async function storeTrack(track) {
       metaRead = false,
       musicalKey = null,
       analyzed = false,
+      audioDetails,
       // Hot cues y loops: son del USUARIO. Se guardan en forma compacta (solo
       // lo que ha puesto) para que subir el número de cues no obligue a migrar
       // lo ya guardado. Ver src/lib/cuePoints.js.
@@ -102,6 +103,7 @@ export async function storeTrack(track) {
         metaRead,
         musicalKey,
         analyzed,
+        ...(audioDetails ? { audioDetails } : {}),
         hotCues: sanitizeHotCues(hotCues),
         savedLoops: sanitizeSavedLoops(savedLoops),
         activeLoop: sanitizeLoopRegion(activeLoop),

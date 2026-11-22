@@ -79,19 +79,19 @@ suite("flujos de la aplicación en el navegador", () => {
   });
 
   it("reproduce: el playhead avanza", async () => {
-    await pulsar("Play");
+    await page.click('[data-testid="deck-transport"]');
     await page.waitForFunction(
-      "(document.querySelectorAll('audio')[0]?.currentTime || 0) > 0.3",
+      "(document.querySelector('[data-testid=deck] audio')?.currentTime || 0) > 0.3",
       { timeout: 15000, polling: 100 },
     );
     const t1 = await page.evaluate(
-      "document.querySelectorAll('audio')[0].currentTime",
+      "document.querySelector('[data-testid=deck] audio').currentTime",
     );
     expect(t1).toBeGreaterThan(0.3);
 
-    await pulsar("Pause");
+    await page.click('[data-testid="deck-transport"]');
     const parado = await page.evaluate(
-      "document.querySelectorAll('audio')[0].paused",
+      "document.querySelector('[data-testid=deck] audio').paused",
     );
     expect(parado).toBe(true);
   });
@@ -182,4 +182,22 @@ suite("flujos de la aplicación en el navegador", () => {
     }
     expect(desbordes).toEqual([]);
   });
+  it("imports production demo assets and keeps the library across reload", async () => {
+    await pulsar("Add demo tracks", 0, true);
+    await page.waitForFunction(() =>
+      document.body.textContent.includes("Afterglow-128.wav"),
+    );
+    await page.reload({ waitUntil: "networkidle0" });
+    await page.waitForFunction(() =>
+      document.body.textContent.includes("Beacon-124.wav"),
+    );
+    expect(
+      await page.$eval("[aria-label=Headphones]", (section) =>
+        [...section.querySelectorAll("button")]
+          .filter((button) => button.textContent.includes("PFL"))
+          .every((button) => button.disabled),
+      ),
+    ).toBe(true);
+  });
+
 });

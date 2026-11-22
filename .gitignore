@@ -30,3 +30,8 @@ CLAUDE.md
 
 # Electron
 release
+
+/firmware/base/
+/firmware/dj/build/
+
+/firmware/dj/midi_out.txt

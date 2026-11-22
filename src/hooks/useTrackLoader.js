@@ -1,9 +1,6 @@
+import { analyzeTrackDetails } from "../audio/trackDetails";
 import { useEffect, useRef, useState } from "react";
-import {
-  analyzeTrackLoudness,
-  analyzeWaveform,
-  computeAutoGainDb,
-} from "../audio/utils";
+import { computeAutoGainDb } from "../audio/utils";
 import { computeOnsetEnvelope, detectTempoAsync } from "../audio/beatGrid";
 import { detectKey } from "../audio/keyDetect";
 import { readTrackMetadata } from "../audio/metadata";
@@ -34,6 +31,7 @@ const cachedFrom = (tr) => ({
   savedLoops: tr.savedLoops,
   activeLoop: tr.activeLoop,
   structure: tr.structure,
+  audioDetails: tr.audioDetails,
 });
 
 // === Carga de una pista en un deck y su análisis ===
@@ -66,6 +64,7 @@ export function useTrackLoader({
   events,
 }) {
   const [fileName, setFileName] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [objectUrl, setObjectUrl] = useState("");
   const [waveData, setWaveData] = useState(null);
   const [bandIndex, setBandIndex] = useState(null);
@@ -135,8 +134,11 @@ export function useTrackLoader({
   // === Onda + bandas + loudness (una sola pasada por el buffer) ===
   // `name` solo es para el registro: el estado fileName aún puede tener el de
   // la pista anterior cuando esto corre
-  async function analyzeTrack(arrayBuffer, loadId, name) {
+  async function analyzeTrack(arrayBuffer, loadId, name, cached) {
     const audioBuffer = await engine.ctx.decodeAudioData(arrayBuffer);
+    const details =
+      cached?.audioDetails || (await analyzeTrackDetails(audioBuffer));
+    if (loadIdRef.current !== loadId) return;
     const ev = events.current;
 
     const duration = audioBuffer.duration;
@@ -146,12 +148,13 @@ export function useTrackLoader({
       bandIndex: bands,
       bandLow: low,
       peak,
-    } = analyzeWaveform(audioBuffer);
+      loudDb,
+    } = details;
 
     setWaveData(norm);
     setBandIndex(bands);
     setBandLow(low);
-    ev.onAnalysis?.(side, { waveData: norm, duration });
+    ev.onAnalysis?.(side, { waveData: norm, duration, audioDetails: details });
 
     // Auto-cue provisional: inicio del sonido (primer bloque no silencioso)
     const onsetIdx = norm.findIndex((v) => v > 0.05);
@@ -159,7 +162,6 @@ export function useTrackLoader({
 
     // Loudness de TODA la pista, calculado una sola vez al cargarla: nunca se
     // vuelve a mover durante la reproducción
-    const { loudDb } = analyzeTrackLoudness(audioBuffer);
     ev.onAutoGainComputed?.(side, computeAutoGainDb({ loudDb, peak }));
 
     setAnalyzing("bpm");
@@ -201,6 +203,7 @@ export function useTrackLoader({
     setBufferDuration(0);
 
     setFileName(f.name);
+    setLoadError("");
     setWaveData(null);
     setBandIndex(null);
     setBandLow(null);
@@ -235,6 +238,7 @@ export function useTrackLoader({
       // decks, dos <audio> leyendo el MISMO File en streaming se atascan
       // (la reproducción se congela); con una copia por deck no
       const arrayBuffer = await f.arrayBuffer();
+      if (loadIdRef.current !== loadId) return;
       const blobCopy = new Blob([arrayBuffer], {
         type: f.type || "audio/mpeg",
       });
@@ -254,10 +258,15 @@ export function useTrackLoader({
 
       // decodeAudioData "consume" (detach) el arrayBuffer, por eso la copia
       // del blob se hace antes
-      await analyzeTrack(arrayBuffer, loadId, f.name);
+      await analyzeTrack(arrayBuffer, loadId, f.name, cached);
     })().catch((err) => {
       logError(ERRORS.TRACK_LOAD, err, { deck: side, file: f.name });
-      setAnalyzing(null);
+      if (loadIdRef.current === loadId) {
+        setAnalyzing(null);
+        setLoadError(
+          `Could not decode ${f.name}. Choose a supported, undamaged audio file.`,
+        );
+      }
     });
   };
 
@@ -311,6 +320,7 @@ export function useTrackLoader({
 
   return {
     fileName,
+    loadError,
     objectUrl,
     waveData,
     bandIndex,

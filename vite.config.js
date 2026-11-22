@@ -16,6 +16,8 @@ const appVersion = () => ({
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), appVersion()],
+  base: "./",
+  optimizeDeps: { entries: ["index.html"] },
   // Misma versión para el <title> y para la interfaz, de una sola fuente
   define: { __APP_VERSION__: JSON.stringify(version) },
 });

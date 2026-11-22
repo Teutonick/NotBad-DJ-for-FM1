@@ -69,9 +69,30 @@ function TrackList({
   showKey,
   playing,
   lockLoadWhilePlaying,
+  playlists,
 }) {
   const { t } = useI18n();
   const inputRef = useRef(null);
+  const folderRef = useRef(null);
+  const [demoStatus, setDemoStatus] = useState("");
+  async function addDemoTracks() {
+    setDemoStatus("Loading demo tracks…");
+    try {
+      const files = await Promise.all(
+        ["Beacon-124.wav", "Afterglow-128.wav"].map(async (name) => {
+          const response = await fetch(
+            `${import.meta.env.BASE_URL}demo/${name}`,
+          );
+          if (!response.ok) throw new Error("Demo file unavailable");
+          return new File([await response.blob()], name, { type: "audio/wav" });
+        }),
+      );
+      onAddTracks(files);
+      setDemoStatus("");
+    } catch (error) {
+      setDemoStatus(error.message);
+    }
+  }
   const artworkUrl = useArtworkUrls(tracks, showArtwork);
 
   // Búsqueda y ordenación
@@ -82,7 +103,9 @@ function TrackList({
   const activeSort = showKey || sortBy !== "key" ? sortBy : "added";
 
   const visibleTracks = useMemo(() => {
-    let list = tracks;
+    let list = playlists?.active
+      ? tracks.filter((track) => playlists.active.ids.includes(track.id))
+      : tracks;
     const q = query.trim().toLowerCase();
     if (q) {
       list = list.filter((tr) =>
@@ -109,7 +132,7 @@ function TrackList({
       list = [...list].reverse();
     }
     return list;
-  }, [tracks, query, activeSort, sortDir]);
+  }, [tracks, query, activeSort, sortDir, playlists?.active]);
 
   const onFiles = (e) => {
     const files = Array.from(e.target.files || []);
@@ -209,7 +232,18 @@ function TrackList({
   };
 
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4 sm:p-5 shadow-xl">
+    <div
+      className="rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4 sm:p-5 shadow-xl"
+      onDragOver={(event) => {
+        if (event.dataTransfer.types.includes("Files")) event.preventDefault();
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        if (event.dataTransfer.files.length)
+          onAddTracks(Array.from(event.dataTransfer.files));
+      }}
+    >
+      {playlists?.toolbar}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
         <h2 className="text-lg font-semibold tracking-tight">{t("songs")}</h2>
         {tracks.length > 0 && (
@@ -273,6 +307,32 @@ function TrackList({
             {t("addSongs")}
           </button>
         </div>
+        {playlists && (
+          <div className="flex items-center gap-3 text-sm">
+            <button type="button" onClick={() => folderRef.current?.click()}>
+              Add folder
+            </button>
+            <button type="button" onClick={addDemoTracks}>
+              Add demo tracks
+            </button>
+            <span role="status">{demoStatus}</span>
+          </div>
+        )}
+        <input
+          ref={folderRef}
+          type="file"
+          webkitdirectory=""
+          multiple
+          onChange={(e) => {
+            onAddTracks(
+              Array.from(e.target.files).filter((file) =>
+                /\.(mp3|wav|flac|ogg|m4a|aac)$/i.test(file.name),
+              ),
+            );
+            e.target.value = "";
+          }}
+          className="hidden"
+        />
         <input
           ref={inputRef}
           type="file"
@@ -363,7 +423,7 @@ function TrackList({
                       </span>
                     ) : track.analyzeFailed ? (
                       <span className="text-[10px] text-neutral-600">
-                        {t("bpmUnknown")}
+                        {playlists ? "Analysis unavailable" : t("bpmUnknown")}
                       </span>
                     ) : (
                       <span className="text-[10px] text-neutral-500 animate-pulse">
@@ -403,6 +463,7 @@ function TrackList({
                       );
                     })}
                   </div>
+                  {playlists?.membership(track.id)}
                   {/* Carátula: hueco fijo de 32 px. Sin carátula se pinta un
                     marcador discreto, así las filas nunca se descuadran. */}
                   {showArtwork &&

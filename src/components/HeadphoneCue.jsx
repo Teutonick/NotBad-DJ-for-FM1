@@ -1,96 +1,131 @@
-import { memo, useEffect, useRef, useState } from "react";
-import Fader from "./Fader";
-import { useI18n } from "../i18n/context";
-import { GLOSS, PRESS, SKIN } from "./PadButton";
-import { ERRORS, logError } from "../lib/log";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { CueOutput, testTone } from "../audio/cueOutput";
 
-// PFL / pre-escucha: envía el deck (pre-fader, post-EQ) a la salida elegida
-// en Config (⚙). Solo tiene sentido con dos dispositivos: el master sigue
-// saliendo por su propia salida.
-function HeadphoneCue({ engine, cueDeviceId }) {
-  const { t } = useI18n();
+export default forwardRef(function HeadphoneCue(
+  { engine, cueDeviceId, masterDeviceId },
+  ref,
+) {
+  const output = useMemo(() => new CueOutput(engine), [engine]);
+  const [ready, setReady] = useState(false);
   const [pfl, setPfl] = useState({ A: false, B: false });
-  const [hpVol, setHpVol] = useState(1);
-  const audioRef = useRef(null);
+  const [volume, setVolume] = useState(0.35);
+  const [mix, setMix] = useState(0);
+  const [status, setStatus] = useState("");
+  const mixRef = useRef(mix);
 
-  const sinkSupported =
-    typeof HTMLMediaElement !== "undefined" &&
-    "setSinkId" in HTMLMediaElement.prototype;
-
-  const ensureCueAudio = () => {
-    const el = audioRef.current;
-    if (!el) return;
-    if (!el.srcObject) el.srcObject = engine.getCueStream();
-    // play() aquí siempre ocurre dentro de un gesto del usuario (click)
-    el.play().catch(() => {});
-  };
-
-  // Aplicar el dispositivo elegido en Config
   useEffect(() => {
-    const el = audioRef.current;
-    if (!el || !sinkSupported) return;
-    el.setSinkId(cueDeviceId || "").catch((err) =>
-      logError(ERRORS.AUDIO_SINK_CUE, err, { deviceId: cueDeviceId }),
-    );
-  }, [cueDeviceId, sinkSupported]);
+    const lost = () => {
+      output.mute();
+      engine.setDeckCue("A", false);
+      engine.setDeckCue("B", false);
+      setPfl({ A: false, B: false });
+      setReady(false);
+      setStatus(
+        cueDeviceId
+          ? "Enable the selected headphones output."
+          : "Choose headphones in audio settings.",
+      );
+    };
+    lost();
+    navigator.mediaDevices?.addEventListener("devicechange", lost);
+    return () => {
+      navigator.mediaDevices?.removeEventListener("devicechange", lost);
+      output.mute();
+    };
+  }, [output, engine, cueDeviceId, masterDeviceId]);
 
-  const togglePfl = (side) => {
-    const next = !pfl[side];
-    engine.setDeckCue(side, next);
-    setPfl((prev) => ({ ...prev, [side]: next }));
-    if (next) ensureCueAudio();
-  };
+  function toggle(side) {
+    if (!ready) return;
+    setPfl((prev) => {
+      engine.setDeckCue(side, !prev[side]);
+      return { ...prev, [side]: !prev[side] };
+    });
+  }
 
-  const onHpVol = (v) => {
-    setHpVol(v);
-    engine.setCueVolume(v);
-  };
+  function adjustMix(value) {
+    const next = Math.min(1, Math.max(0, value));
+    mixRef.current = next;
+    setMix(next);
+    engine.setCueMix(next);
+  }
+
+  async function enable() {
+    setReady(false);
+    try {
+      const connected = await output.connect(cueDeviceId, masterDeviceId);
+      setReady(connected);
+      if (connected) setStatus("Headphones ready");
+      return connected;
+    } catch (error) {
+      setStatus(error.message);
+      return false;
+    }
+  }
+
+  useImperativeHandle(ref, () => ({
+    toggle,
+    pfl,
+    adjustMix: (delta) => adjustMix(mixRef.current + delta),
+    test: async () => {
+      if (!(await enable())) throw new Error("Headphones output unavailable.");
+      output.testSource = testTone(output.context, output.gate, 660);
+      output.testSource.onended = () => {
+        output.testSource = null;
+      };
+    },
+  }));
 
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/70 px-4 py-2 shadow-xl flex flex-wrap items-center gap-x-4 gap-y-2">
-      <span
-        className="text-xs text-neutral-400 shrink-0 whitespace-nowrap"
-        title={t("cueBusTitle")}
-      >
-        {t("cueBus")}
-      </span>
-      <div className="flex items-center gap-1 shrink-0">
-        {["A", "B"].map((side) => (
-          <button
-            key={side}
-            onClick={() => togglePfl(side)}
-            className={`px-2 py-1 rounded-lg text-xs font-semibold border whitespace-nowrap ${GLOSS} ${PRESS} ${
-              pfl[side]
-                ? "bg-gradient-to-b from-amber-300 to-amber-500 text-black border-amber-300"
-                : `text-neutral-300 ${SKIN}`
-            }`}
-            title={t("pflTitle", { side })}
-          >
-            PFL {side}
-          </button>
-        ))}
-      </div>
-      <div className="flex items-center gap-2 flex-1 min-w-40">
-        <span className="text-[10px] text-neutral-500 shrink-0">
-          {t("vol")}
-        </span>
-        <Fader
-          min={0}
-          max={1}
-          step={0.01}
-          value={hpVol}
-          onChange={(e) => onHpVol(Number(e.target.value))}
-          ticks={11}
-          thickness={18}
-          accent="#fbbf24"
-          resetValue={1}
-          title={t("cueVolTitle")}
-          ariaLabel={t("vol")}
+    <section className="fm-hardware fm-headphones" aria-label="Headphones">
+      <strong>HEADPHONES</strong>
+      <button type="button" onClick={enable} disabled={ready}>
+        Enable Cue Output
+      </button>
+      {["A", "B"].map((side) => (
+        <button
+          key={side}
+          type="button"
+          disabled={!ready}
+          aria-pressed={pfl[side]}
+          onClick={() => toggle(side)}
+        >
+          PFL {side}
+        </button>
+      ))}
+      <label>
+        Level{" "}
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={volume}
+          onChange={(event) => {
+            const next = Number(event.target.value);
+            setVolume(next);
+            engine.setCueVolume(next);
+          }}
         />
-      </div>
-      <audio ref={audioRef} className="hidden" />
-    </div>
+      </label>
+      <label>
+        Cue / Master{" "}
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={mix}
+          onChange={(event) => adjustMix(Number(event.target.value))}
+        />
+      </label>
+      <span role="status">{status}</span>
+    </section>
   );
-}
-
-export default memo(HeadphoneCue);
+});

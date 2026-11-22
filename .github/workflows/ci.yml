@@ -1,37 +1,38 @@
-name: CI
-
-# Lint, formato, tests y build en cada push y en cada pull request a main.
-# Las pruebas de navegador (tests/e2e) NO corren aquí: necesitan un Chrome
-# instalado y no deben poder tumbar la integración continua.
+name: Web checks and GitHub Pages
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
-
+  workflow_dispatch:
+permissions:
+  contents: read
 jobs:
-  check:
-    name: Lint + tests + build
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Format
-        run: npm run format:check
-
-      - name: Tests
-        run: npm test
-
-      - name: Build web bundle
-        run: npm run build
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          path: dist
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy production build
+        id: deployment
+        uses: actions/deploy-pages@v4

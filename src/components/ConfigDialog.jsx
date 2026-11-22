@@ -119,13 +119,20 @@ export default function ConfigDialog({
       .then((all) => {
         const outs = all.filter((d) => d.kind === "audiooutput");
         setDevices(outs);
-        setLabelsAllowed(outs.some((d) => d.label));
+        setLabelsAllowed(outs.some((d) => d.deviceId !== "default" && d.label));
       })
       .catch(() => {});
   };
 
   useEffect(() => {
-    if (open) refreshDevices();
+    if (!open) return;
+    refreshDevices();
+    navigator.mediaDevices?.addEventListener("devicechange", refreshDevices);
+    return () =>
+      navigator.mediaDevices?.removeEventListener(
+        "devicechange",
+        refreshDevices,
+      );
   }, [open]);
 
   useEffect(() => {
@@ -223,11 +230,17 @@ export default function ConfigDialog({
         className="bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1.5 text-sm text-neutral-200"
       >
         <option value="">{extraOption}</option>
-        {devices.map((d, i) => (
-          <option key={d.deviceId || i} value={d.deviceId}>
-            {d.label || t("outputDevice", { n: i + 1 })}
-          </option>
-        ))}
+        {devices
+          .filter(
+            (d) =>
+              key !== "cueOut" ||
+              !["", "default", "communications"].includes(d.deviceId),
+          )
+          .map((d, i) => (
+            <option key={d.deviceId || i} value={d.deviceId}>
+              {d.label || t("outputDevice", { n: i + 1 })}
+            </option>
+          ))}
       </select>
     </label>
   );
@@ -255,7 +268,7 @@ export default function ConfigDialog({
         )}
         {sinkSupported ? (
           <>
-            {deviceSelect("cueOut", t("preListenOut"), t("defaultOutput"))}
+            {deviceSelect("cueOut", t("preListenOut"), "Disabled")}
             {deviceSelect(
               "deckAOut",
               t("deckExternal", { side: "A" }),

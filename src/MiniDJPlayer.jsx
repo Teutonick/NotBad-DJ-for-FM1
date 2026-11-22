@@ -1,3 +1,12 @@
+import TrackOverview from "./components/TrackOverview";
+import Hardware from "./fm1/Hardware";
+import { usePlaylists } from "./fm1/playlists";
+import {
+  fourteen,
+  unit,
+  shortTitle,
+  phaseAlignedPosition,
+} from "./fm1/protocol";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AudioEngine } from "./audio/engine";
 import { PITCH_RANGES } from "./lib/constants";
@@ -29,7 +38,7 @@ export default function MiniDJMixer() {
   const { t } = useI18n();
   const engine = useMemo(() => new AudioEngine(), []);
 
-  const [master, setMaster] = useState(1);
+  const [master, setMaster] = useState(0.65);
   const [volA, setVolA] = useState(1);
   const [volB, setVolB] = useState(1);
   const [eqA, setEqA] = useState({ gain: 0, high: 0, mid: 0, low: 0 });
@@ -291,12 +300,22 @@ export default function MiniDJMixer() {
     if (isPlaying) setLastStarted(side);
   }, []);
 
-  const onAnalysis = useCallback((side, data) => {
-    setDeckAnalysis((prev) => ({
-      ...prev,
-      [side]: { ...prev[side], ...data },
-    }));
-  }, []);
+  const onAnalysis = useCallback(
+    (side, data) => {
+      setDeckAnalysis((prev) => ({
+        ...prev,
+        [side]: { ...prev[side], ...data },
+      }));
+      const track = deckTracksRef.current[side];
+      if (track && data.audioDetails && !track.audioDetails) {
+        updateTrack(track.id, (current) => ({
+          ...current,
+          audioDetails: data.audioDetails,
+        }));
+      }
+    },
+    [updateTrack],
+  );
 
   // Marcar en la lista que la pista ya se pinchó en ese deck
   const onPlayed = useCallback(
@@ -309,9 +328,38 @@ export default function MiniDJMixer() {
   );
 
   // SYNC continuo: alterna el modo sync del deck
-  const onSync = useCallback((side) => {
-    setSyncOn((prev) => ({ ...prev, [side]: !prev[side] }));
-  }, []);
+  const align = (side) => {
+    if (config.phaseSync === false || masterSyncOn) return;
+    const other = side === "A" ? "B" : "A";
+    const own = deckRefs.current[side]?.getGrid();
+    const reference = deckRefs.current[other]?.getGrid();
+    const el = audioElsRef.current[side];
+    const leader = audioElsRef.current[other];
+    if (
+      !own?.bpm ||
+      !reference?.bpm ||
+      !el ||
+      !leader ||
+      leader.paused ||
+      !Number.isFinite(el.duration)
+    )
+      return;
+    const target = phaseAlignedPosition(
+      el.currentTime,
+      own.anchor,
+      own.bpm,
+      leader.currentTime,
+      reference.anchor,
+      reference.bpm,
+      el.duration,
+    );
+    if (Math.abs(el.currentTime - target) > 0.012) el.currentTime = target;
+  };
+
+  const onSync = (side) => {
+    if (!syncOn[side]) align(side);
+    setSyncOn((prev) => ({ A: false, B: false, [side]: !prev[side] }));
+  };
 
   const onAutoGainComputed = useCallback((side, gainDb) => {
     setDeckAutoGain((prev) => ({ ...prev, [side]: gainDb }));
@@ -426,8 +474,187 @@ export default function MiniDJMixer() {
   const eqPair = useMemo(() => ({ A: eqA, B: eqB }), [eqA, eqB]);
   const volPair = useMemo(() => ({ A: volA, B: volB }), [volA, volB]);
 
+  const overviewRefs = useMemo(
+    () => ({
+      A: {
+        get current() {
+          return audioElsRef.current.A;
+        },
+      },
+      B: {
+        get current() {
+          return audioElsRef.current.B;
+        },
+      },
+    }),
+    [],
+  );
+  const cueRef = useRef(null);
+  const [cross, setCross] = useState(0.5);
+  const [filt, setFilt] = useState({ A: 0, B: 0 });
+  const [fx, setFx] = useState({
+    A: { on: false, amount: 0.35 },
+    B: { on: false, amount: 0.35 },
+  });
+  const [selectedTrack, setSelectedTrack] = useState("");
+  const playlists = usePlaylists(config, setConfig);
+  const controllerTracks = playlists.active
+    ? tracks.filter((track) => playlists.active.ids.includes(track.id))
+    : tracks;
+  const controls = useRef({ shift: false, layer: false, turns: new Map() });
+  const onFilt = (side, value) => {
+    setFilt((prev) => ({ ...prev, [side]: value }));
+    engine.setDeckFilter(side, value);
+  };
+  const changeFx = (side, patch) => {
+    const next = { ...fx[side], ...patch };
+    setFx((prev) => ({ ...prev, [side]: next }));
+    engine.setEcho(side, next.on, next.amount);
+  };
+
+  const onMidi = ([status, number, value]) => {
+    const hardware = controls.current;
+    if (status === undefined) {
+      hardware.shift = false;
+      hardware.turns.clear();
+      for (const deck of Object.values(deckRefs.current)) deck?.nudgeEnd();
+      return;
+    }
+    const kind = status & 0xf0;
+    const down = kind === 0x90 && value > 0;
+    if ((status & 15) !== 0) return;
+    const bounded = (v, min = 0, max = 1) => Math.max(min, Math.min(max, v));
+    const selected = Math.max(
+      0,
+      controllerTracks.findIndex((track) => track.id === selectedTrack),
+    );
+    if (kind === 0xb0 && number >= 16 && number <= 22) {
+      const now = performance.now();
+      const elapsed = now - (hardware.turns.get(number) ?? -Infinity);
+      hardware.turns.set(number, now);
+      const delta = value < 64 ? value : value - 128;
+      const step = delta * (elapsed < 55 ? 3 : elapsed < 100 ? 2 : 1);
+      const side = activeDeck;
+      if (number === 16 || number === 18)
+        setSelectedTrack(
+          controllerTracks[
+            bounded(selected + delta, 0, controllerTracks.length - 1)
+          ]?.id || "",
+        );
+      else if (number === 17) setCross((prev) => bounded(prev + step * 0.0125));
+      else if (hardware.shift || hardware.layer) {
+        if (number === 19)
+          onFilt(
+            side,
+            bounded(engine._deck(side).filterValue + step * 0.025, -1, 1),
+          );
+        if (number === 20) {
+          const range = side === "A" ? rangeA : rangeB;
+          setSyncOn((prev) => ({ ...prev, [side]: false }));
+          const setPitch = side === "A" ? setPitchPctA : setPitchPctB;
+          setPitch((prev) => bounded(prev + step * 0.1, -range, range));
+        }
+        if (number === 21) cueRef.current?.adjustMix(step * 0.02);
+        if (number === 22)
+          changeFx(side, {
+            amount: bounded(engine._deck(side).fxAmount + step * 0.02),
+          });
+      } else if (number === 19) {
+        const setVol = side === "A" ? setVolA : setVolB;
+        setVol((prev) => bounded(prev + step * 0.02));
+      } else {
+        const setBands = side === "A" ? setEqA : setEqB;
+        const band = ["low", "mid", "high"][number - 20];
+        setBands((prev) => ({
+          ...prev,
+          [band]: bounded(prev[band] + step * 0.5, -12, 12),
+        }));
+      }
+      return;
+    }
+    if (kind !== 0x80 && kind !== 0x90) return;
+    number = config.noteMap?.[number] ?? number;
+    if (number === 65) hardware.shift = down;
+    if (down && number === 66) hardware.layer = !hardware.layer;
+    if (down && number === 67) changeFx(activeDeck, { on: !fx[activeDeck].on });
+    if (down && number === 85) setActiveDeck("A");
+    if (down && number === 86) setActiveDeck("B");
+    if (down && number === 87 && controllerTracks[selected])
+      onLoadToDeck(activeDeck, controllerTracks[selected]);
+    const side = number < 65 ? "A" : "B";
+    const command = number - (side === "A" ? 53 : 68);
+    if (command < 0 || command > 11) return;
+    const deck = deckRefs.current[side];
+    if (!deck) return;
+    if (command === 4 || command === 5) {
+      if (down) deck.nudgeStart(command === 4 ? -1 : 1);
+      else deck.nudgeEnd();
+      return;
+    }
+    if (!down) return;
+    if (command === 0) deck.playPause();
+    if (command === 1) deck.cueStop();
+    if (command === 2 && canSyncFor(side)) onSync(side);
+    if (command === 3) cueRef.current?.toggle(side);
+    if (command === 6) deck.loopBeats();
+    if (command === 7) deck.loopResize(0.5);
+    if (command === 8) deck.loopResize(2);
+    if (command >= 9) deck.hotCue(command - 9);
+  };
+
+  const getPacket = () => [
+    unit(cross),
+    activeDeck === "A" ? 0 : 1,
+    Number(controls.current.layer || controls.current.shift),
+    ...["A", "B"].flatMap((side) => {
+      const el = audioElsRef.current[side];
+      const api = deckRefs.current[side];
+      const grid = api?.getGrid();
+      const t = el?.currentTime || 0;
+      const beats = ((t - (grid?.anchor || 0)) * (grid?.bpm || 0)) / 60;
+      const eq = eqPair[side];
+      const analysis = deckAnalysis[side];
+      const peaks = analysis?.waveData;
+      const track = deckTracksRef.current[side];
+      return [
+        Number(playing[side]) |
+          (syncOn[side] ? 2 : 0) |
+          (cueRef.current?.pfl[side] ? 4 : 0) |
+          (fx[side].on ? 8 : 0),
+        ...fourteen(
+          Math.round(
+            (grid?.bpm || 0) *
+              (1 + (side === "A" ? pitchPctA : pitchPctB) / 100) *
+              10,
+          ),
+        ),
+        unit(t / el?.duration),
+        unit(((beats % 1) + 1) % 1),
+        unit(volPair[side]),
+        unit((eq.low + 12) / 24),
+        unit((eq.mid + 12) / 24),
+        unit((eq.high + 12) / 24),
+        unit((filt[side] + 1) / 2),
+        unit(fx[side].amount),
+        ...shortTitle(track?.title || api?.getTitle()),
+        ...Array.from({ length: 24 }, (_, i) =>
+          unit(
+            peaks?.length
+              ? Math.max(
+                  ...peaks.slice(
+                    Math.floor((i * peaks.length) / 24),
+                    Math.ceil(((i + 1) * peaks.length) / 24),
+                  ),
+                )
+              : 0,
+          ),
+        ),
+      ];
+    }),
+  ];
+
   return (
-    <div className="min-h-screen w-full bg-neutral-950 text-neutral-100 p-3 sm:p-6">
+    <div className="fm-workspace min-h-screen w-full bg-neutral-950 text-neutral-100 p-3 sm:p-6">
       <div className="mx-auto grid gap-4 sm:gap-6">
         {/* Cabecera: título + REC | beat match | master + master sync */}
         <CentralMeters
@@ -443,6 +670,39 @@ export default function MiniDJMixer() {
           onOpenConfig={onOpenConfig}
           vuMode={vuMode}
         />
+
+        <Hardware
+          engine={engine}
+          config={config}
+          setConfig={setConfig}
+          onMidi={onMidi}
+          getPacket={getPacket}
+          cueRef={cueRef}
+        />
+        {selectedTrack && (
+          <div className="fm-selection">
+            Controller selection ·{" "}
+            {tracks.find((track) => track.id === selectedTrack)?.name}
+          </div>
+        )}
+
+        <section className="fm-overviews" aria-label="Track overviews">
+          {["A", "B"].map((side) => (
+            <div key={side} className={`fm-overview fm-overview-${side}`}>
+              <strong>{side}</strong>
+              <TrackOverview
+                waveData={deckAnalysis[side]?.waveData}
+                beats={deckAnalysis[side]?.beats}
+                duration={deckAnalysis[side]?.duration}
+                audioRef={overviewRefs[side]}
+                title={`Seek Deck ${side}`}
+                onSeek={(fraction) =>
+                  deckRefs.current[side]?.seekFraction(fraction)
+                }
+              />
+            </div>
+          ))}
+        </section>
 
         {/* Decks */}
         {/* El mixer ocupa lo que necesita y los dos decks se reparten el
@@ -469,6 +729,7 @@ export default function MiniDJMixer() {
             onBpmDetected={onBpmDetected}
             onAnalysis={onAnalysis}
             onSync={onSync}
+            alignBeforePlay={(side) => syncOn[side] && align(side)}
             canSync={canSyncFor("A")}
             syncActive={syncOn.A}
             syncLabel={syncLabel("A")}
@@ -495,6 +756,12 @@ export default function MiniDJMixer() {
             vol={volPair}
             onVolChange={onVolChange}
             deckAutoGain={deckAutoGain}
+            cross={cross}
+            setCross={setCross}
+            filt={filt}
+            onFilt={onFilt}
+            fx={fx}
+            changeFx={changeFx}
             vuMode={vuMode}
           />
           <Deck
@@ -516,6 +783,7 @@ export default function MiniDJMixer() {
             onBpmDetected={onBpmDetected}
             onAnalysis={onAnalysis}
             onSync={onSync}
+            alignBeforePlay={(side) => syncOn[side] && align(side)}
             canSync={canSyncFor("B")}
             syncActive={syncOn.B}
             syncLabel={syncLabel("B")}
@@ -538,11 +806,17 @@ export default function MiniDJMixer() {
         </div>
 
         {/* Pre-escucha */}
-        <HeadphoneCue engine={engine} cueDeviceId={config.cueOut} />
+        <HeadphoneCue
+          ref={cueRef}
+          engine={engine}
+          cueDeviceId={config.cueOut}
+          masterDeviceId={config.masterOut}
+        />
 
         {/* Lista de canciones */}
         <TrackList
           tracks={tracks}
+          playlists={playlists}
           deckTracks={deckTracks}
           onAddTracks={addTracks}
           onLoadToDeck={onLoadToDeck}

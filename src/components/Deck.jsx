@@ -83,6 +83,7 @@ function Deck({
   onSync,
   canSync,
   syncActive,
+  alignBeforePlay,
   syncLabel,
   onPlayed,
   onPlayingChange,
@@ -110,6 +111,7 @@ function Deck({
   const loaderEvents = useRef({});
   const {
     fileName,
+    loadError,
     objectUrl,
     waveData,
     bandIndex,
@@ -397,11 +399,12 @@ function Deck({
   };
 
   const play = async () => {
-    await engine?.resume();
     const el = audioRef.current;
     if (!el) return;
     try {
-      await el.play();
+      alignBeforePlay?.(side);
+      const resume = engine?.resume();
+      await Promise.all([resume, el.play()]);
       setIsPlaying(true);
       onPlayingChange?.(side, true);
       if (typeof onPlayed === "function") onPlayed(side);
@@ -646,6 +649,13 @@ function Deck({
     loopIn: setLoopInNow,
     loopOut: setLoopOutNow,
     loopToggle: toggleLoop,
+    loopBeats: () => (loopOn ? toggleLoop() : autoLoop(4)),
+    seekFraction: (fraction) => {
+      const elapsed = fraction * audioRef.current?.duration;
+      if (Number.isFinite(elapsed)) onDragSeek(elapsed);
+    },
+    getGrid: () => ({ bpm, anchor: gridAnchor ?? 0 }),
+    getTitle: () => fileName || "",
     loopMove: moveLoopBy,
     loopResize: resizeLoopBy,
     rollStart: startRoll,
@@ -959,6 +969,11 @@ function Deck({
             </div>
           </div>
         </div>
+        {loadError && (
+          <p role="alert" className="text-sm text-orange-300">
+            {loadError}
+          </p>
+        )}
         {/* Transporte */}
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           {/* Un solo botón: en grid reservamos el ancho del texto más
@@ -968,6 +983,7 @@ function Deck({
             radius={TRANSPORT_RADIUS}
             skin="none"
             contentClass="grid place-items-center w-full"
+            data-testid="deck-transport"
             onClick={isPlaying ? pause : play}
             disabled={!objectUrl && !isPlaying}
             className={`min-w-24 text-sm text-black bg-gradient-to-b ${

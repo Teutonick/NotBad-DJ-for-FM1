@@ -3,7 +3,7 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createServer } from "vite";
+import { build, preview } from "vite";
 import puppeteer from "puppeteer-core";
 import { clickTrack, encodeWav } from "../helpers/wav.js";
 
@@ -30,8 +30,12 @@ export function makeTrackFile(nombre, bpm, seconds = 20) {
 }
 
 export async function startApp() {
-  const server = await createServer({ server: { port: 0 }, logLevel: "error" });
-  await server.listen();
+  await build({ logLevel: "error" });
+  const server = await preview({
+    base: "/fm1-dj/",
+    preview: { host: "127.0.0.1", port: 0 },
+    logLevel: "error",
+  });
   const { port } = server.httpServer.address();
 
   const browser = await puppeteer.launch({
@@ -47,7 +51,7 @@ export async function startApp() {
   });
 
   return {
-    url: `http://localhost:${port}/`,
+    url: `http://127.0.0.1:${port}/fm1-dj/`,
     browser,
     async close() {
       await browser.close();
@@ -60,15 +64,18 @@ export async function openPage(browser, url) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 900 });
 
-  // AudioContext.resume() no resuelve NUNCA sin salida de audio, y la app
-  // espera a esa promesa antes de reproducir. Se sustituye por una promesa ya
-  // resuelta: el grafo se monta igual.
+  // The silent sink gives Web Audio a rendering clock even without CoreAudio.
+  // Playback and the actual graph still run inside Chromium.
   await page.evaluateOnNewDocument(() => {
-    const parche = (Ctor) => {
-      if (Ctor) Ctor.prototype.resume = () => Promise.resolve();
+    const NativeAudioContext = window.AudioContext;
+    window.AudioContext = class extends NativeAudioContext {
+      constructor(options) {
+        super({ sinkId: { type: "none" }, ...options });
+      }
+      setSinkId(id) {
+        return super.setSinkId(id || { type: "none" });
+      }
     };
-    parche(window.AudioContext);
-    parche(window.webkitAudioContext);
   });
 
   page.on("pageerror", (err) => console.error("[página]", err.message));

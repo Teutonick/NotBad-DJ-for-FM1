@@ -19,6 +19,11 @@ class FakeParam {
     this.value = v;
     return this;
   }
+  setTargetAtTime(v, t, timeConstant) {
+    this.automation.push(["target", v, t, timeConstant]);
+    this.value = v;
+    return this;
+  }
   linearRampToValueAtTime(v, t) {
     this.automation.push(["ramp", v, t]);
     this.value = v;
@@ -63,6 +68,12 @@ export class FakeAudioContext {
     const n = new FakeNode(this, "gain");
     n.gain = new FakeParam(1);
     return n;
+  }
+
+  createDelay() {
+    const node = new FakeNode(this, "delay");
+    node.delayTime = new FakeParam(0);
+    return node;
   }
 
   createBiquadFilter() {

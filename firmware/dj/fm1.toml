@@ -1,0 +1,17 @@
+name = "fm1-dj"
+id_prefix = "FM-1_82"
+usb_manufacturer = "FM-1 DJ"
+usb_product = "FM-1 DJ"
+usb_audio_in = true
+usb_audio_out = true
+usb_midi_last = true
+ble = false
+author = "FM-1 DJ contributors"
+licence = "MPL-2.0"
+tagline = "Two-deck DJ controller"
+description = "USB MIDI controller and headphones output for FM-1 DJ on Chrome."
+tags = ["controller", "midi"]
+repo = "https://github.com/Teutonick/fm1-dj"
+site = "https://teutonick.github.io/fm1-dj/"
+install = "https://github.com/Teutonick/fm1-dj#firmware"
+screenshot = "panel.png"

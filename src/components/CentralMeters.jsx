@@ -79,9 +79,7 @@ function CentralMeters({
       {/* Título + REC */}
       <header className="shrink-0 self-start flex flex-col gap-1">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Mini DJ Mixer
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight">FM-1 DJ</h1>
           {recSupported && (
             <button
               onClick={toggleRecording}

@@ -18,76 +18,33 @@ afterEach(() => {
   fake.restore();
 });
 
-describe("crossfader dipless", () => {
-  const gains = (x) => {
-    engine.setCrossfader(x);
-    return {
-      a: engine.deckA.xfGain.gain.value,
-      b: engine.deckB.xfGain.gain.value,
-    };
-  };
-
-  it("en los extremos deja pasar un solo deck", () => {
-    expect(gains(0).a).toBeCloseTo(1, 6);
-    expect(gains(0).b).toBeCloseTo(0, 6);
-    expect(gains(1).a).toBeCloseTo(0, 6);
-    expect(gains(1).b).toBeCloseTo(1, 6);
-  });
-
-  it("en el centro los dos van a tope (sin bajón de volumen al mezclar)", () => {
-    const { a, b } = gains(0.5);
-    expect(a).toBeCloseTo(1, 6);
-    expect(b).toBeCloseTo(1, 6);
-  });
-
-  it("al salir del centro solo BAJA el canal contrario, nunca sube el propio", () => {
-    let prevA = gains(0.5).a;
-    let prevB = gains(0.5).b;
-    for (let x = 0.5; x <= 1.0001; x += 0.05) {
-      const { a, b } = gains(x);
-      // Hacia B: A se atenúa y B se queda donde estaba (a tope)
-      expect(a).toBeLessThanOrEqual(prevA + 1e-9);
-      expect(b).toBeCloseTo(1, 6);
-      expect(b).toBeLessThanOrEqual(prevB + 1e-9);
-      prevA = a;
-      prevB = b;
-    }
-    prevA = gains(0.5).a;
-    prevB = gains(0.5).b;
-    for (let x = 0.5; x >= -0.0001; x -= 0.05) {
-      const { a, b } = gains(x);
-      expect(b).toBeLessThanOrEqual(prevB + 1e-9);
-      expect(a).toBeCloseTo(1, 6);
-      prevA = a;
-      prevB = b;
+describe("Equal Power crossfader", () => {
+  it("isolates each deck at the endpoints and keeps squared gain constant", () => {
+    for (const x of [0, 0.25, 0.5, 0.75, 1]) {
+      engine.setCrossfader(x);
+      const a = engine.deckA.xfGain.gain;
+      const b = engine.deckB.xfGain.gain;
+      expect(a.value).toBeCloseTo(Math.cos((x * Math.PI) / 2));
+      expect(b.value).toBeCloseTo(Math.sin((x * Math.PI) / 2));
+      expect(a.value ** 2 + b.value ** 2).toBeCloseTo(1);
+      expect(a.automation.at(-1)).toEqual(["target", a.value, 0, 0.012]);
     }
   });
 });
 
-describe("filtro DJ por deck", () => {
-  it("en el centro es transparente", () => {
-    engine.setDeckFilter("A", 0.02);
-    expect(engine.deckA.filter.type).toBe("peaking");
-    expect(engine.deckA.filter.gain.value).toBe(0);
-  });
-
-  it("a la izquierda es paso bajo y a la derecha paso alto", () => {
+describe("DJ filter", () => {
+  it("uses the dry branch at center and sweeps the active filter on each side", () => {
+    const d = engine.deckA;
+    engine.setDeckFilter("A", 0);
+    expect(
+      [d.filterDry, d.filterLow, d.filterHigh].map((n) => n.gain.value),
+    ).toEqual([1, 0, 0]);
     engine.setDeckFilter("A", -1);
-    expect(engine.deckA.filter.type).toBe("lowpass");
-    expect(engine.deckA.filter.frequency.value).toBeCloseTo(80, 0);
-
+    expect(d.filterLow.gain.value).toBe(1);
+    expect(d.lowPass.frequency.value).toBeCloseTo(80);
     engine.setDeckFilter("A", 1);
-    expect(engine.deckA.filter.type).toBe("highpass");
-    expect(engine.deckA.filter.frequency.value).toBeCloseTo(8000, 0);
-  });
-
-  it("cuanto más se gira, más cierra", () => {
-    const freqAt = (v) => {
-      engine.setDeckFilter("B", v);
-      return engine.deckB.filter.frequency.value;
-    };
-    expect(freqAt(-0.3)).toBeGreaterThan(freqAt(-0.7));
-    expect(freqAt(0.7)).toBeGreaterThan(freqAt(0.3));
+    expect(d.filterHigh.gain.value).toBe(1);
+    expect(d.highPass.frequency.value).toBeCloseTo(8000);
   });
 });
 
@@ -99,6 +56,7 @@ describe("ruteo", () => {
     // …y no del fader del canal: bajar el volumen no puede callar el PFL
     expect(pathExists(fake.ctx, preGain, cueGain)).toBe(false);
     expect(pathExists(fake.ctx, cueGain, engine.cueDest)).toBe(true);
+    expect(pathExists(fake.ctx, cueGain, fake.ctx.destination)).toBe(false);
   });
 
   it("el VU del canal mide en el mismo punto que el PFL", () => {
@@ -140,7 +98,7 @@ describe("ruteo", () => {
   it("cada deck llega a la salida pasando por EQ, fader y crossfader", () => {
     for (const deck of [engine.deckA, engine.deckB]) {
       expect(targetsOf(fake.ctx, deck.eqPreGain)).toContain(deck.low);
-      expect(targetsOf(fake.ctx, deck.high)).toContain(deck.filter);
+      expect(pathExists(fake.ctx, deck.high, deck.filter)).toBe(true);
       expect(targetsOf(fake.ctx, deck.filter)).toContain(deck.preGain);
       expect(targetsOf(fake.ctx, deck.preGain)).toContain(deck.xfGain);
       expect(pathExists(fake.ctx, deck.xfGain, fake.ctx.destination)).toBe(

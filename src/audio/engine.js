@@ -7,7 +7,7 @@ export class AudioEngine {
 
     // Master (único)
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = 1;
+    this.masterGain.gain.value = 0.65;
 
     // Ruteo final (sin duplicados, sin conexiones huérfanas):
     // decks -> masterGain -> limitador -> destination (+ medidor y grabación)
@@ -43,9 +43,16 @@ export class AudioEngine {
     // Bus de pre-escucha (PFL): tap post-EQ / pre-fader de cada deck
     // -> cueGain (on/off) -> cueBus (volumen auriculares) -> stream
     this.cueBus = this.ctx.createGain();
-    this.cueBus.gain.value = 1;
+    this.cueBus.gain.value = 0.35;
     this.cueDest = this.ctx.createMediaStreamDestination();
     this.cueBus.connect(this.cueDest);
+    this.cueMonitor = this.ctx.createGain();
+    this.cuePfl = this.ctx.createGain();
+    this.cueMonitor.gain.value = 0;
+    this.limiter.connect(this.cueMonitor).connect(this.cueBus);
+    this.cuePfl.connect(this.cueBus);
+    this.cross = 0.5;
+    this.setCueMix(0);
 
     this.deckA = this._buildDeck();
     this.deckB = this._buildDeck();
@@ -64,7 +71,18 @@ export class AudioEngine {
       low: ctx.createBiquadFilter(), // low-shelf 100 Hz
       mid: ctx.createBiquadFilter(), // peaking 1 kHz
       high: ctx.createBiquadFilter(), // high-shelf 10 kHz
-      filter: ctx.createBiquadFilter(), // filtro DJ LPF↔HPF
+      filter: ctx.createGain(),
+      lowPass: ctx.createBiquadFilter(),
+      highPass: ctx.createBiquadFilter(),
+      filterDry: ctx.createGain(),
+      filterLow: ctx.createGain(),
+      filterHigh: ctx.createGain(),
+      echo: ctx.createDelay(1),
+      echoFeedback: ctx.createGain(),
+      echoWet: ctx.createGain(),
+      filterValue: 0,
+      fxAmount: 0.35,
+      fxOn: false,
       // Fader y mezcla
       preGain: ctx.createGain(), // volumen del deck (slider)
       xfGain: ctx.createGain(), // coeficiente del crossfader
@@ -85,10 +103,15 @@ export class AudioEngine {
     deck.high.type = "highshelf";
     deck.high.frequency.value = 10000;
 
-    // bypass: peaking con ganancia 0 es transparente
-    deck.filter.type = "peaking";
-    deck.filter.frequency.value = 1000;
-    deck.filter.gain.value = 0;
+    deck.lowPass.type = "lowpass";
+    deck.lowPass.frequency.value = 20000;
+    deck.highPass.type = "highpass";
+    deck.highPass.frequency.value = 20;
+    deck.filterLow.gain.value = 0;
+    deck.filterHigh.gain.value = 0;
+    deck.echo.delayTime.value = 0.375;
+    deck.echoFeedback.gain.value = 0.28;
+    deck.echoWet.gain.value = 0;
 
     deck.cueGain.gain.value = 0;
 
@@ -99,13 +122,28 @@ export class AudioEngine {
     deck.eqPreGain.connect(deck.low);
     deck.low.connect(deck.mid);
     deck.mid.connect(deck.high);
-    deck.high.connect(deck.filter);
+    deck.high.connect(deck.filterDry).connect(deck.filter);
+    deck.high
+      .connect(deck.lowPass)
+      .connect(deck.filterLow)
+      .connect(deck.filter);
+    deck.high
+      .connect(deck.highPass)
+      .connect(deck.filterHigh)
+      .connect(deck.filter);
+    deck.filter
+      .connect(deck.echo)
+      .connect(deck.echoFeedback)
+      .connect(deck.echo);
+    deck.echo.connect(deck.echoWet).connect(deck.preGain);
+    // The wet signal rejoins downstream of the delay input, avoiding a second feedback path.
+
     deck.filter.connect(deck.preGain);
     deck.preGain.connect(deck.xfGain);
     deck.xfGain.connect(deck.out);
     deck.out.connect(this.masterGain);
     deck.filter.connect(deck.cueGain); // PFL pre-fader, post-EQ/filtro
-    deck.cueGain.connect(this.cueBus);
+    deck.cueGain.connect(this.cuePfl);
     deck.filter.connect(deck.meter); // VU del canal: mismo punto que el PFL
     return deck;
   }
@@ -146,11 +184,11 @@ export class AudioEngine {
 
   setDeckVolume(which, vol) {
     const deck = this._deck(which);
-    deck.preGain.gain.value = vol;
+    this.smooth(deck.preGain.gain, vol);
   }
 
   setMaster(vol) {
-    this.masterGain.gain.value = vol;
+    this.smooth(this.masterGain.gain, vol);
   }
 
   // === Ruteo de salidas (config multi-tarjeta) ===
@@ -193,30 +231,42 @@ export class AudioEngine {
   // positivo = highpass (barre hacia agudos)
   setDeckFilter(which, v) {
     const deck = this._deck(which);
-    const f = deck.filter;
-    if (Math.abs(v) < 0.05) {
-      f.type = "peaking";
-      f.gain.value = 0; // transparente
-      return;
-    }
-    f.Q.value = 1.2; // algo de resonancia, tacto de mesa DJ
-    if (v < 0) {
-      f.type = "lowpass";
-      f.frequency.value = 20000 * Math.pow(80 / 20000, -v); // 20k → 80 Hz
-    } else {
-      f.type = "highpass";
-      f.frequency.value = 20 * Math.pow(8000 / 20, v); // 20 → 8k Hz
-    }
+    deck.filterValue = v;
+    const wet = Math.min(1, Math.abs(v) * 12);
+    this.smooth(deck.filterDry.gain, 1 - wet);
+    this.smooth(deck.filterLow.gain, v < 0 ? wet : 0);
+    this.smooth(deck.filterHigh.gain, v > 0 ? wet : 0);
+    this.smooth(
+      deck.lowPass.frequency,
+      20000 * (80 / 20000) ** Math.max(0, -v),
+    );
+    this.smooth(deck.highPass.frequency, 20 * (8000 / 20) ** Math.max(0, v));
   }
 
-  // === PFL / pre-escucha por auriculares ===
+  smooth(param, value) {
+    const now = this.ctx.currentTime;
+    param.cancelScheduledValues(now);
+    param.setTargetAtTime(value, now, 0.012);
+  }
+
+  setEcho(side, on, amount) {
+    const deck = this._deck(side);
+    deck.fxOn = on;
+    deck.fxAmount = amount;
+    this.smooth(deck.echoWet.gain, on ? amount * 0.55 : 0);
+  }
+
   setDeckCue(which, on) {
-    const deck = this._deck(which);
-    deck.cueGain.gain.value = on ? 1 : 0;
+    this.smooth(this._deck(which).cueGain.gain, on ? 1 : 0);
   }
 
   setCueVolume(vol) {
-    this.cueBus.gain.value = vol;
+    this.smooth(this.cueBus.gain, vol);
+  }
+
+  setCueMix(mix) {
+    this.smooth(this.cuePfl.gain, 1 - mix);
+    this.smooth(this.cueMonitor.gain, mix);
   }
 
   getCueStream() {
@@ -228,14 +278,11 @@ export class AudioEngine {
     return this.recordDest.stream;
   }
 
-  // Crossfader "dipless" estilo mesa DJ (x∈[0,1], 0=A, 1=B):
-  // cada deck va a tope en su mitad; del centro hacia un lado solo se
-  // atenúa el canal contrario (nunca sube el propio)
   setCrossfader(x) {
-    const tA = Math.min(1, Math.max(0, (x - 0.5) * 2)); // cuánto se aleja hacia B
-    const tB = Math.min(1, Math.max(0, (0.5 - x) * 2)); // cuánto se aleja hacia A
-    this.deckA.xfGain.gain.value = Math.cos(tA * Math.PI * 0.5);
-    this.deckB.xfGain.gain.value = Math.cos(tB * Math.PI * 0.5);
+    this.cross = Math.min(1, Math.max(0, x));
+    const angle = (this.cross * Math.PI) / 2;
+    this.smooth(this.deckA.xfGain.gain, this.cross === 1 ? 0 : Math.cos(angle));
+    this.smooth(this.deckB.xfGain.gain, Math.sin(angle));
   }
 
   // Aplicar EQ por deck: {gain, low, mid, high} en dB
@@ -255,11 +302,11 @@ export class AudioEngine {
 
     // 👉 Cambio importante: nada de cancelScheduledValues ni linearRamp
     // Ajuste directo, súper barato:
-    d.eqPreGain.gain.value = target;
+    this.smooth(d.eqPreGain.gain, target);
 
     // filtros EQ (esto ya era “gratis”)
-    d.low.gain.value = low;
-    d.mid.gain.value = mid;
-    d.high.gain.value = high;
+    this.smooth(d.low.gain, low);
+    this.smooth(d.mid.gain, mid);
+    this.smooth(d.high.gain, high);
   }
 }
