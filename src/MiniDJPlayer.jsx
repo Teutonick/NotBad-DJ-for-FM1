@@ -76,6 +76,7 @@ export default function MiniDJMixer() {
   // qué pista comparar las compatibilidades armónicas
   const [deckKeys, setDeckKeys] = useState({ A: null, B: null });
   const [playing, setPlaying] = useState({ A: false, B: false });
+  const [firmwareBusy, setFirmwareBusy] = useState(false);
   const [lastStarted, setLastStarted] = useState("A");
   // Espejo en ref del estado de reproducción: lo consulta el guardián de
   // carga sin que cambie la identidad de onLoadToDeck (TrackList es memo)
@@ -673,6 +674,7 @@ export default function MiniDJMixer() {
 
         <Hardware
           engine={engine}
+          suspended={firmwareBusy}
           config={config}
           setConfig={setConfig}
           onMidi={onMidi}
@@ -841,6 +843,9 @@ export default function MiniDJMixer() {
 
       <ConfigDialog
         open={showConfig}
+        firmwareBusy={firmwareBusy}
+        onFirmwareBusyChange={setFirmwareBusy}
+        playing={playing.A || playing.B}
         onClose={() => setShowConfig(false)}
         config={config}
         onConfigChange={setConfig}

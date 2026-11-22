@@ -12,6 +12,7 @@ export default function Hardware({
   config,
   setConfig,
   cueRef,
+  suspended = false,
 }) {
   const [access, setAccess] = useState(null);
   const [ports, setPorts] = useState({ inputs: [], outputs: [] });
@@ -59,7 +60,7 @@ export default function Hardware({
       : undefined;
 
   useEffect(() => {
-    if (!input || !output) return;
+    if (suspended || !input || !output) return;
     let sequence = 0;
     let nextFrame;
     let acknowledged = false;
@@ -118,7 +119,7 @@ export default function Hardware({
       setVerified(null);
       latest.current.onMidi([]);
     };
-  }, [input, output]);
+  }, [input, output, suspended]);
 
   function saveMapping() {
     try {

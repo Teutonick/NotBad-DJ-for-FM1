@@ -49,7 +49,10 @@ suite("flujos de la aplicación en el navegador", () => {
 
   // Abre ⚙ en una pestaña y espera a que esté pintada
   const abrirAjustes = async (pestaña) => {
-    await page.click('[aria-label="Settings: audio outputs and analysis"]');
+    const settings = await page.waitForSelector(
+      '[aria-label="Settings: audio outputs and analysis"]',
+    );
+    await settings.click();
     await page.waitForFunction(
       (p) =>
         [...document.querySelectorAll("button")].some(
@@ -64,6 +67,24 @@ suite("flujos de la aplicación en el navegador", () => {
     page.$$eval("button", (bs) =>
       bs.find((b) => b.textContent.trim() === "✕")?.click(),
     );
+
+  it("opens the firmware tab with flashing disabled before a package is verified", async () => {
+    await page.waitForSelector("select[aria-label]");
+    await page.select("select[aria-label]", "en");
+    await abrirAjustes("Firmware");
+    const dialog = await page.waitForSelector('[role="dialog"]');
+    expect(await dialog.$eval('input[type="file"]', (file) => file.accept)).toBe(
+      ".fwsc",
+    );
+    expect(
+      await dialog.$$eval("button", (buttons) =>
+        buttons.find(
+          (button) => button.textContent.trim() === "Install FM-1 DJ 0.1.0",
+        )?.disabled,
+      ),
+    ).toBe(true);
+    await cerrarAjustes();
+  });
 
   it("carga una pista y detecta su BPM", async () => {
     const ruta = makeTrackFile("deck-a-128.wav", 128, 25);

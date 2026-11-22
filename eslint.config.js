@@ -5,7 +5,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", "release", "coverage"]),
+  globalIgnores(["dist", "release", "coverage", "src/fm1/updater"]),
   // Envoltorio Electron y scripts de build: se ejecutan en Node, no en el navegador
   {
     files: ["electron/**/*.cjs", "scripts/**/*.mjs", "*.config.js"],

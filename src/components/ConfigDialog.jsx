@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useI18n } from "../i18n/context";
+import FirmwarePanel from "./FirmwarePanel";
 import {
   clearLog,
   ERRORS,
@@ -80,6 +81,7 @@ const TABS = [
   { id: "display", labelKey: "tabDisplay" },
   { id: "safety", labelKey: "tabSafety" },
   { id: "log", labelKey: "tabLog" },
+  { id: "firmware", labelKey: "tabFirmware" },
 ];
 
 // Pestaña activa entre aperturas del diálogo: dura lo que la sesión de la
@@ -93,6 +95,9 @@ let lastTab = TABS[0].id;
 export default function ConfigDialog({
   open,
   onClose,
+  firmwareBusy,
+  onFirmwareBusyChange,
+  playing,
   config,
   onConfigChange,
 }) {
@@ -100,6 +105,9 @@ export default function ConfigDialog({
   const [devices, setDevices] = useState([]);
   const [labelsAllowed, setLabelsAllowed] = useState(false);
   const [tab, setTab] = useState(lastTab);
+  const close = () => {
+    if (!firmwareBusy) onClose?.();
+  };
   // El registro se relee al entrar en su pestaña: así refleja lo que haya
   // pasado mientras el diálogo estaba abierto
   const [entries, setEntries] = useState([]);
@@ -141,8 +149,8 @@ export default function ConfigDialog({
 
   // Escape cierra, esté donde esté el foco dentro del diálogo. Con ⚙ abierto
   // los atajos del deck están suspendidos: no hay nada con lo que choque.
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  const onCloseRef = useRef(close);
+  onCloseRef.current = close;
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
@@ -248,6 +256,13 @@ export default function ConfigDialog({
   // Bloques de ajustes, uno por pestaña. Todos van dentro del mismo panel de
   // alto fijo, así que cambiar de pestaña no mueve ni redimensiona el diálogo.
   const panels = {
+    firmware: (
+      <FirmwarePanel
+        busy={firmwareBusy}
+        setBusy={onFirmwareBusyChange}
+        playing={playing}
+      />
+    ),
     audio: (
       <div className="grid gap-3">
         <h3 className="text-sm font-semibold text-neutral-300">
@@ -695,7 +710,7 @@ export default function ConfigDialog({
   return (
     <div
       className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
-      onClick={onClose}
+      onClick={close}
     >
       <div
         role="dialog"
@@ -709,7 +724,8 @@ export default function ConfigDialog({
             {t("configHeading")}
           </h2>
           <button
-            onClick={onClose}
+            onClick={close}
+            disabled={firmwareBusy}
             className="px-2 py-1 rounded-lg bg-neutral-800 border border-neutral-700 text-neutral-300 text-sm hover:bg-neutral-700"
             title={t("close")}
           >
@@ -726,6 +742,7 @@ export default function ConfigDialog({
             <button
               key={tb.id}
               role="tab"
+              disabled={firmwareBusy}
               aria-selected={tab === tb.id}
               onClick={() => setTab(tb.id)}
               className={`px-3 py-1.5 text-xs font-semibold whitespace-nowrap border-b-2 -mb-px ${

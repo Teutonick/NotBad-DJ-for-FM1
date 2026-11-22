@@ -91,7 +91,7 @@ describe("apertura", () => {
 });
 
 describe("pestañas", () => {
-  it("ofrece las cinco y arranca en audio", () => {
+  it("incluye la pestaña de firmware y arranca en audio", () => {
     const nombres = screen.queryAllByRole("tab");
     expect(nombres).toHaveLength(0); // aún no hay diálogo abierto en este test
     abrir();
@@ -101,6 +101,7 @@ describe("pestañas", () => {
       t("tabDisplay"),
       t("tabSafety"),
       t("tabLog"),
+      t("tabFirmware"),
     ]);
     expect(pestaña(t("tabAudio"))).toHaveAttribute("aria-selected", "true");
   });

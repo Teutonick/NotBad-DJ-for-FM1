@@ -1,38 +1,45 @@
 # FM-1 DJ
 
-Две браузерные деки и прошивка USB-контроллера для M-VAVE FM-1. Браузер декодирует и микширует локальные файлы. FM-1 принимает звук Cue по USB Audio и обменивается командами и состоянием по USB MIDI.
+[Русская версия](README.ru.md)
 
-## Запуск
+FM-1 DJ combines two browser-based decks with custom firmware for the M-VAVE FM-1. The browser decodes and mixes local tracks. The controller receives headphone cue audio over USB Audio and exchanges controls and status over USB MIDI.
 
-Откройте [FM-1 DJ на GitHub Pages](https://teutonick.github.io/fm1-dj/) в актуальном Google Chrome на macOS или Windows 11. Для работы сайта локальный сервер, Python и Node.js не требуются. Полный сценарий с FM-1 на Windows ещё предстоит проверить по [чек-листу Windows](docs/WINDOWS.md).
+## Getting started
 
-Для локальной сборки выполните `npm ci --ignore-scripts`, затем `npm run build` и `npm run preview`. Workflow **Web checks and GitHub Pages** публикует `dist` из ветки `main`.
+Open [FM-1 DJ on GitHub Pages](https://teutonick.github.io/fm1-dj/) in a current version of Chrome on macOS or Windows 11. For Windows MIDI and audio setup, see the [Windows checklist](docs/WINDOWS.md).
 
-В библиотеке добавьте WAV, MP3 или FLAC, затем загрузите треки на A и B. Кнопка **Add demo tracks** импортирует два встроенных тестовых файла. [Beacon, 124 BPM](public/demo/Beacon-124.wav) и [Afterglow, 128 BPM](public/demo/Afterglow-128.wav) — сгенерированные метрономные фрагменты, CC0-1.0. Для проверки фазового Sync включите A, нажмите Sync на B и запустите B. В инструментах деки можно исправить BPM и положение сетки.
+To build locally, use Node.js 24 and run `npm ci --ignore-scripts`, `npm run build`, and `npm run preview`. The **Web checks and GitHub Pages** workflow publishes `dist` from `main`.
 
-## Master и Cue
+Add local WAV, MP3 or FLAC tracks to the library and load them onto decks A and B. **Add demo tracks** imports [Beacon (124 BPM)](public/demo/Beacon-124.wav) and [Afterglow (128 BPM)](public/demo/Afterglow-128.wav), generated metronome samples released under CC0-1.0. To check phase sync, start deck A, enable Sync on B, and start B. The deck tools let you adjust each track's BPM and beat grid.
 
-1. Выберите динамики компьютера или внешний выход как Master. Подключите FM-1 по USB и вставьте проводные наушники в FM-1. Начните с малой громкости MASTER на корпусе.
-2. Нажмите **Connect FM-1**, разрешите MIDI с SysEx. Дождитесь **MIDI connected**. Если автоматический выбор не сработал, откройте **Hardware diagnostics** и отдельно выберите **MIDI input** и **MIDI output** FM-1. Номера портов Windows могут различаться. Приложение покажет версию прошивки после её ответа.
-3. В настройках **Audio** выберите Master и отдельный Cue **FM-1 DJ**. Если Chrome скрывает имена, запросите разрешение на доступ к аудиоустройствам в этой вкладке. Приложение сразу освобождает полученный аудиовход. Если маршрутизация отклонена, явно выберите динамики компьютера в Master вместо системного значения по умолчанию.
-4. Нажмите **Enable Cue Output**. В Hardware diagnostics отдельно проверьте **Test Master** и **Test headphones**.
-5. Установите Crossfader в A. Запустите обе деки и включите PFL B. В Master должен остаться A, а в наушниках должен появиться B. Повторите зеркально, затем включите оба PFL и проверьте Cue/Master.
-6. Если FM-1 отключился, приложение заглушает Cue при обновлении списка аудиоустройств. После подключения дождитесь **MIDI connected**, проверьте название выхода и снова включите Cue.
+## Master and headphone cue
+
+1. Plug the FM-1 into USB and connect wired headphones to it. Start with the controller's MASTER level low.
+2. Select **Connect FM-1** and allow MIDI with SysEx. If the browser does not select the ports automatically, choose the FM-1 MIDI input and output separately under **Hardware diagnostics**. Windows may number the ports differently.
+3. In **Settings → Audio**, select your speakers or other audio interface as Master and **FM-1 DJ** as the separate Cue output. Use the permission button in that tab if the browser hides device names.
+4. Select **Enable Cue Output**. Use **Test Master** and **Test headphones** in Hardware diagnostics to check routing.
+5. Pan the crossfader to A, start both decks, and enable PFL B. Master should play A, and the headphones should play B. Swap sides and then test both PFL buttons and the Cue/Master blend.
+6. If the FM-1 disconnects, reconnect it, verify the Cue device, and enable Cue again.
 
 ## Firmware
 
-Установочный файл доступен в [релизе 0.1.0](https://github.com/Teutonick/fm1-dj/releases/tag/v0.1.0). Исходники в [firmware/dj](firmware/dj). `firmware/build.sh --host` собирает симулятор. Для файла устройства используйте Linux x86-64 или macOS с запущенным Docker/Podman, Python 3.12 и Pillow с Raqm. Выполните `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk` после первой host-сборки, затем `firmware/build.sh --release 0.1.0`. Установочный пакет создаётся в `firmware/dj/build`. Те же шаги выполняет workflow **FM-1 DJ firmware**.
+### Install from the browser
 
-### Установка 0.1.0
+1. Download `fm1-dj-0.1.0.fwsc` from [release v0.1.0](https://github.com/Teutonick/fm1-dj/releases/tag/v0.1.0). Back up your data and get the stock package from the [fm1-base recovery instructions](https://charlesvestal.github.io/fm1-base/install/) before flashing.
+2. Stop playback, close other MIDI applications, and connect only the M-VAVE FM-1 using a data-capable USB cable.
+3. Open **Settings → Firmware** in Chrome or Edge over HTTPS or localhost. Select the release file. The installer checks the package identity, SHA-256 and internal checksums before requesting MIDI access.
+4. Check each acknowledgment, select **Install FM-1 DJ 0.1.0**, confirm, and grant MIDI/SysEx access. Keep the USB cable connected and the page open until the controller restarts and the installer reports success.
 
-Один и тот же `.fwsc` предназначен для FM-1 независимо от ОС компьютера. Ниже приведены команды macOS. Для Windows используйте [инструкцию PowerShell](docs/WINDOWS.md#установка-прошивки).
+If the updater detects M-VAVE Open firmware, restore the stock firmware before trying again. For stock recovery, see **Back to the stock firmware** in the [fm1-base installer](https://charlesvestal.github.io/fm1-base/install/). If the controller no longer starts, follow the recovery instructions there. A command-line installation procedure is also available in the [Russian README](README.ru.md#установка-из-командной-строки) and the [Windows PowerShell guide](docs/WINDOWS.md#установка-прошивки).
 
-1. Скачайте `fm1-dj-0.1.0.fwsc` и `fm1-dj-0.1.0.fwsc.sha256` из релиза, затем выполните `shasum -a 256 -c fm1-dj-0.1.0.fwsc.sha256` в папке загрузки. Скачайте штатный пакет M-VAVE из раздела восстановления, прежде чем начинать запись.
-2. Запустите FM-1 в рабочем режиме, подключите кабель USB с передачей данных и закройте другие программы, занявшие USB MIDI. Обычная установка использует штатный механизм обновления и не требует отдельной замены загрузчика.
-3. В среде Python с `mido` и `python-rtmidi` выполните `python3 firmware/base/tools/fm1_install.py --info`, затем `python3 firmware/base/tools/fm1_install.py /путь/к/fm1-dj-0.1.0.fwsc`. Дождитесь сообщения о завершении и перезапуска, после чего найдите **FM-1 DJ** в Audio MIDI Setup. Если установщик сообщает о версии M-VAVE Open, сначала верните штатный пакет M-VAVE и повторите установку.
+### Build the firmware
 
-### Возврат штатной прошивки
+The source is in [firmware/dj](firmware/dj). Run `firmware/build.sh --host` for the simulator. The device build uses Linux x86-64 or macOS with Docker or Podman, Python 3.12 and Pillow with Raqm. After the first host build, run `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk` and then `firmware/build.sh --release 0.1.0`. The installer package appears under `firmware/dj/build`. The **FM-1 DJ firmware** workflow uses the same process.
 
-Откройте раздел **Back to the stock firmware** в [инсталляторе fm1-base](https://charlesvestal.github.io/fm1-base/install/). Скачайте `FM-1.fwsc` по ссылке из этого раздела и выберите файл там же. Подключите FM-1, дождитесь результата проверки файла и нажмите **Install the stock firmware**. Дождитесь перезапуска до отключения кабеля. Если FM-1 не загружается, используйте процедуру из раздела **If the FM-1 no longer starts** и [инструменты восстановления felucca-bsp](https://github.com/hugelton/felucca-bsp/tree/7b77bfbce8e0d185461a79d164c893551492ded1/tools).
+## License and disclaimer
 
-[Карта управления и протокол](docs/PROTOCOL.md) · [Сторонние компоненты](docs/UPSTREAM.md) · [Отчёт о проверках](docs/ACCEPTANCE.md)
+The web application is distributed under the [MIT License](LICENSE), with separately licensed components identified in [Third-party components](docs/UPSTREAM.md). The firmware source and the vendored fm1-base installer modules are [MPL-2.0](firmware/licenses/MPL-2.0.txt). Retain applicable attribution and license notices when redistributing.
+
+FM-1 DJ is an independent project. Review the [disclaimer](DISCLAIMER.md) before using or distributing it, especially before flashing the controller.
+
+[Control map and protocol](docs/PROTOCOL.md) · [Acceptance report](docs/ACCEPTANCE.md)
