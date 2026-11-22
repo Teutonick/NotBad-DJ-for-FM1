@@ -1,5 +1,4 @@
 export default {
-  subtitle: "Dj Wincha 制作（制作中）",
   rec: "● REC",
   recTitle:
     "マスターミックスを録音します。停止すると .webm でダウンロードされます",
@@ -194,7 +193,7 @@ export default {
   wavePaletteHeading: "波形の色",
   wavePaletteNote:
     "低域・中域・高域は解析済みです。カラーパレットを変えても再解析なしで即座に塗り直されます。",
-  paletteMinidj: "Mini DJ（既定）",
+  paletteMinidj: "NotBad DJ（既定）",
   paletteMono: "クラシックグリーン（単色）",
   paletteCustom: "カスタム…",
   bandLow: "低域",
@@ -253,7 +252,7 @@ export default {
   logCopy: "コピー",
   logClear: "消去",
   logFile: "デスクトップアプリでは次の場所にも保存されます: {path}",
-  versionTitle: "Mini DJ のバージョン",
+  versionTitle: "NotBad DJ のバージョン",
 
   // Estructura de la pista y aviso de fin
   structureLabel: "構成",

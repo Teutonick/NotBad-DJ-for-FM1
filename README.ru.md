@@ -1,4 +1,4 @@
-# FM-1 DJ
+# NotBad DJ for FM1
 
 [English](README.md)
 
@@ -6,7 +6,7 @@
 
 ## Запуск
 
-Откройте [FM-1 DJ на GitHub Pages](https://teutonick.github.io/fm1-dj/) в актуальном Google Chrome на macOS или Windows 11. Для работы сайта локальный сервер, Python и Node.js не требуются. Полный сценарий с FM-1 на Windows ещё предстоит проверить по [чек-листу Windows](docs/WINDOWS.md).
+Откройте [NotBad DJ for FM1 на GitHub Pages](https://teutonick.github.io/NotBad-DJ-for-FM1/) в актуальном Google Chrome на macOS или Windows 11. Для работы сайта локальный сервер, Python и Node.js не требуются. Полный сценарий с FM-1 на Windows ещё предстоит проверить по [чек-листу Windows](docs/WINDOWS.md).
 
 Для локальной сборки выполните `npm ci --ignore-scripts`, затем `npm run build` и `npm run preview`. Workflow **Web checks and GitHub Pages** публикует `dist` из ветки `main`.
 
@@ -23,11 +23,11 @@
 
 ## Firmware
 
-Установочный файл доступен в [релизе 0.1.0](https://github.com/Teutonick/fm1-dj/releases/tag/v0.1.0). Исходники в [firmware/dj](firmware/dj). `firmware/build.sh --host` собирает симулятор. Для файла устройства используйте Linux x86-64 или macOS с запущенным Docker/Podman, Python 3.12 и Pillow с Raqm. Выполните `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk` после первой host-сборки, затем `firmware/build.sh --release 0.1.0`. Установочный пакет создаётся в `firmware/dj/build`. Те же шаги выполняет workflow **FM-1 DJ firmware**.
+Установочный файл доступен в [релизе 0.1.0](https://github.com/Teutonick/NotBad-DJ-for-FM1/releases/tag/v0.1.0). Исходники в [firmware/dj](firmware/dj). `firmware/build.sh --host` собирает симулятор. Для файла устройства используйте Linux x86-64 или macOS с запущенным Docker/Podman, Python 3.12 и Pillow с Raqm. Выполните `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk` после первой host-сборки, затем `firmware/build.sh --release 0.1.0`. Установочный пакет создаётся в `firmware/dj/build`. Те же шаги выполняет workflow **FM-1 DJ firmware**.
 
 ### Установка через браузер
 
-1. Скачайте `fm1-dj-0.1.0.fwsc` из [релиза v0.1.0](https://github.com/Teutonick/fm1-dj/releases/tag/v0.1.0). Сохраните нужные данные и скачайте штатную прошивку для восстановления.
+1. Скачайте `fm1-dj-0.1.0.fwsc` из [релиза v0.1.0](https://github.com/Teutonick/NotBad-DJ-for-FM1/releases/tag/v0.1.0). Сохраните нужные данные и скачайте штатную прошивку для восстановления.
 2. Остановите воспроизведение, закройте другие программы с доступом к MIDI и подключите только M-VAVE FM-1 кабелем USB с передачей данных.
 3. В Chrome или Edge откройте **Настройки → Прошивка** и выберите пакет. Установщик сверит идентификатор, SHA-256 и внутренние контрольные суммы.
 4. Отметьте подтверждения, нажмите **Установить FM-1 DJ 0.1.0**, подтвердите запуск записи и разрешите MIDI с SysEx. До завершения держите страницу открытой и кабель подключённым.

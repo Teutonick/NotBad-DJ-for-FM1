@@ -1,4 +1,8 @@
-# Сторонние компоненты
+# Third-party licenses and credits / Лицензии и авторство
+
+The web application includes **Mini DJ by Wincha**, licensed under MIT. The original copyright and permission notice is in [LICENSE](../LICENSE). The firmware and the vendored browser installer modules use [MPL-2.0](../firmware/licenses/MPL-2.0.txt). See [firmware/licenses](../firmware/licenses/) for the SDK and font license texts. npm dependencies retain their respective licenses and notices. The demo tracks are generated audio distributed under CC0-1.0.
+
+Веб-приложение включает **Mini DJ автора Wincha**. Оригинальное уведомление об авторских правах и условия MIT находятся в [LICENSE](../LICENSE). Прошивка и заимствованные модули браузерного установщика используют [MPL-2.0](../firmware/licenses/MPL-2.0.txt). Лицензии SDK и шрифтов собраны в [firmware/licenses](../firmware/licenses/). Пакеты npm сохраняют собственные лицензии и уведомления. Сгенерированные демотреки распространяются под CC0-1.0.
 
 Модули `fm1ota.js`, `fm1pkg.js` и `fm1ports.js` в [src/fm1/updater](../src/fm1/updater) взяты без изменений из [fm1-base, b0c384b](https://github.com/charlesvestal/fm1-base/tree/b0c384b21b095fb4f940025ce6ce7348625b4dda/web) и используются для проверки пакета и установки через Web MIDI. Их исходники и уведомления об авторских правах сохранены в репозитории. Текст лицензии [MPL-2.0](../firmware/licenses/MPL-2.0.txt). Интерфейс вкладки вдохновлён [установщиком Felucca](https://hugelton.github.io/Felucca/webapp/installer/).
 

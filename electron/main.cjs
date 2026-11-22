@@ -196,7 +196,8 @@ function createWindow() {
     backgroundColor: "#0a0a0a",
     autoHideMenuBar: true,
     show: false,
-    title: "Mini DJ",
+    title: "NotBad DJ for FM1",
+    icon: path.join(__dirname, "..", "build", "icon.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,

@@ -1,5 +1,4 @@
 export default {
-  subtitle: "由 Dj Wincha 制作（施工中）",
   rec: "● 录制",
   recTitle: "录制主混音；停止后会下载为 .webm",
   master: "主输出",
@@ -175,7 +174,7 @@ export default {
   wavePaletteHeading: "波形颜色",
   wavePaletteNote:
     "低频、中频和高频已经分析过了：切换配色会立即重新上色，无需重新分析。",
-  paletteMinidj: "Mini DJ（默认）",
+  paletteMinidj: "NotBad DJ（默认）",
   paletteMono: "经典绿（单色）",
   paletteCustom: "自定义…",
   bandLow: "低频",
@@ -231,7 +230,7 @@ export default {
   logCopy: "复制",
   logClear: "清空",
   logFile: "在桌面应用中还会写入：{path}",
-  versionTitle: "Mini DJ 版本",
+  versionTitle: "NotBad DJ 版本",
 
   // Estructura de la pista y aviso de fin
   structureLabel: "结构",

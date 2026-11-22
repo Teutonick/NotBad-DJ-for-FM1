@@ -1,5 +1,4 @@
 export default {
-  subtitle: "per Dj Wincha (en construcció)",
   rec: "● REC",
   recTitle: "Grava el mix master; en aturar es descarrega com a .webm",
   master: "Master",
@@ -193,7 +192,7 @@ export default {
   wavePaletteHeading: "Colors de l'ona",
   wavePaletteNote:
     "Els greus, mitjans i aguts ja estan analitzats: canviar de paleta recolora a l'instant, sense tornar a analitzar res.",
-  paletteMinidj: "Mini DJ (per defecte)",
+  paletteMinidj: "NotBad DJ (per defecte)",
   paletteMono: "Verd clàssic (un sol color)",
   paletteCustom: "Personalitzada…",
   bandLow: "Greus",
@@ -253,7 +252,7 @@ export default {
   logCopy: "Copia",
   logClear: "Buida",
   logFile: "A l'app d'escriptori també es desa a: {path}",
-  versionTitle: "Versió de Mini DJ",
+  versionTitle: "Versió de NotBad DJ",
 
   // Estructura de la pista y aviso de fin
   structureLabel: "Estructura",

@@ -2,7 +2,7 @@
 
 [Русский](#отказ-от-ответственности)
 
-FM-1 DJ is an independent project. It is not affiliated with, sponsored by, or endorsed by M-VAVE. Product names and trademarks belong to their respective owners.
+NotBad DJ for FM1 is an independent project. It is not affiliated with, sponsored by, or endorsed by M-VAVE. Product names and trademarks belong to their respective owners.
 
 The software, documentation, and custom firmware are provided as is, subject to their applicable licenses and without warranties, including warranties of fitness for a particular purpose, compatibility, or non-infringement. Use, modification, installation and redistribution are at your own risk. Flashing firmware may erase settings or other data, render hardware inoperable, require recovery or replacement, and affect manufacturer support or warranty coverage.
 
@@ -12,7 +12,7 @@ To the extent permitted by applicable law, the authors and contributors disclaim
 
 ## Отказ от ответственности
 
-FM-1 DJ — независимый проект, который не связан с M-VAVE и не поддерживается производителем. Названия продуктов и товарные знаки принадлежат их владельцам.
+NotBad DJ for FM1 — независимый проект, который не связан с M-VAVE и не поддерживается производителем. Названия продуктов и товарные знаки принадлежат их владельцам.
 
 Программа, документация и модифицированная прошивка предоставляются «как есть» на условиях соответствующих лицензий, без гарантий пригодности для конкретной цели, совместимости или отсутствия нарушений прав третьих лиц. Вы используете, изменяете, устанавливаете и распространяете их на свой риск. Запись прошивки может привести к потере настроек и других данных, поломке оборудования, необходимости восстановления или замены, а также повлиять на поддержку и гарантию производителя.
 

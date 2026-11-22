@@ -32,7 +32,7 @@ export function makeTrackFile(nombre, bpm, seconds = 20) {
 export async function startApp() {
   await build({ logLevel: "error" });
   const server = await preview({
-    base: "/fm1-dj/",
+    base: "/NotBad-DJ-for-FM1/",
     preview: { host: "127.0.0.1", port: 0 },
     logLevel: "error",
   });
@@ -51,7 +51,7 @@ export async function startApp() {
   });
 
   return {
-    url: `http://127.0.0.1:${port}/fm1-dj/`,
+    url: `http://127.0.0.1:${port}/NotBad-DJ-for-FM1/`,
     browser,
     async close() {
       await browser.close();

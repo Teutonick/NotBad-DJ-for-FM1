@@ -74,7 +74,6 @@ export const fm1English = {
 
 export default {
   // Header
-  subtitle: "by Dj Wincha (under construction)",
   rec: "● REC",
   recTitle: "Records the master mix; downloads as .webm when you stop",
   master: "Master",
@@ -274,7 +273,7 @@ export default {
   wavePaletteHeading: "Waveform colours",
   wavePaletteNote:
     "Lows, mids and highs are already analysed: switching palette recolours instantly, with no re-analysis.",
-  paletteMinidj: "Mini DJ (default)",
+  paletteMinidj: "NotBad DJ (default)",
   paletteMono: "Classic green (single colour)",
   paletteCustom: "Custom…",
   bandLow: "Lows",
@@ -336,7 +335,7 @@ export default {
   logCopy: "Copy",
   logClear: "Clear",
   logFile: "On the desktop app it is also written to: {path}",
-  versionTitle: "Mini DJ version",
+  versionTitle: "NotBad DJ version",
 
   // Estructura de la pista y aviso de fin
   structureLabel: "Structure",

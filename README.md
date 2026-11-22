@@ -1,12 +1,12 @@
-# FM-1 DJ
+# NotBad DJ for FM1
 
 [Русская версия](README.ru.md)
 
-FM-1 DJ combines two browser-based decks with custom firmware for the M-VAVE FM-1. The browser decodes and mixes local tracks. The controller receives headphone cue audio over USB Audio and exchanges controls and status over USB MIDI.
+NotBad DJ for FM1 combines two browser-based decks with custom firmware for the M-VAVE FM-1. The browser decodes and mixes local tracks. The controller receives headphone cue audio over USB Audio and exchanges controls and status over USB MIDI.
 
 ## Getting started
 
-Open [FM-1 DJ on GitHub Pages](https://teutonick.github.io/fm1-dj/) in a current version of Chrome on macOS or Windows 11. For Windows MIDI and audio setup, see the [Windows checklist](docs/WINDOWS.md).
+Open [NotBad DJ for FM1 on GitHub Pages](https://teutonick.github.io/NotBad-DJ-for-FM1/) in a current version of Chrome on macOS or Windows 11. For Windows MIDI and audio setup, see the [Windows checklist](docs/WINDOWS.md).
 
 To build locally, use Node.js 24 and run `npm ci --ignore-scripts`, `npm run build`, and `npm run preview`. The **Web checks and GitHub Pages** workflow publishes `dist` from `main`.
 
@@ -25,7 +25,7 @@ Add local WAV, MP3 or FLAC tracks to the library and load them onto decks A and 
 
 ### Install from the browser
 
-1. Download `fm1-dj-0.1.0.fwsc` from [release v0.1.0](https://github.com/Teutonick/fm1-dj/releases/tag/v0.1.0). Back up your data and get the stock package from the [fm1-base recovery instructions](https://charlesvestal.github.io/fm1-base/install/) before flashing.
+1. Download `fm1-dj-0.1.0.fwsc` from [release v0.1.0](https://github.com/Teutonick/NotBad-DJ-for-FM1/releases/tag/v0.1.0). Back up your data and get the stock package from the [fm1-base recovery instructions](https://charlesvestal.github.io/fm1-base/install/) before flashing.
 2. Stop playback, close other MIDI applications, and connect only the M-VAVE FM-1 using a data-capable USB cable.
 3. Open **Settings → Firmware** in Chrome or Edge over HTTPS or localhost. Select the release file. The installer checks the package identity, SHA-256 and internal checksums before requesting MIDI access.
 4. Check each acknowledgment, select **Install FM-1 DJ 0.1.0**, confirm, and grant MIDI/SysEx access. Keep the USB cable connected and the page open until the controller restarts and the installer reports success.
@@ -38,8 +38,8 @@ The source is in [firmware/dj](firmware/dj). Run `firmware/build.sh --host` for 
 
 ## License and disclaimer
 
-The web application is distributed under the [MIT License](LICENSE), with separately licensed components identified in [Third-party components](docs/UPSTREAM.md). The firmware source and the vendored fm1-base installer modules are [MPL-2.0](firmware/licenses/MPL-2.0.txt). Retain applicable attribution and license notices when redistributing.
+See [Third-party licenses and credits](docs/UPSTREAM.md) for Mini DJ by Wincha, firmware, the browser installer, and other components. The web application is distributed under the [MIT License](LICENSE). The firmware source and the vendored fm1-base installer modules are [MPL-2.0](firmware/licenses/MPL-2.0.txt). Retain applicable attribution and license notices when redistributing.
 
-FM-1 DJ is an independent project. Review the [disclaimer](DISCLAIMER.md) before using or distributing it, especially before flashing the controller.
+NotBad DJ for FM1 is an independent project. Review the [disclaimer](DISCLAIMER.md) before using or distributing it, especially before flashing the controller.
 
 [Control map and protocol](docs/PROTOCOL.md) · [Acceptance report](docs/ACCEPTANCE.md)

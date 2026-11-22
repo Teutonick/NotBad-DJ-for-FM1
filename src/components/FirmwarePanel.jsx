@@ -7,7 +7,7 @@ import {
   sha256hex,
 } from "../fm1/updater/fm1pkg.js";
 
-const release = "https://github.com/Teutonick/fm1-dj/releases/tag/v0.1.0";
+const release = "https://github.com/Teutonick/NotBad-DJ-for-FM1/releases/tag/v0.1.0";
 const recovery = "https://charlesvestal.github.io/fm1-base/install/";
 const digest =
   "7e567d7950c2a4c601933697d3f33bcaaa38d7d1e2735e2c2734aca773b07330";
@@ -138,14 +138,14 @@ export default function FirmwarePanel({ busy, setBusy, playing }) {
           {t("firmwareRecovery")}
         </a>
         <a
-          href="https://github.com/Teutonick/fm1-dj/blob/main/DISCLAIMER.md"
+          href="https://github.com/Teutonick/NotBad-DJ-for-FM1/blob/main/DISCLAIMER.md"
           target="_blank"
           rel="noreferrer"
         >
           {t("firmwareDisclaimer")}
         </a>
         <a
-          href="https://github.com/Teutonick/fm1-dj/blob/main/docs/UPSTREAM.md"
+          href="https://github.com/Teutonick/NotBad-DJ-for-FM1/blob/main/docs/UPSTREAM.md"
           target="_blank"
           rel="noreferrer"
         >

@@ -1,5 +1,5 @@
 appId: com.wincha.minidj
-productName: Mini DJ
+productName: NotBad DJ for FM1
 copyright: Copyright © Wincha
 
 directories:
@@ -11,6 +11,11 @@ files:
   - dist/**/*
   - electron/**/*
   - package.json
+  - build/icon.png
+  - LICENSE
+  - DISCLAIMER.md
+  - docs/UPSTREAM.md
+  - firmware/licenses/**/*
 
 asar: true
 # No hay dependencias nativas: no hace falta recompilar nada
@@ -22,8 +27,8 @@ npmRebuild: false
 # ve el updater: hay que publicarlo. Ver README ("Auto-update").
 publish:
   - provider: github
-    owner: Wincha
-    repo: mini-dj
+    owner: Teutonick
+    repo: NotBad-DJ-for-FM1
     releaseType: draft
 
 win:
@@ -43,7 +48,7 @@ nsis:
   allowElevation: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: Mini DJ
+  shortcutName: NotBad DJ for FM1
   artifactName: ${productName}-${version}-win-x64-setup.${ext}
 
 portable:
@@ -55,10 +60,10 @@ linux:
   # Asocia la ventana con su entrada .desktop (icono correcto en la barra)
   syncDesktopName: true
   synopsis: Mesa de DJ de dos decks
-  description: Mini DJ — aplicación de DJ de dos decks (Web Audio) empaquetada para escritorio.
+  description: NotBad DJ for FM1 — two-deck DJ application for M-VAVE FM-1.
   desktop:
     entry:
-      Name: Mini DJ
+      Name: NotBad DJ for FM1
       Categories: AudioVideo;Audio;Player;
   target:
     - target: AppImage

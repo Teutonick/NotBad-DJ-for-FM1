@@ -736,7 +736,7 @@ export default function ConfigDialog({
         {/* Pestañas temáticas */}
         <div
           role="tablist"
-          className="flex gap-1 border-b border-neutral-800 overflow-x-auto"
+          className="flex flex-wrap gap-1 border-b border-neutral-800"
         >
           {TABS.map((tb) => (
             <button

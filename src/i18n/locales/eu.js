@@ -1,5 +1,4 @@
 export default {
-  subtitle: "Dj Wincha-k egina (eraikitzen)",
   rec: "● REC",
   recTitle: "Master mix-a grabatzen du; gelditzean .webm gisa deskargatzen da",
   master: "Master",
@@ -194,7 +193,7 @@ export default {
   wavePaletteHeading: "Uhinaren koloreak",
   wavePaletteNote:
     "Baxuak, ertainak eta altuak aztertuta daude jada: paleta aldatzeak berehala koloreztatzen du, ezer berriro aztertu gabe.",
-  paletteMinidj: "Mini DJ (lehenetsia)",
+  paletteMinidj: "NotBad DJ (lehenetsia)",
   paletteMono: "Berde klasikoa (kolore bakarra)",
   paletteCustom: "Pertsonalizatua…",
   bandLow: "Baxuak",
@@ -255,7 +254,7 @@ export default {
   logCopy: "Kopiatu",
   logClear: "Hustu",
   logFile: "Mahaigaineko aplikazioan hemen ere gordetzen da: {path}",
-  versionTitle: "Mini DJ-ren bertsioa",
+  versionTitle: "NotBad DJ-ren bertsioa",
 
   // Estructura de la pista y aviso de fin
   structureLabel: "Egitura",

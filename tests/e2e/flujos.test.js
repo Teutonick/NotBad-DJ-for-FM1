@@ -68,6 +68,27 @@ suite("flujos de la aplicación en el navegador", () => {
       bs.find((b) => b.textContent.trim() === "✕")?.click(),
     );
 
+  it("serves the NotBad favicon and keeps tab rows free of vertical scrolling", async () => {
+    await page.waitForSelector('select[aria-label]');
+    await page.select("select[aria-label]", "ru");
+    await page.waitForFunction(() => document.documentElement.lang === "ru");
+    expect(await page.title()).toMatch(/^NotBad DJ for FM1/);
+    const favicon = await page.$eval('link[rel="icon"]', (link) => link.href);
+    expect(favicon).toContain("/NotBad-DJ-for-FM1/notbad-dj.svg");
+    expect((await fetch(favicon)).ok).toBe(true);
+
+    await page.setViewport({ width: 540, height: 900 });
+    try {
+      expect(
+        await page.$$eval('[role="tablist"]', (rows) =>
+          rows.every((row) => getComputedStyle(row).overflowY === "visible"),
+        ),
+      ).toBe(true);
+    } finally {
+      await page.setViewport({ width: 1440, height: 900 });
+    }
+  });
+
   it("opens the firmware tab with flashing disabled before a package is verified", async () => {
     await page.waitForSelector("select[aria-label]");
     await page.select("select[aria-label]", "en");

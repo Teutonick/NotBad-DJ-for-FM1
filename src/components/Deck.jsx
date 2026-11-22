@@ -1051,14 +1051,14 @@ function Deck({
               pestaña enseña UN grupo, en el orden de siempre, y el panel
               tiene alto fijo: cambiar de pestaña no mueve nada de sitio. */}
         <div className="pt-3 border-t border-neutral-800/70">
-          <div role="tablist" className="flex gap-0.5 overflow-x-auto">
+          <div role="tablist" className="flex flex-wrap gap-0.5">
             {TOOL_TABS.map((tb) => (
               <button
                 key={tb.id}
                 role="tab"
                 aria-selected={tool === tb.id}
                 onClick={() => setTool(tb.id)}
-                className={`px-2 py-1 text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap border-b-2 -mb-px ${
+                className={`px-2 py-1 text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap border-b-2 ${
                   tool === tb.id
                     ? "border-emerald-400 text-neutral-100"
                     : "border-transparent text-neutral-500 hover:text-neutral-300"
