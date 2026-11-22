@@ -143,10 +143,10 @@ const mandatoryJobs = [
   "recovery_lab",
 ];
 const gaps = {
-  "target-stack-mmio":
-    "Target stack analysis is enabled. Passing release-build evidence and complete MMIO verification are still needed.",
+  "target-mmio":
+    "Strict emulation checks observed CPU and bus faults. Complete target MMIO coverage is still unverified.",
   "flash-power-loss":
-    "SPI boundary cuts, real staging cuts and selected application-write cuts are tested. The real loader cut matrix is incomplete.",
+    "The fast loader matrix covers every operation when rewriting the two boundary sectors. A full-slot rewrite matrix is still unverified.",
   "ota-recovery":
     "Direct loader resume and mock Download Mode run in software. Automatic SPL handoff and real ROM boot are unverified.",
 };
@@ -170,6 +170,13 @@ export function releaseDecision(jobs, integrity) {
   );
   const mandatory = {
     ...checks,
+    // The build job requires reports for both the main and interrupt stacks.
+    "target-stack": checks.build === "PASS" ? "PASS" : "NOT VERIFIED",
+    "fast-loader-cut-matrix":
+      checks.recovery_lab === "PASS" &&
+      jobs.recovery_lab.outputs?.fast_cut_matrix === "PASS"
+        ? "PASS"
+        : "NOT VERIFIED",
     "release-manifest": integrity,
     ...Object.fromEntries(
       Object.keys(gaps).map((key) => [key, "NOT VERIFIED"]),

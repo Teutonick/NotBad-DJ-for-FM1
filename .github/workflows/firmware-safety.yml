@@ -202,6 +202,8 @@ jobs:
 
   recovery_lab:
     needs: build
+    outputs:
+      fast_cut_matrix: ${{ steps.recovery.outputs.fast_cut_matrix }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -220,9 +222,12 @@ jobs:
           path: firmware/dj/build
       - run: cd firmware/dj/build && shasum -a 256 --check safety/firmware.sha256
       - run: rustup toolchain install 1.98.0 --profile minimal
-      - env:
+      - id: recovery
+        env:
           RUSTUP_TOOLCHAIN: '1.98.0'
-        run: bash scripts/firmware/safety.sh recovery-lab
+        run: |
+          bash scripts/firmware/safety.sh recovery-lab
+          echo "fast_cut_matrix=PASS" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

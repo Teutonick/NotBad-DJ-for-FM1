@@ -116,13 +116,29 @@ test("gate fails closed when any required evidence is missing or fails", () => {
     host: success,
     fm1kit: success,
     installer: success,
-    recovery_lab: success,
+    recovery_lab: { ...success, outputs: { fast_cut_matrix: "PASS" } },
     emulator_puya: success,
     emulator_uc25hq80: success,
   };
   const current = releaseDecision(jobs, "PASS");
   assert.equal(current.passed, false);
+  assert.equal(current.checks["target-stack"], "PASS");
+  assert.equal(current.checks["target-mmio"], "NOT VERIFIED");
+  assert.equal(current.checks["fast-loader-cut-matrix"], "PASS");
+  assert.equal(
+    releaseDecision({ ...jobs, recovery_lab: success }, "PASS").checks[
+      "fast-loader-cut-matrix"
+    ],
+    "NOT VERIFIED",
+  );
   assert.equal(current.checks["flash-power-loss"], "NOT VERIFIED");
+  assert.equal(current.checks["ota-recovery"], "NOT VERIFIED");
+  assert.equal(
+    releaseDecision({ ...jobs, build: { result: "failure" } }, "PASS").checks[
+      "target-stack"
+    ],
+    "NOT VERIFIED",
+  );
   const failed = releaseDecision(
     {
       ...jobs,

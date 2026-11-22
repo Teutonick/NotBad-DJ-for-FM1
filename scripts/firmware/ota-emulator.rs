@@ -45,10 +45,39 @@ fn pack(data: &[u8]) -> Vec<u8> {
     out
 }
 
-fn reply(request: &[u8], image: &[u8]) -> Result<(u32, Vec<u8>), String> {
+fn sector_table(image: &[u8], offset: usize, length: usize) -> Result<Vec<u8>, String> {
+    if length == 0 || length % 6 != 0 || length > 4096 {
+        return Err("Invalid sector table length".into());
+    }
+    let sectors = image
+        .get(offset..offset + length / 6 * 4096)
+        .ok_or("Sector table is outside the package")?;
+    let mut table = Vec::with_capacity(length);
+    for sector in sectors.chunks_exact(4096) {
+        let (mut crc16, mut crc32) = (0u16, u32::MAX);
+        for &byte in sector {
+            crc16 ^= u16::from(byte) << 8;
+            crc32 ^= u32::from(byte);
+            for _ in 0..8 {
+                crc16 = (crc16 << 1) ^ if crc16 & 0x8000 != 0 { 0x1021 } else { 0 };
+                crc32 = (crc32 >> 1) ^ if crc32 & 1 != 0 { 0xedb88320 } else { 0 };
+            }
+        }
+        table.extend_from_slice(&crc16.to_le_bytes());
+        table.extend_from_slice(&(!crc32).to_le_bytes());
+    }
+    Ok(table)
+}
+
+fn reply(request: &[u8], image: &[u8], fast: bool) -> Result<(u32, Vec<u8>), String> {
     let address = u32::from_le_bytes(request[7..11].try_into().unwrap());
     let length = u32::from_le_bytes([request[11], request[12], request[13], 0]) as usize;
+    let table;
     let payload: &[u8] = match address {
+        0xd0000000..=0xdfffffff if fast => {
+            table = sector_table(image, (address - 0xd0000000) as usize, length)?;
+            &table
+        }
         0xe0000000 | 0xf0000000 if length == 8 => b"success\0",
         _ if length != 0 && length <= 4096 => {
             let from = address as usize;
@@ -103,6 +132,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     soc.set_flash_part(FlashPart::parse(chip).ok_or("invalid Flash model")?);
     let strict = mode == "probe";
     let loader = mode == "loader";
+    let fast = loader && env::var("FM1_OTA_FAST").as_deref() == Ok("1");
     let ticks = if strict { 8 } else { 1 };
     soc.periph.cycle_ticks = ticks;
     soc.periph.hz = 240_000_000 * ticks;
@@ -148,6 +178,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut tick = false;
     let mut queried = false;
     let mut full_query = false;
+    let mut fast_ready = false;
+    let mut table_requests = 0;
     let mut identified = false;
     let mut requests = 0;
     let mut finish = None;
@@ -224,6 +256,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("strict CPU/USB identity={text}; observed guards clear; staging cleanup ops={}", soc.flash.ops);
                     return Ok(());
                 }
+                if fast {
+                    soc.usb
+                        .midi_send(&pack(&[0, 0x59, 0x31, 3, 0, 0, 1, 0, 16, 0xee]));
+                } else {
+                    soc.usb.midi_send(UPGRADE);
+                }
+            }
+            if fast
+                && identified
+                && !fast_ready
+                && frame == [0, 0x59, 0x31, 3, 0, 0, 1, 0, 16, 0xee]
+            {
+                fast_ready = true;
                 soc.usb.midi_send(UPGRADE);
             }
             if frame.len() == 15
@@ -233,7 +278,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .fold(0u8, |sum, byte| sum.wrapping_add(*byte))
                     == 0xff
             {
-                let (address, message) = reply(&frame, &image)?;
+                let (address, message) = reply(&frame, &image, fast_ready)?;
+                if (0xd0000000..0xe0000000).contains(&address) {
+                    table_requests += 1;
+                }
                 requests += 1;
                 soc.usb.midi_send(&message);
                 if address == if loader { 0xf0000000 } else { 0xe0000000 } {
@@ -247,7 +295,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     fs::write(snapshot, &soc.flash.mem)?;
     println!(
-        "identity={identified} requests={requests} staged={} ops={} cut={} resets={}",
+        "identity={identified} requests={requests} staged={} ops={} cut={} resets={} tables={table_requests}",
         finish.is_some(),
         soc.flash.ops,
         soc.flash.cut(),
@@ -255,6 +303,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let requested_cut = soc.flash.cut_at;
     if !identified
+        || (fast && (!fast_ready || table_requests == 0))
         || requests == 0
         || soc.flash.ops == 0
         || requested_cut.is_some_and(|cut| !soc.flash.cut() || soc.flash.ops < cut)
@@ -263,7 +312,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("OTA staging or injected power cut was not reached".into());
     }
     if loader {
-        if soc.flash.cut() && soc.flash.mem[0x4000..0x5000] == stock.flash[0x4000..0x5000] {
+        if requested_cut.is_some_and(|cut| cut <= 2)
+            && soc.flash.mem[0x4000..0x5000] == stock.flash[0x4000..0x5000]
+        {
             return Err("Cut left the first application sector intact".into());
         }
         if !soc.flash.cut() && soc.flash.mem[0x4000..0x93000] != stock.flash[0x4000..0x93000] {

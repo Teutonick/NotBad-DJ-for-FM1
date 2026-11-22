@@ -39,7 +39,7 @@ rustc --edition 2021 -O "$work/spi/main.rs" -o "$work/spi-cut"
 cargo build --offline --release --manifest-path "$work/Cargo.toml"
 
 peer="$work/target/release/peer"
-unset FM1_FLASH_CUT
+unset FM1_FLASH_CUT FM1_OTA_FAST
 "$peer" "$candidate" p25q80 seed "$work/original.bin"
 "$work/spi-cut" "$work/original.bin" "$work/cuts"
 python "$scripts/rom-recovery.py" "$unbricker" "$work/original.bin" "$work/cuts" "$reports"
@@ -69,6 +69,22 @@ for chip in p25q80 uc25hq80; do
     "$peer" "$candidate" "$chip" loader "$resumed" "$snapshot" "$loader"
     "$peer" "$candidate" "$chip" probe "$resumed"
   done
+
+  # Discover the number of operations from the same package and chip, including
+  # completion bookkeeping. Every case starts with the same two damaged sectors.
+  metrics=$(FM1_OTA_FAST=1 "$peer" "$candidate" "$chip" loader "$work/$chip-fast-written.bin" "$damaged" "$loader")
+  echo "$chip fast loader $metrics"
+  ops=$(sed -n 's/.* ops=\([0-9][0-9]*\) .*/\1/p' <<< "$metrics")
+  [[ "$ops" =~ ^[0-9]+$ && "$ops" -ge 35 ]]
+  for ((cut = 1; cut <= ops; cut++)); do
+    echo "$chip fast loader cut $cut/$ops"
+    snapshot="$work/$chip-fast-cut.bin"
+    resumed="$work/$chip-fast-resumed.bin"
+    FM1_OTA_FAST=1 FM1_FLASH_CUT=$cut "$peer" "$candidate" "$chip" loader "$snapshot" "$damaged" "$loader"
+    FM1_OTA_FAST=1 "$peer" "$candidate" "$chip" loader "$resumed" "$snapshot" "$loader"
+    "$peer" "$candidate" "$chip" probe "$resumed"
+  done
+  echo "$chip fast loader matrix: $ops/$ops passed"
 done
 python "$scripts/rom-recovery.py" "$unbricker" "$work/original.bin" "$work/app-cuts" "$reports/ota-rom" --staged
 echo "Partial recovery evidence collected. SPL handoff and on-device ROM are not covered."
