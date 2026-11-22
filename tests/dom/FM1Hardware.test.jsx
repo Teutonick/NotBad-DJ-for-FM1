@@ -3,6 +3,7 @@ import { useState } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import Hardware from "../../src/fm1/Hardware";
 import { packet } from "../../src/fm1/protocol";
+import { I18nProvider } from "../../src/i18n";
 
 class Port extends EventTarget {
   constructor(id, name) {
@@ -27,7 +28,11 @@ function setup(input, ...outputs) {
   const request = vi.fn(async () => access);
   vi.stubGlobal(
     "navigator",
-    Object.assign(Object.create(navigator), { requestMIDIAccess: request }),
+    {
+      languages: ["en-US"],
+      language: "en-US",
+      requestMIDIAccess: request,
+    },
   );
   const onMidi = vi.fn();
   const engine = { resume: () => new Promise(() => {}), ctx: {} };
@@ -43,7 +48,11 @@ function setup(input, ...outputs) {
       />
     );
   }
-  render(<Fixtures />);
+  render(
+    <I18nProvider>
+      <Fixtures />
+    </I18nProvider>,
+  );
   return { request, access, onMidi };
 }
 

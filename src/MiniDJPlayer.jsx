@@ -681,12 +681,12 @@ export default function MiniDJMixer() {
         />
         {selectedTrack && (
           <div className="fm-selection">
-            Controller selection ·{" "}
+            {t("controllerSelection")} ·{" "}
             {tracks.find((track) => track.id === selectedTrack)?.name}
           </div>
         )}
 
-        <section className="fm-overviews" aria-label="Track overviews">
+        <section className="fm-overviews" aria-label={t("trackOverviews")}>
           {["A", "B"].map((side) => (
             <div key={side} className={`fm-overview fm-overview-${side}`}>
               <strong>{side}</strong>
@@ -695,7 +695,7 @@ export default function MiniDJMixer() {
                 beats={deckAnalysis[side]?.beats}
                 duration={deckAnalysis[side]?.duration}
                 audioRef={overviewRefs[side]}
-                title={`Seek Deck ${side}`}
+                title={t("seekDeck", { side })}
                 onSeek={(fraction) =>
                   deckRefs.current[side]?.seekFraction(fraction)
                 }

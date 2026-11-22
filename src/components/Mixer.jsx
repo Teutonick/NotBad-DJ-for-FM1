@@ -173,7 +173,7 @@ function Mixer({
 
   return (
     <div
-      className={`rounded-2xl border border-neutral-400 bg-neutral-900/70 p-4 sm:p-5 shadow-xl relative overflow-hidden order-last lg:order-none`}
+      className={`fm-panel fm-mixer rounded-2xl border border-neutral-400 bg-neutral-900/70 p-4 sm:p-5 shadow-xl relative overflow-hidden order-last lg:order-none`}
     >
       <div className="flex flex-row flex-wrap gap-4 justify-between mb-4">
         <div className="flex flex-row items-center gap-3 sm:gap-4">
@@ -245,14 +245,14 @@ function Mixer({
               aria-pressed={fx[side].on}
               onClick={() => changeFx(side, { on: !fx[side].on })}
             >
-              Echo {side}
+              {t("echoDeck", { side })}
             </button>
             <input
               type="range"
               min="0"
               max="1"
               step="0.01"
-              aria-label={`Echo amount ${side}`}
+              aria-label={t("echoAmount", { side })}
               value={fx[side].amount}
               onChange={(e) =>
                 changeFx(side, { amount: Number(e.target.value) })
@@ -261,7 +261,7 @@ function Mixer({
           </div>
         ))}
       </div>
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4 shadow-xl">
+      <div className="fm-panel rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4 shadow-xl">
         <div className="flex items-center justify-between text-xs text-neutral-400 mb-2">
           <span>A</span>
           <span>{t("crossfader")}</span>

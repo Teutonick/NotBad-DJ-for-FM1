@@ -8,6 +8,8 @@ import {
 } from "react";
 import { CueOutput, testTone } from "../audio/cueOutput";
 
+import { useI18n } from "../i18n/context";
+
 export default forwardRef(function HeadphoneCue(
   { engine, cueDeviceId, masterDeviceId },
   ref,
@@ -17,6 +19,7 @@ export default forwardRef(function HeadphoneCue(
   const [pfl, setPfl] = useState({ A: false, B: false });
   const [volume, setVolume] = useState(0.35);
   const [mix, setMix] = useState(0);
+  const { t } = useI18n();
   const [status, setStatus] = useState("");
   const mixRef = useRef(mix);
 
@@ -29,8 +32,8 @@ export default forwardRef(function HeadphoneCue(
       setReady(false);
       setStatus(
         cueDeviceId
-          ? "Enable the selected headphones output."
-          : "Choose headphones in audio settings.",
+          ? "cueSelected"
+          : "cueChoose",
       );
     };
     lost();
@@ -61,7 +64,7 @@ export default forwardRef(function HeadphoneCue(
     try {
       const connected = await output.connect(cueDeviceId, masterDeviceId);
       setReady(connected);
-      if (connected) setStatus("Headphones ready");
+      if (connected) setStatus("cueReady");
       return connected;
     } catch (error) {
       setStatus(error.message);
@@ -83,10 +86,10 @@ export default forwardRef(function HeadphoneCue(
   }));
 
   return (
-    <section className="fm-hardware fm-headphones" aria-label="Headphones">
-      <strong>HEADPHONES</strong>
+    <section className="fm-hardware fm-headphones" aria-label={t("headphones")}>
+      <strong>{t("headphones")}</strong>
       <button type="button" onClick={enable} disabled={ready}>
-        Enable Cue Output
+        {t("cueEnable")}
       </button>
       {["A", "B"].map((side) => (
         <button
@@ -100,7 +103,7 @@ export default forwardRef(function HeadphoneCue(
         </button>
       ))}
       <label>
-        Level{" "}
+        {t("vol")}{" "}
         <input
           type="range"
           min="0"
@@ -115,7 +118,7 @@ export default forwardRef(function HeadphoneCue(
         />
       </label>
       <label>
-        Cue / Master{" "}
+        {t("cueMix")}{" "}
         <input
           type="range"
           min="0"
@@ -125,7 +128,7 @@ export default forwardRef(function HeadphoneCue(
           onChange={(event) => adjustMix(Number(event.target.value))}
         />
       </label>
-      <span role="status">{status}</span>
+      <span role="status">{t(status)}</span>
     </section>
   );
 });

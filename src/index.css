@@ -27,9 +27,91 @@
 }
 
 .fm-workspace {
-  background: #101318;
-  color: #e6eaf0;
+  --fm-ink: #e4edf1;
+  --fm-amber: #edba80;
+  --fm-blue: #83cadd;
+  background:
+    radial-gradient(ellipse at 86% 0%, #63301766, transparent 35rem),
+    radial-gradient(ellipse at 9% 0%, #1a586a77, transparent 36rem),
+    #0a1118;
+  color: var(--fm-ink);
+  font-family: "Segoe UI", system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
+}
+.fm-workspace :is(.fm-panel, .fm-hardware) {
+  border-color: #3a515e;
+  border-radius: 0.45rem;
+  background:
+    repeating-linear-gradient(0deg, #ffffff03 0 1px, transparent 1px 3px),
+    linear-gradient(155deg, #253944, #17242e 43%, #111b24);
+  box-shadow: inset 0 1px #ffffff18, 0 5px 16px #0007;
+}
+.fm-header h1 {
+  color: var(--fm-ink);
+  font-family: "Bahnschrift", "Arial Narrow", "Segoe UI", sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.17em;
+}
+.fm-workspace :is(h2, h3, .fm-hardware strong) {
+  color: var(--fm-amber);
+  letter-spacing: 0.07em;
+}
+.fm-workspace :is(button, select, input:not([type="range"])) {
+  border-radius: 0.3rem;
+}
+.fm-workspace :is(button, select, input):focus-visible {
+  outline: 2px solid var(--fm-blue);
+  outline-offset: 2px;
+}
+.fm-workspace button svg {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fm-settings-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 15px;
+  height: 13px;
+  color: var(--fm-blue);
+  background:
+    linear-gradient(currentColor, currentColor) 4px 1px / 2px 6px no-repeat,
+    linear-gradient(currentColor, currentColor) 10px 6px / 2px 6px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 3px / 15px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 8px / 15px 1px no-repeat;
+}
+.fm-workspace :is(.fm-hardware, .fm-effects) button {
+  border-color: #45606c;
+  background: linear-gradient(#2c424e, #182630);
+  box-shadow: inset 0 1px #ffffff17, 0 2px 3px #0006;
+}
+.fm-workspace :is(.fm-hardware, .fm-effects) button[aria-pressed="true"] {
+  color: #17191c;
+  border-color: #f0c08e;
+  background: linear-gradient(#e9b579, #cc864d);
+}
+.fm-workspace :is(select, input:not([type])) {
+  color: var(--fm-ink);
+  background-color: #0e1922;
+  border-color: #405663;
+}
+.fm-workspace .fm-knob {
+  border-color: #69818b;
+  background: radial-gradient(circle at 34% 26%, #526874, #2c414e 54%, #15242e 76%);
+  box-shadow: inset 0 0 0 3px #0e1c25, 0 3px 6px #000a;
+}
+.fm-knob:focus-within {
+  outline: 2px solid var(--fm-blue);
+}
+.fm-workspace .fm-wave {
+  background: #101b24;
+  outline: 1px solid #405562;
+  outline-offset: -1px;
+}
+.fm-workspace .fm-overview-A {
+  color: var(--fm-blue);
+}
+.fm-workspace .fm-overview-B {
+  color: var(--fm-amber);
 }
 .fm-workspace > div {
   max-width: 1540px;

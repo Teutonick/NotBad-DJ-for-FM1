@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
 
+import { useI18n } from "../i18n/context";
+
 const EMPTY = [];
 
 export function usePlaylists(config, setConfig) {
+  const { t } = useI18n();
   const [activeId, setActive] = useState("");
   const [name, setName] = useState("");
   const lists = config.playlists || EMPTY;
@@ -27,9 +30,9 @@ export function usePlaylists(config, setConfig) {
         }}
       >
         <label>
-          Playlist{" "}
+          {t("playlist")}{" "}
           <select value={activeId} onChange={(e) => setActive(e.target.value)}>
-            <option value="">All tracks</option>
+            <option value="">{t("allTracks")}</option>
             {lists.map((list) => (
               <option key={list.id} value={list.id}>
                 {list.name}
@@ -38,14 +41,14 @@ export function usePlaylists(config, setConfig) {
           </select>
         </label>
         <input
-          aria-label="New playlist name"
-          placeholder="New playlist name"
+          aria-label={t("playlistName")}
+          placeholder={t("playlistName")}
           value={name}
           maxLength={70}
           onChange={(e) => setName(e.target.value)}
         />
         <button type="submit" disabled={!name.trim()}>
-          Create playlist
+          {t("playlistCreate")}
         </button>
         {active && (
           <button
@@ -55,7 +58,7 @@ export function usePlaylists(config, setConfig) {
               setActive("");
             }}
           >
-            Delete playlist
+            {t("playlistDelete")}
           </button>
         )}
       </form>
@@ -76,12 +79,12 @@ export function usePlaylists(config, setConfig) {
             )
           }
         >
-          Remove from playlist
+          {t("playlistRemove")}
         </button>
       ) : (
         lists.length > 0 && (
           <select
-            aria-label="Add track to playlist"
+            aria-label={t("playlistAddTrack")}
             value=""
             onChange={(event) => {
               const id = event.target.value;
@@ -94,7 +97,7 @@ export function usePlaylists(config, setConfig) {
               );
             }}
           >
-            <option value="">Add to playlist</option>
+            <option value="">{t("playlistAdd")}</option>
             {lists.map((list) => (
               <option key={list.id} value={list.id}>
                 {list.name}
@@ -104,5 +107,5 @@ export function usePlaylists(config, setConfig) {
         )
       );
     return { active, toolbar, membership };
-  }, [activeId, name, lists, setConfig]);
+  }, [activeId, name, lists, setConfig, t]);
 }

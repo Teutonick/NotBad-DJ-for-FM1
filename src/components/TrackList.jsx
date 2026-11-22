@@ -76,14 +76,14 @@ function TrackList({
   const folderRef = useRef(null);
   const [demoStatus, setDemoStatus] = useState("");
   async function addDemoTracks() {
-    setDemoStatus("Loading demo tracks…");
+    setDemoStatus("demoLoading");
     try {
       const files = await Promise.all(
         ["Beacon-124.wav", "Afterglow-128.wav"].map(async (name) => {
           const response = await fetch(
             `${import.meta.env.BASE_URL}demo/${name}`,
           );
-          if (!response.ok) throw new Error("Demo file unavailable");
+          if (!response.ok) throw new Error("demoUnavailable");
           return new File([await response.blob()], name, { type: "audio/wav" });
         }),
       );
@@ -233,7 +233,7 @@ function TrackList({
 
   return (
     <div
-      className="rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4 sm:p-5 shadow-xl"
+      className="fm-panel fm-library rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4 sm:p-5 shadow-xl"
       onDragOver={(event) => {
         if (event.dataTransfer.types.includes("Files")) event.preventDefault();
       }}
@@ -313,9 +313,9 @@ function TrackList({
               Add folder
             </button>
             <button type="button" onClick={addDemoTracks}>
-              Add demo tracks
+              {t("demoAdd")}
             </button>
-            <span role="status">{demoStatus}</span>
+            <span role="status">{t(demoStatus)}</span>
           </div>
         )}
         <input
@@ -423,7 +423,7 @@ function TrackList({
                       </span>
                     ) : track.analyzeFailed ? (
                       <span className="text-[10px] text-neutral-600">
-                        {playlists ? "Analysis unavailable" : t("bpmUnknown")}
+                        {playlists ? t("analysisUnavailable") : t("bpmUnknown")}
                       </span>
                     ) : (
                       <span className="text-[10px] text-neutral-500 animate-pulse">

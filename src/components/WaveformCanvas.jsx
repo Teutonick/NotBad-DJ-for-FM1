@@ -94,7 +94,7 @@ function WaveformCanvas({
     // entran en cada píxel. Agrupa por color: como mucho PALETTE_SIZE
     // rellenos, nunca uno por píxel.
     const drawWave = (dst, width, height, from, perPx, colored, dur) => {
-      dst.fillStyle = "#171717";
+      dst.fillStyle = "#101b24";
       dst.fillRect(0, 0, width, height);
 
       const paths = bandPathsRef.current;
@@ -554,7 +554,7 @@ function WaveformCanvas({
   return (
     <canvas
       ref={canvasRef}
-      className="w-full h-28 bg-neutral-800 rounded-md cursor-pointer select-none"
+      className="fm-wave w-full h-28 bg-neutral-800 rounded-md cursor-pointer select-none"
       style={{ touchAction: "pan-y" }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

@@ -6,10 +6,13 @@ import {
   loadLocale,
 } from "../../../src/i18n/locales";
 import { LANGUAGES, translate } from "../../../src/i18n/context";
+import { fm1English } from "../../../src/i18n/locales/en";
 
 const codes = [...LOCALE_CODES];
 const reference = LOCALES[DEFAULT_LOCALE];
 const referenceKeys = Object.keys(reference).sort();
+const keysFor = (code) =>
+  code === "ru" ? [...referenceKeys, ...Object.keys(fm1English)] : referenceKeys;
 // Parámetros de una cadena: "Deck {side}" → ["side"]
 const placeholders = (str) =>
   [...String(str).matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
@@ -38,20 +41,21 @@ describe("traducciones", () => {
 
   it("el selector de idioma ofrece exactamente los idiomas que existen", () => {
     expect(LANGUAGES.map((l) => l.code).sort()).toEqual(codes.sort());
-    expect(codes).toHaveLength(11);
+    expect(codes).toContain("ru");
   });
 
   it.each(codes)("%s tiene las mismas claves que el inglés", (code) => {
     const keys = Object.keys(LOCALES[code]);
-    const missing = referenceKeys.filter((k) => !keys.includes(k));
-    const extra = keys.filter((k) => !referenceKeys.includes(k));
+    const expected = keysFor(code);
+    const missing = expected.filter((k) => !keys.includes(k));
+    const extra = keys.filter((k) => !expected.includes(k));
     expect({ missing, extra }).toEqual({ missing: [], extra: [] });
   });
 
   it.each(codes)("%s conserva los parámetros de cada cadena", (code) => {
     const wrong = [];
-    for (const key of referenceKeys) {
-      const expected = placeholders(reference[key]);
+    for (const key of keysFor(code)) {
+      const expected = placeholders(reference[key] ?? fm1English[key]);
       const actual = placeholders(LOCALES[code][key] ?? "");
       if (expected.join() !== actual.join())
         wrong.push({ key, expected, actual });
@@ -60,7 +64,7 @@ describe("traducciones", () => {
   });
 
   it.each(codes)("%s no deja ninguna cadena vacía", (code) => {
-    const empty = referenceKeys.filter(
+    const empty = keysFor(code).filter(
       (k) => !String(LOCALES[code][k] ?? "").trim(),
     );
     expect(empty).toEqual([]);

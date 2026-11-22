@@ -75,7 +75,7 @@ function CentralMeters({
   };
 
   return (
-    <div className="flex flex-wrap items-center rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4 shadow-xl gap-4 sm:gap-6">
+    <div className="fm-panel fm-header flex flex-wrap items-center rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4 shadow-xl gap-4 sm:gap-6">
       {/* Título + REC */}
       <header className="shrink-0 self-start flex flex-col gap-1">
         <div className="flex items-center gap-3">
@@ -135,8 +135,9 @@ function CentralMeters({
             onClick={onOpenConfig}
             className={`px-2 py-0.5 rounded-lg border text-xs text-neutral-300 ${SKIN} ${GLOSS} ${PRESS}`}
             title={t("configTitle")}
+            aria-label={t("configTitle")}
           >
-            ⚙
+            <span className="fm-settings-icon" aria-hidden="true" />
           </button>
         </div>
         <Fader

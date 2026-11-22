@@ -3,6 +3,8 @@ import { firmwareVersion, packet } from "./protocol";
 import { selectInput, selectOutput } from "./midiPorts";
 import { testTone } from "../audio/cueOutput";
 
+import { useI18n } from "../i18n/context";
+
 export default function Hardware({
   engine,
   onMidi,
@@ -13,6 +15,7 @@ export default function Hardware({
 }) {
   const [access, setAccess] = useState(null);
   const [ports, setPorts] = useState({ inputs: [], outputs: [] });
+  const { t } = useI18n();
   const [status, setStatus] = useState("");
   const [monitor, setMonitor] = useState([]);
   const [verified, setVerified] = useState(null);
@@ -135,7 +138,7 @@ export default function Hardware({
         );
       }
       setConfig((prev) => ({ ...prev, noteMap: parsed }));
-      setStatus("MIDI mapping saved");
+      setStatus("mappingSaved");
     } catch (error) {
       setStatus(error.message);
     }
@@ -157,33 +160,33 @@ export default function Hardware({
   }
 
   return (
-    <section className="fm-hardware" aria-label="FM-1 hardware">
+    <section className="fm-hardware" aria-label={t("hardware")}>
       <button type="button" onClick={connect}>
-        {firmware ? "MIDI connected" : "Connect FM-1"}
+        {firmware ? t("midiConnected") : t("connectFm")}
       </button>
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
       >
-        Hardware diagnostics
+        {t("hardwareDiagnostics")}
       </button>
       <span role="status">
-        {status ||
+        {t(status) ||
           (firmware
             ? input.name
             : access &&
               (!input
-                ? "Select the FM-1 MIDI input in Hardware diagnostics."
+                ? t("selectMidiIn")
                 : !output
-                  ? "Select the FM-1 MIDI output in Hardware diagnostics."
-                  : "Waiting for FM-1 DJ firmware to confirm the MIDI pair."))}
+                  ? t("selectMidiOut")
+                  : t("waitFirmware")))}
       </span>
       {expanded && (
         <div className="fm-diagnostics">
           {[
-            ["MIDI input", "midiInput", ports.inputs],
-            ["MIDI output", "midiOutput", ports.outputs],
+            [t("midiInput"), "midiInput", ports.inputs],
+            [t("midiOutput"), "midiOutput", ports.outputs],
           ].map(([label, key, devices]) => (
             <label key={key}>
               {label}{" "}
@@ -194,11 +197,11 @@ export default function Hardware({
                   setConfig((prev) => ({ ...prev, [key]: value }));
                 }}
               >
-                <option value="">FM-1 DJ auto-select</option>
+                <option value="">{t("midiAuto")}</option>
                 {config[key] &&
                   !devices.some((port) => port.id === config[key]) && (
                     <option value={config[key]}>
-                      Previously selected port unavailable
+                      {t("portUnavailable")}
                     </option>
                   )}
                 {devices.map((port) => (
@@ -209,18 +212,18 @@ export default function Hardware({
               </select>
             </label>
           ))}
-          <span>Firmware {firmware || "—"}</span>
-          <button onClick={() => outputTest(false)}>Test Master</button>
-          <button onClick={() => outputTest(true)}>Test headphones</button>
+          <span>{t("firmware")} {firmware || "—"}</span>
+          <button onClick={() => outputTest(false)}>{t("testMaster")}</button>
+          <button onClick={() => outputTest(true)}>{t("testHeadphones")}</button>
           <span>
-            {engine.ctx.sampleRate} Hz · Master audio latency{" "}
+            {engine.ctx.sampleRate} Hz · {t("masterLatency")}{" "}
             {Math.round(
               1000 * (engine.ctx.baseLatency + (engine.ctx.outputLatency || 0)),
             )}{" "}
             ms
           </span>
           <label>
-            SYNC phase{" "}
+            {t("phaseSync")}{" "}
             <input
               type="checkbox"
               checked={config.phaseSync !== false}
@@ -230,15 +233,15 @@ export default function Hardware({
             />
           </label>
           <label>
-            MIDI note map{" "}
+            {t("midiMap")}{" "}
             <input
               value={mapping}
               onChange={(e) => setMapping(e.target.value)}
               placeholder='{"53":68}'
             />
           </label>
-          <button onClick={saveMapping}>Save mapping</button>
-          <pre aria-label="MIDI monitor">{monitor.join("\n")}</pre>
+          <button onClick={saveMapping}>{t("mappingSave")}</button>
+          <pre aria-label={t("midiMonitor")}>{monitor.join("\n")}</pre>
         </div>
       )}
     </section>

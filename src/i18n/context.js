@@ -1,11 +1,13 @@
 import { createContext, useContext } from "react";
 import { LOCALES, DEFAULT_LOCALE } from "./locales";
+import { fm1English } from "./locales/en";
 
 export const STORAGE_KEY = "mini-dj-lang";
 
 export const LANGUAGES = [
   { code: "es", label: "Español" },
   { code: "en", label: "English" },
+  { code: "ru", label: "Русский" },
   { code: "ca", label: "Català" },
   { code: "gl", label: "Galego" },
   { code: "eu", label: "Euskara" },
@@ -41,7 +43,7 @@ export function detectLanguage() {
 // t(clave, {params}); cae al inglés y, si falta, devuelve la clave
 export function translate(lang, key, params) {
   const dict = LOCALES[lang] || LOCALES[DEFAULT_LOCALE];
-  let str = dict[key] ?? LOCALES[DEFAULT_LOCALE][key] ?? key;
+  let str = dict[key] ?? LOCALES[DEFAULT_LOCALE][key] ?? fm1English[key] ?? key;
   if (params) {
     for (const [k, v] of Object.entries(params)) {
       // Con función: un "$&" o "$$" en el valor (lo que escribe el usuario en

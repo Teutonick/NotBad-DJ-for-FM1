@@ -35,23 +35,20 @@ export default function Knob({
       }
     >
       <div
-        className="relative rounded-full bg-neutral-800 border border-neutral-700 shadow-inner overflow-hidden"
+        className="fm-knob relative rounded-full bg-neutral-800 border border-neutral-700 shadow-inner overflow-hidden"
         style={{ width: size, height: size }}
       >
         {/* Cara con SVG para una aguja precisa */}
         <svg viewBox="0 0 56 56" className="absolute inset-0">
-          {/* fondo interno */}
-          <circle cx="28" cy="28" r="26" fill="rgb(23 23 23)" />{" "}
-          {/* neutral-900 */}
           {/* aguja: anclada en el centro, rotada alrededor de (28,28) */}
           <g transform={`rotate(${deg} 28 28)`}>
             {/* línea desde el centro hacia arriba (antes de rotar) */}
             <line
               x1="28"
-              y1="28"
+              y1="17"
               x2="28"
               y2="8"
-              stroke={killed ? "rgb(248 113 113)" : "rgb(212 212 212)"}
+              stroke={killed ? "rgb(248 113 113)" : "#edba80"}
               strokeWidth="2"
               strokeLinecap="round"
             />
@@ -66,6 +63,7 @@ export default function Knob({
           step={step}
           value={value}
           onChange={onChange}
+          aria-label={label}
           className="absolute inset-0 opacity-0 cursor-pointer"
         />
       </div>

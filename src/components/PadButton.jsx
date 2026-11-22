@@ -46,7 +46,7 @@ export const PRESS = "active:translate-y-px active:shadow-none";
 // por encima. Lo comparten los botones que NO son PadButton (REC, ⚙, PFL,
 // Auto, los de la lista) para que todos parezcan del mismo aparato.
 export const SKIN =
-  "border-neutral-700 bg-gradient-to-b from-neutral-700 to-neutral-800 hover:from-neutral-600 hover:to-neutral-700";
+  "border-[#42606e] bg-gradient-to-b from-[#2b414e] to-[#172630] hover:from-[#3b5664] hover:to-[#223742]";
 
 export default function PadButton({
   size = "xs",

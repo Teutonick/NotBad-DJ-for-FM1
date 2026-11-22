@@ -49,7 +49,7 @@ suite("flujos de la aplicación en el navegador", () => {
 
   // Abre ⚙ en una pestaña y espera a que esté pintada
   const abrirAjustes = async (pestaña) => {
-    await pulsar("⚙");
+    await page.click('[aria-label="Settings: audio outputs and analysis"]');
     await page.waitForFunction(
       (p) =>
         [...document.querySelectorAll("button")].some(
@@ -159,6 +159,7 @@ suite("flujos de la aplicación en el navegador", () => {
       "zh",
       "ja",
       "ko",
+      "ru",
       "en",
     ]) {
       await page.select("select[aria-label]", code);
@@ -166,6 +167,11 @@ suite("flujos de la aplicación en el navegador", () => {
         `document.documentElement.lang === '${code}'`,
         { timeout: 5000 },
       );
+      if (code === "ru") {
+        await page.waitForFunction(() =>
+          document.body.textContent.includes("Подключить FM-1"),
+        );
+      }
 
       const info = await page.evaluate(() => ({
         scrollWidth: document.documentElement.scrollWidth,
