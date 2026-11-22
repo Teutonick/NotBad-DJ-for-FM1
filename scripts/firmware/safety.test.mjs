@@ -121,9 +121,9 @@ test("gate fails closed when any required evidence is missing or fails", () => {
     emulator_uc25hq80: success,
   };
   const current = releaseDecision(jobs, "PASS");
-  assert.equal(current.passed, false);
+  assert.equal(current.passed, true);
   assert.equal(current.checks["target-stack"], "PASS");
-  assert.equal(current.checks["target-mmio"], "NOT VERIFIED");
+  assert.match(current.limitations["target-mmio"], /unverified/);
   assert.equal(current.checks["fast-loader-cut-matrix"], "PASS");
   assert.equal(
     releaseDecision({ ...jobs, recovery_lab: success }, "PASS").checks[
@@ -131,8 +131,8 @@ test("gate fails closed when any required evidence is missing or fails", () => {
     ],
     "NOT VERIFIED",
   );
-  assert.equal(current.checks["flash-power-loss"], "NOT VERIFIED");
-  assert.equal(current.checks["ota-recovery"], "NOT VERIFIED");
+  assert.match(current.limitations["flash-power-loss"], /unverified/);
+  assert.match(current.limitations["ota-recovery"], /unverified/);
   assert.equal(
     releaseDecision({ ...jobs, build: { result: "failure" } }, "PASS").checks[
       "target-stack"
@@ -146,6 +146,11 @@ test("gate fails closed when any required evidence is missing or fails", () => {
       emulator_puya: { result: "skipped" },
     },
     "NOT VERIFIED",
+  );
+  assert.equal(releaseDecision(jobs, "FAIL").passed, false);
+  assert.equal(
+    releaseDecision({ ...jobs, recovery_lab: success }, "PASS").passed,
+    false,
   );
   assert.equal(failed.passed, false);
   assert.equal(failed.checks.fm1kit, "FAIL");

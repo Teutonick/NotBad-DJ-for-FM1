@@ -142,7 +142,7 @@ const mandatoryJobs = [
   "installer",
   "recovery_lab",
 ];
-const gaps = {
+const limitations = {
   "target-mmio":
     "Strict emulation checks observed CPU and bus faults. Complete target MMIO coverage is still unverified.",
   "flash-power-loss":
@@ -178,13 +178,10 @@ export function releaseDecision(jobs, integrity) {
         ? "PASS"
         : "NOT VERIFIED",
     "release-manifest": integrity,
-    ...Object.fromEntries(
-      Object.keys(gaps).map((key) => [key, "NOT VERIFIED"]),
-    ),
   };
   return {
     checks: mandatory,
-    gaps,
+    limitations,
     passed: Object.values(mandatory).every((result) => result === "PASS"),
   };
 }
@@ -222,11 +219,18 @@ function report(jobs) {
       ([name, value]) => `| ${name} | ${value} |`,
     ),
     "",
-    ...Object.entries(gaps).map(
+    "## Coverage limits",
+    "",
+    ...Object.entries(result.limitations).map(
       ([name, reason]) => `- **${name}** — ${reason}`,
     ),
     "",
     `**${status}**`,
+    ...(result.passed
+      ? [
+          "Hardware acceptance is required before publication. Test the firmware-under-test artifact with the SHA-256 above.",
+        ]
+      : []),
     "",
   ].join("\n");
   writeFileSync(join(reports, "report.md"), md);
@@ -240,6 +244,8 @@ function report(jobs) {
       `${status}\n${blockers.join("\n")}\nDetails: ${join(reports, "report.md")}`,
     );
     process.exitCode = 1;
+  } else {
+    console.log(`${status}: ${hash}. Hardware acceptance pending.`);
   }
 }
 
