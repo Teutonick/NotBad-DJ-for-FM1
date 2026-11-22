@@ -4,6 +4,16 @@
 
 NotBad DJ for FM1 combines two browser-based decks with custom firmware for the M-VAVE FM-1. The browser decodes and mixes local tracks. The controller receives headphone cue audio over USB Audio and exchanges controls and status over USB MIDI.
 
+## Mixing in the browser
+
+![Both decks playing the built-in demo tracks with master sync and live level meters](docs/screenshots/web-mixer.jpg)
+
+**Mix two tracks.** Compare both waveforms in Beat Match, match tempos with Sync, and blend the decks with channel EQ, filters, echo and the crossfader. The local library shows BPM and musical key, and **REC** captures the master mix.
+
+![Deck A beat-grid controls and an active eight-beat loop on deck B](docs/screenshots/web-deck-tools.png)
+
+**Prepare transitions.** Fine-tune the beat grid in **BPM**, jump to hot cues in **Position**, or use **Loops & rolls** to set, resize and save loops. Deck B shows an active eight-beat loop.
+
 ## Getting started
 
 Open [NotBad DJ for FM1 on GitHub Pages](https://teutonick.github.io/NotBad-DJ-for-FM1/) in a current version of Chrome on macOS or Windows 11. For Windows MIDI and audio setup, see the [Windows checklist](docs/WINDOWS.md).
@@ -12,7 +22,19 @@ To build locally, use Node.js 24 and run `npm ci --ignore-scripts`, `npm run bui
 
 Add local WAV, MP3 or FLAC tracks to the library and load them onto decks A and B. **Add demo tracks** imports [Beacon (124 BPM)](public/demo/Beacon-124.wav) and [Afterglow (128 BPM)](public/demo/Afterglow-128.wav), generated metronome samples released under CC0-1.0. To check phase sync, start deck A, enable Sync on B, and start B. The deck tools let you adjust each track's BPM and beat grid.
 
+## Windows desktop app
+
+![NotBad DJ in a Windows desktop window with both demo tracks playing and mixer meters active](docs/screenshots/desktop-mixer.jpg)
+
 ## Master and headphone cue
+
+![Desktop app with FM-1 MIDI diagnostics open during playback, showing the connection status and audio test buttons](docs/screenshots/desktop-fm1-diagnostics.jpg)
+
+**Connect the controller.** Hardware diagnostics shows the MIDI connection status, separate input and output selectors, and test controls for the master and headphone paths. The screenshot shows the panel before a MIDI connection is established.
+
+![Audio settings with separate Master, Cue and per-deck output selectors](docs/screenshots/fm1-audio-routing.jpg)
+
+**Route the mix and headphones separately.** Assign the speakers to Master and the FM-1 to Cue. Use PFL A or B to preview a deck in the headphones and adjust the Cue/Master blend.
 
 1. Plug the FM-1 into USB and connect wired headphones to it. Start with the controller's MASTER level low.
 2. Select **Connect FM-1** and allow MIDI with SysEx. If the browser does not select the ports automatically, choose the FM-1 MIDI input and output separately under **Hardware diagnostics**. Windows may number the ports differently.
