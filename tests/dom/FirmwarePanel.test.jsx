@@ -107,7 +107,16 @@ it.each(["FM-1_82000100", "ota-FM-1_900"])(
       target: { value: "0xb36014" },
     });
     expect(screen.getByText("Recognized chip: UCUN UC25HQ80.")).toBeVisible();
-    expect(release.verifiedConfigurations).toEqual([]);
+    expect(
+      screen.getByText(/Puya P25Q80H.*856014.*m-bootloader 2\.3/),
+    ).toBeVisible();
+    expect(release.verifiedConfigurations).toEqual([
+      {
+        jedec: "856014",
+        bootloader: "m-bootloader 2.3",
+        evidence: "user-reported",
+      },
+    ]);
     expect(request).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Read MIDI identity" }));
     expect(

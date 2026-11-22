@@ -8,6 +8,12 @@
       "856014": "Puya P25Q80H",
       "B36014": "UCUN UC25HQ80"
     },
-    "verifiedConfigurations": []
+    "verifiedConfigurations": [
+      {
+        "jedec": "856014",
+        "bootloader": "m-bootloader 2.3",
+        "evidence": "user-reported"
+      }
+    ]
   }
 }

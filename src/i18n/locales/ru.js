@@ -1,6 +1,7 @@
 export default {
   firmwareIntro: "Проверьте пакет релиза, полные дампы Flash и идентификатор MIDI.",
-  firmwareBlocked: "Установка заблокирована. Для релиза нет проверенных аппаратных конфигураций. Загрузчик и принадлежность дампа требуют отдельной проверки.",
+  firmwareBlocked: "Установка заблокирована. В этой вкладке доступна диагностика. Загрузчик и принадлежность дампа требуют отдельной проверки.",
+  firmwareTestedConfiguration: "Проверки на устройстве подтверждены только для связки {chip} (0x{jedec}) и {bootloader}. Другие сочетания не проверены и могут привести к проблемам с устройством.",
   firmwareReportedChip: "Устройство сообщило JEDEC ID 0x{id} ({chip}).",
   firmwareChipUnavailable: "Устройство не сообщило JEDEC ID.",
   firmwareMFlasher: "M-Flasher",
@@ -13,7 +14,7 @@ export default {
   firmwareProbe: "Прочитать идентификатор MIDI",
   firmwareNoIdentity: "FM-1 не ответил. Проверьте USB или откройте руководство по восстановлению.",
   firmwareReportedIdentity: "Идентификатор MIDI: {identity}",
-  firmwareKnownChips: "Известные чипы Flash: {chips}. Аппаратная проверка релиза ещё не проведена.",
+  firmwareKnownChips: "Распознаваемые чипы Flash: {chips}.",
   firmwareChipInput: "JEDEC ID из Device Info",
   firmwareChipUnknown: "Неизвестный JEDEC ID. Установка заблокирована.",
   firmwareChipKnown: "По введённому JEDEC ID распознан чип {chip}.",

@@ -32,10 +32,36 @@ const hex = (bytes) =>
   bytes.map((byte) => byte.toString(16).padStart(2, "0")).join(" ");
 const broken = packet(1, 2, payload);
 broken[broken.length - 2] ^= 1;
+const wrongVersion = packet(1, 3, payload);
+wrongVersion[4] += 1;
+wrongVersion[wrongVersion.length - 2] =
+  (wrongVersion[wrongVersion.length - 2] - 1) & 127;
+let seed = 0x464d31;
+const fuzz = Array.from({ length: 64 }, (_, length) =>
+  hex([
+    0xf0,
+    0x7d,
+    0x46,
+    0x44,
+    1,
+    0x7e,
+    ...Array.from({ length }, () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed >>> 25;
+    }),
+    0xf7,
+  ]),
+);
 writeFileSync(
   script,
   [
     "usb plug",
+    "wait 130",
+    "expect usb_play_gain 0",
+    ...fuzz.map((message) => `sysex ${message}`),
+    `sysex ${hex(wrongVersion)}`,
+    "sysex F0 7D 46 44 F7",
+    "sysex F0 7D 46 44 01 01 00 77 F7",
     "wait 130",
     "expect usb_play_gain 0",
     `sysex ${hex(packet(0, 0, []))}`,

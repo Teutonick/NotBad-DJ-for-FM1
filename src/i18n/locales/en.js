@@ -1,6 +1,7 @@
 export const fm1English = {
   firmwareIntro: "Check the release package, full Flash dumps and MIDI identity.",
-  firmwareBlocked: "Installation blocked. No hardware configuration has been verified for this release. The bootloader and backup provenance still require verification.",
+  firmwareBlocked: "Installation blocked. This panel provides diagnostics. The bootloader and backup provenance still require verification.",
+  firmwareTestedConfiguration: "Hardware checks were reported only for {chip} (0x{jedec}) with {bootloader}. Other combinations are unverified and may cause hardware problems.",
   firmwareReportedChip: "Device reports JEDEC 0x{id} ({chip}).",
   firmwareChipUnavailable: "The device did not report a JEDEC ID.",
   firmwareMFlasher: "M-Flasher",
@@ -13,7 +14,7 @@ export const fm1English = {
   firmwareProbe: "Read MIDI identity",
   firmwareNoIdentity: "No FM-1 identity received. Check USB or follow the recovery guide.",
   firmwareReportedIdentity: "MIDI identity: {identity}",
-  firmwareKnownChips: "Known Flash chips: {chips}. Release validation on hardware is pending.",
+  firmwareKnownChips: "Recognized Flash IDs: {chips}.",
   firmwareChipInput: "JEDEC ID from Device Info",
   firmwareChipUnknown: "Unknown JEDEC ID. Installation is blocked.",
   firmwareChipKnown: "Recognized chip: {chip}.",

@@ -107,6 +107,15 @@ export default function FirmwarePanel({ busy, setBusy, playing }) {
         {t("firmwareBlocked")}
       </p>
       <p>{t("firmwareIntro")}</p>
+      {release.verifiedConfigurations.map(({ jedec, bootloader }) => (
+        <p key={jedec + bootloader}>
+          {t("firmwareTestedConfiguration", {
+            chip: release.knownFlash[jedec],
+            jedec,
+            bootloader,
+          })}
+        </p>
+      ))}
       <div className="flex flex-wrap gap-3 text-sky-300 underline">
         {Object.entries(links).map(([key, url]) => (
           <a key={key} href={url} target="_blank" rel="noreferrer">

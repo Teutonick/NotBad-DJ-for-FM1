@@ -1,0 +1,15 @@
+{
+  "fm1kit": "408ac4c0e7b7cec0ffb0b008431108bb24074261",
+  "emulator": "0.5.1",
+  "emulatorLinuxSha256": "2b4b5cc89bc42edc91dc64830b912633bde35b5fb8a66c173341ed9a851917b7",
+  "xcode": "26.2",
+  "baseline": "0.1.0",
+  "memory": {
+    "flashSize": 1048576,
+    "imageOffset": 1024,
+    "slotEnd": 602112,
+    "bootEnd": 16384,
+    "bootSha256": "f36f2ab8cd6f3ff14e4b4453a15909ff24132fbc9d76f81e70d42e532c0a99be",
+    "loaderSha256": "f0da7398b234c99c7916ce123d1069d71abc02242f243c0c7976636f656a50ba"
+  }
+}
