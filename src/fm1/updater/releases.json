@@ -1,0 +1,13 @@
+{
+  "0.1.0": {
+    "product": "FM-1_82000100",
+    "sha256": "7e567d7950c2a4c601933697d3f33bcaaa38d7d1e2735e2c2734aca773b07330",
+    "baseCommit": "b0c384b21b095fb4f940025ce6ce7348625b4dda",
+    "bspCommit": "7b77bfbce8e0d185461a79d164c893551492ded1",
+    "knownFlash": {
+      "856014": "Puya P25Q80H",
+      "B36014": "UCUN UC25HQ80"
+    },
+    "verifiedConfigurations": []
+  }
+}

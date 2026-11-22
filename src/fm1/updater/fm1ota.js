@@ -140,11 +140,12 @@ export function resPayload(region) {
 class Link {
   constructor(input, output) {
     this.input = input; this.output = output; this.q = []; this.waiter = null;
-    input.onmidimessage = (ev) => {
+    this.onMessage = (ev) => {
       if (ev.data[0] !== 0xF0) return;
       this.q.push(Array.from(ev.data));
       if (this.waiter) { const w = this.waiter; this.waiter = null; w(); }
     };
+    input.addEventListener("midimessage", this.onMessage);
   }
   get lost() { return this.input.state === "disconnected" || this.output.state === "disconnected"; }
   // false when the port is gone (unplugged): WebMIDI throws on a disconnected output
@@ -161,17 +162,17 @@ class Link {
     }
     return this.q.shift() || null;
   }
-  close() { this.input.onmidimessage = null; }
+  close() { this.input.removeEventListener("midimessage", this.onMessage); }
 }
 
 // send a handshake -> the identity answered, null (no answer in ms), false (the send failed)
-async function ask(link, query, ms) {
+async function ask(link, query, ms, decode = parseIdentity) {
   if (!link.send(query)) return false;
   const end = Date.now() + ms;
   while (Date.now() < end) {
     const p = await link.read(end - Date.now());
     if (!p) break;
-    const id = parseIdentity(p);
+    const id = decode(p);
     if (id) return id;
   }
   return null;
@@ -183,14 +184,14 @@ async function ask(link, query, ms) {
 // that never answered HS_FULL; fm1_install.py's check, the same)
 const sameId = (text, product) => text === product || (/^[^_]+_\d{3}$/.test(text) && product.startsWith(text));
 
-async function handshake(link, tries = 3) {
+async function handshake(link, tries = 3, decode = parseIdentity) {
   link.drain();
   for (let t = 0; t < tries; t++) {
-    const id = await ask(link, HS_QUERY, 1000);
+    const id = await ask(link, HS_QUERY, 1000, decode);
     if (id === false) return null;
     if (id === null) continue;
     if (IS_OTA(id) || !/^[^_]+_\d{3}$/.test(id.text)) return id;
-    const full = await ask(link, HS_FULL, 600);
+    const full = await ask(link, HS_FULL, 600, decode);
     return full && full.model === id.model && full.text.startsWith(id.text) ? full : id;
   }
   return null;
@@ -278,6 +279,33 @@ async function query(link, cmd, payload = []) {
     if ((s & 0xFF) === 0xFF) return u.slice(6, 6 + (u[3] | (u[4] << 8)));
   }
   return null;
+}
+
+function parseDiagnosticIdentity(packet) {
+  const identity = parseIdentity(packet);
+  const frame = parseFrame(packet);
+  if (!identity || !frame || identity.text.length >= 24) return identity;
+
+  // Felucca's optional JEDEC extension starts after the zero-padded identity.
+  const body = frame.body;
+  if (body.slice(identity.text.length, 24).some(Boolean)) return identity;
+  const bytes = body.slice(24, 27);
+  if (bytes.every((byte) => byte === 0) || bytes.every((byte) => byte === 0xff)) return identity;
+
+  const jedec = bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
+  return { ...identity, jedec };
+}
+
+export async function probeIdentity(input, output) {
+  await input.open();
+  await output.open();
+  const link = new Link(input, output);
+  try {
+    const id = await handshake(link, 2, parseDiagnosticIdentity);
+    return link.lost ? null : id;
+  } finally {
+    link.close();
+  }
 }
 
 export class Updater {

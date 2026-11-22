@@ -23,14 +23,7 @@ Add local WAV, MP3 or FLAC tracks to the library and load them onto decks A and 
 
 ## Firmware
 
-### Install from the browser
-
-1. Download `fm1-dj-0.1.0.fwsc` from [release v0.1.0](https://github.com/Teutonick/NotBad-DJ-for-FM1/releases/tag/v0.1.0). Back up your data and get the stock package from the [fm1-base recovery instructions](https://charlesvestal.github.io/fm1-base/install/) before flashing.
-2. Stop playback, close other MIDI applications, and connect only the M-VAVE FM-1 using a data-capable USB cable.
-3. Open **Settings → Firmware** in Chrome or Edge over HTTPS or localhost. Select the release file. The installer checks the package identity, SHA-256 and internal checksums before requesting MIDI access.
-4. Check each acknowledgment, select **Install FM-1 DJ 0.1.0**, confirm, and grant MIDI/SysEx access. Keep the USB cable connected and the page open until the controller restarts and the installer reports success.
-
-If the updater detects M-VAVE Open firmware, restore the stock firmware before trying again. For stock recovery, see **Back to the stock firmware** in the [fm1-base installer](https://charlesvestal.github.io/fm1-base/install/). If the controller no longer starts, follow the recovery instructions there. A command-line installation procedure is also available in the [Russian README](README.ru.md#установка-из-командной-строки) and the [Windows PowerShell guide](docs/WINDOWS.md#установка-прошивки).
+Release 0.1.0 is available for inspection in [Settings → Firmware](docs/FIRMWARE-SAFETY.md). The panel verifies the release package, compares two complete Flash dumps and reads the MIDI identity. Installation is blocked pending hardware validation and a recovery path tied to the connected unit.
 
 ### Build the firmware
 

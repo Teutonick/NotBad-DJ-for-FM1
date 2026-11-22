@@ -1,125 +1,102 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useI18n } from "../i18n/context";
+import { probeIdentity } from "../fm1/updater/fm1ota.js";
+import { livePorts, pairs, usualName } from "../fm1/updater/fm1ports.js";
 import {
-  checkUfw,
-  logicalImage,
-  productOf,
-  sha256hex,
-} from "../fm1/updater/fm1pkg.js";
+  release,
+  verifyBackup,
+  verifyPackage,
+} from "../fm1/updater/preflight.js";
 
-const release = "https://github.com/Teutonick/NotBad-DJ-for-FM1/releases/tag/v0.1.0";
-const recovery = "https://charlesvestal.github.io/fm1-base/install/";
-const digest =
-  "7e567d7950c2a4c601933697d3f33bcaaa38d7d1e2735e2c2734aca773b07330";
-const product = "FM-1_82000100";
-const checks = [
-  "firmwareDevice",
-  "firmwareBackup",
-  "firmwarePower",
-  "firmwareRisk",
-];
+const links = {
+  firmwareDownload:
+    "https://github.com/Teutonick/NotBad-DJ-for-FM1/releases/tag/v0.1.0",
+  firmwareMFlasher: "https://github.com/jvitkauskas/m-flasher",
+  firmwareStock: "https://www.m-vave.com/download",
+  firmwareRecovery: "https://quixotic7.github.io/MvaveFM1Unbricker/",
+};
 
 export default function FirmwarePanel({ busy, setBusy, playing }) {
   const { t } = useI18n();
-  const [image, setImage] = useState(null);
+  const [verified, setVerified] = useState(false);
+  const [backup, setBackup] = useState("");
+  const [jedec, setJedec] = useState("");
+  const chip =
+    release.knownFlash[jedec.trim().replace(/^0x/i, "").toUpperCase()];
+  const [identity, setIdentity] = useState(null);
   const [checking, setChecking] = useState(false);
-  const [acknowledged, setAcknowledged] = useState({});
-  const [step, setStep] = useState("");
-  const [progress, setProgress] = useState(null);
-  const [error, setError] = useState("");
-  const writing = useRef(false);
-  const fileInput = useRef(null);
+  const [errors, setErrors] = useState({});
   const supported =
     window.isSecureContext && typeof navigator.requestMIDIAccess === "function";
-  const ready =
-    supported && !playing && image && checks.every((key) => acknowledged[key]);
 
-  async function selectFile(event) {
-    const file = event.target.files[0];
-    setImage(null);
-    setAcknowledged({});
-    setError("");
-    setStep("");
-    setProgress(null);
-    if (!file) return;
+  async function check(kind, work) {
     setChecking(true);
+    setErrors((previous) => ({ ...previous, [kind]: "" }));
     try {
-      if (
-        !file.name.toLowerCase().endsWith(".fwsc") ||
-        file.size > 4 * 1024 * 1024
-      ) {
-        throw new Error(t("firmwareInvalid"));
-      }
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      if ((await sha256hex(bytes)) !== digest || productOf(bytes) !== product) {
-        throw new Error(t("firmwareInvalid"));
-      }
-      const validated = logicalImage(bytes);
-      checkUfw(validated);
-      setImage(validated);
+      await work();
     } catch (failure) {
-      setError(failure.message);
+      const message =
+        kind === "device"
+          ? failure.message
+          : t(kind === "package" ? "firmwareInvalid" : "firmwareBackupInvalid");
+      setErrors((previous) => ({ ...previous, [kind]: message }));
     } finally {
       setChecking(false);
     }
   }
 
-  async function install() {
-    if (!ready || writing.current || !window.confirm(t("firmwareConfirm")))
-      return;
-    writing.current = true;
+  function selectPackage(event) {
+    const file = event.target.files[0];
+    setVerified(false);
+    void check("package", async () => {
+      if (!file) return;
+      if (!(await verifyPackage(file))) throw new Error();
+      setVerified(true);
+    });
+  }
+
+  function selectBackup(event) {
+    const files = Array.from(event.target.files);
+    setBackup("");
+    void check("backup", async () => {
+      if (!files.length) return;
+      const hash = await verifyBackup(files);
+      if (!hash) throw new Error();
+      setBackup(hash);
+    });
+  }
+
+  async function probe() {
+    setIdentity(null);
     setBusy(true);
-    fileInput.current.value = "";
-    setImage(null);
-    setAcknowledged({});
-    setError("");
-    setStep("firmwareConnect");
-    setProgress(null);
-    const protectPage = (event) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", protectPage);
     try {
-      const midi = await navigator.requestMIDIAccess({ sysex: true });
-      const [{ Updater }, { livePorts, pairs }] = await Promise.all([
-        import("../fm1/updater/fm1ota.js"),
-        import("../fm1/updater/fm1ports.js"),
-      ]);
-      if (
-        livePorts(midi.inputs).length !== 1 ||
-        livePorts(midi.outputs).length !== 1 ||
-        pairs(midi).length !== 1
-      ) {
-        throw new Error(t("firmwareOneDevice"));
-      }
-      const updater = new Updater(midi);
-      await updater.install(
-        image,
-        product,
-        (phase, count, size, percent) => {
-          const stage = {
-            start: "firmwareVerify",
-            verify: "firmwareVerify",
-            loader: "firmwareLoader",
-            write: "firmwareWrite",
-            reboot: "firmwareReboot",
-          }[phase];
-          if (stage) setStep(stage);
-          if (phase === "write" && Number.isFinite(percent))
-            setProgress(percent);
-        },
-        digest,
-      );
-      setStep("firmwareDone");
-      setProgress(100);
-    } catch (failure) {
-      setStep("");
-      setProgress(null);
-      setError(failure.message || t("firmwareFailed"));
+      await check("device", async () => {
+        const midi = await navigator.requestMIDIAccess({ sysex: true });
+        const ports = pairs(midi);
+        if (
+          livePorts(midi.inputs, true).length !== 1 ||
+          livePorts(midi.outputs, true).length !== 1 ||
+          ports.length !== 1 ||
+          !usualName(ports[0].name)
+        ) {
+          throw new Error(t("firmwareOneDevice"));
+        }
+        const { input, output } = ports[0];
+        const id = await probeIdentity(input, output);
+        if (
+          input.state === "disconnected" ||
+          output.state === "disconnected" ||
+          (id?.model !== "FM-1" && !/^ota-FM(?:-1|1C)$/i.test(id?.model ?? ""))
+        ) {
+          throw new Error(t("firmwareNoIdentity"));
+        }
+        setIdentity({
+          text: id.text,
+          jedec: id.jedec,
+          loader: /^ota-/i.test(id.model),
+        });
+      });
     } finally {
-      window.removeEventListener("beforeunload", protectPage);
-      writing.current = false;
       setBusy(false);
     }
   }
@@ -127,93 +104,111 @@ export default function FirmwarePanel({ busy, setBusy, playing }) {
   return (
     <div className="space-y-3 text-sm text-neutral-300">
       <p className="rounded border border-amber-500/60 bg-amber-950/40 p-3 text-amber-100">
-        {t("firmwareWarning")}
+        {t("firmwareBlocked")}
       </p>
       <p>{t("firmwareIntro")}</p>
       <div className="flex flex-wrap gap-3 text-sky-300 underline">
-        <a href={release} target="_blank" rel="noreferrer">
-          {t("firmwareDownload")}
-        </a>
-        <a href={recovery} target="_blank" rel="noreferrer">
-          {t("firmwareRecovery")}
-        </a>
-        <a
-          href="https://github.com/Teutonick/NotBad-DJ-for-FM1/blob/main/DISCLAIMER.md"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {t("firmwareDisclaimer")}
-        </a>
-        <a
-          href="https://github.com/Teutonick/NotBad-DJ-for-FM1/blob/main/docs/UPSTREAM.md"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {t("firmwareLicenses")}
-        </a>
+        {Object.entries(links).map(([key, url]) => (
+          <a key={key} href={url} target="_blank" rel="noreferrer">
+            {t(key)}
+          </a>
+        ))}
       </div>
-      {!supported && <p role="status">{t("firmwareBrowser")}</p>}
-      {playing && <p role="status">{t("firmwareStopPlaying")}</p>}
       <fieldset
-        disabled={busy || checking || !supported}
+        disabled={busy || checking}
         className="space-y-2 disabled:opacity-70"
       >
         <label className="block">
           {t("firmwareFile")}
           <input
-            ref={fileInput}
             type="file"
             accept=".fwsc"
-            onChange={selectFile}
+            onChange={selectPackage}
             className="mt-1 block max-w-full"
           />
         </label>
-        {image && (
-          <>
-            <p className="text-emerald-300">{t("firmwareVerified")}</p>
-            {checks.map((key) => (
-              <label key={key} className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  checked={Boolean(acknowledged[key])}
-                  onChange={(event) => {
-                    const checked = event.target.checked;
-                    setAcknowledged((previous) => ({
-                      ...previous,
-                      [key]: checked,
-                    }));
-                  }}
-                />
-                <span>{t(key)}</span>
-              </label>
-            ))}
-          </>
+        {verified && <p role="status">{t("firmwareVerified")}</p>}
+        <label className="block">
+          {t("firmwareChipInput")}
+          <input
+            type="text"
+            value={jedec}
+            onChange={(event) => setJedec(event.target.value)}
+            className="mt-1 block max-w-full rounded border border-neutral-500 bg-neutral-900 px-2 py-1"
+          />
+        </label>
+        {jedec.trim() && (
+          <p role="status">
+            {chip ? t("firmwareChipKnown", { chip }) : t("firmwareChipUnknown")}
+          </p>
+        )}
+        <p>{t("firmwareBackupInstructions")}</p>
+        <label className="block">
+          {t("firmwareBackupFiles")}
+          <input
+            type="file"
+            accept=".bin"
+            multiple
+            onChange={selectBackup}
+            className="mt-1 block max-w-full"
+          />
+        </label>
+        {backup && (
+          <p role="status" className="break-all">
+            {t("firmwareBackupVerified", { hash: backup })}
+          </p>
         )}
         <button
           type="button"
-          disabled={!ready}
-          onClick={install}
-          className="rounded border border-amber-500 bg-amber-300 px-3 py-1.5 font-semibold text-neutral-950 disabled:opacity-40"
+          disabled={!supported || playing}
+          onClick={probe}
+          className="rounded border border-neutral-500 px-3 py-1.5 disabled:opacity-40"
         >
-          {t("firmwareInstall")}
+          {t("firmwareProbe")}
         </button>
       </fieldset>
-      {(checking || step) && (
-        <p role="status">{t(checking ? "firmwareChecking" : step)}</p>
-      )}
-      {(busy || progress === 100) && (
-        <progress
-          className="w-full"
-          max="100"
-          value={progress ?? undefined}
-          aria-label={t("firmwareProgress")}
-        />
-      )}
-      {error && (
-        <p role="alert" className="text-red-300">
-          {t("firmwareFailed")} {error}
+      {!supported && <p>{t("firmwareBrowser")}</p>}
+      {playing && <p>{t("firmwareStopPlaying")}</p>}
+      {checking && <p role="status">{t("firmwareChecking")}</p>}
+      {Object.entries(errors)
+        .filter(([, error]) => error)
+        .map(([kind, error]) => (
+          <p key={kind} role="alert" className="text-red-300">
+            {error}
+          </p>
+        ))}
+      {identity && (
+        <p role="status">
+          {t("firmwareReportedIdentity", { identity: identity.text })}
+          {" · "}
+          {identity.jedec
+            ? t("firmwareReportedChip", {
+                id: identity.jedec,
+                chip:
+                  release.knownFlash[identity.jedec] ??
+                  t("firmwareChipUnknown"),
+              })
+            : t("firmwareChipUnavailable")}
         </p>
       )}
+      <p>
+        {t("firmwareKnownChips", {
+          chips: Object.entries(release.knownFlash)
+            .map(([id, name]) => `0x${id} ${name}`)
+            .join(", "),
+        })}
+      </p>
+      <details open={identity?.loader || undefined}>
+        <summary className="cursor-pointer">
+          {t("firmwareRecoveryTitle")}
+        </summary>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>{t("firmwareRecoverNormal")}</li>
+          <li>{t("firmwareRecoverLoader")}</li>
+          <li>{t("firmwareRecoverRom")}</li>
+          <li>{t("firmwareRecoverMissing")}</li>
+        </ul>
+      </details>
     </div>
   );
 }
