@@ -1,6 +1,9 @@
 {
   "fm1kit": "408ac4c0e7b7cec0ffb0b008431108bb24074261",
   "emulator": "0.5.1",
+  "lz4Source": "b0c384b21b095fb4f940025ce6ce7348625b4dda",
+  "emulatorSource": "c7e47c4fcbdaafb4beffa40493da1b2b07ffa263",
+  "unbrickerSource": "331f848c96842bd7e3d4ab4bcdc05604fe64f9a2",
   "emulatorLinuxSha256": "2b4b5cc89bc42edc91dc64830b912633bde35b5fb8a66c173341ed9a851917b7",
   "xcode": "26.2",
   "baseline": "0.1.0",

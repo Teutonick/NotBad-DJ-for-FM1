@@ -116,14 +116,14 @@ function checkCandidate() {
   );
 }
 
-const mandatoryJobs = ["build", "host", "fm1kit", "emulator", "installer"];
+const mandatoryJobs = ["build", "host", "fm1kit", "emulator", "installer", "recovery_lab"];
 const gaps = {
   "target-stack-mmio":
-    "The target build and BSP tests run, but complete target stack and MMIO analysis has not been validated.",
+    "Target stack analysis is enabled. Passing release-build evidence and complete MMIO verification are still needed.",
   "flash-power-loss":
-    "No write workload exercises every erase/program cut and proves recovery and protected Flash contents.",
+    "SPI boundary cuts, real staging cuts and selected application-write cuts are tested. The real loader cut matrix is incomplete.",
   "ota-recovery":
-    "Full OTA interruption, resume and Download Mode recovery have not been verified.",
+    "Direct loader resume and mock Download Mode run in software. Automatic SPL handoff and real ROM boot are unverified.",
 };
 
 export function releaseDecision(jobs, integrity) {

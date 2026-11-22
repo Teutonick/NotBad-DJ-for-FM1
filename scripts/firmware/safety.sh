@@ -31,6 +31,7 @@ case "${1:-}" in
       bash "$0" prepare-emulator
       bash "$0" emulator
       bash "$0" installer
+      bash "$0" recovery-lab
     elif [[ "$(uname -s)" == Darwin ]]; then
       bash "$0" prepare-fm1kit
       bash "$0" package
@@ -39,13 +40,15 @@ case "${1:-}" in
       exit 1
     fi
     echo "The complete gate requires both runners and all mandatory evidence. Run GitHub Actions for the aggregate report." >&2
-    bash "$0" recovery
+    exit 1
     ;;
   build)
     [[ "$(uname -s)" == Linux ]] || { echo "Target gate requires Linux with the JieLi toolchain."; exit 1; }
     sh firmware/build.sh --host 2>&1 | tee "$report/build-host.log"
     firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk 2>&1 | tee "$report/sdk.log"
     sh firmware/build.sh --release "$version" 2>&1 | tee "$report/build.log"
+    grep -E 'main stack: .*at most \(static\)' "$report/build.log" > "$report/target-stack.log"
+    grep -E 'interrupt stack: .*at most \(static\)' "$report/build.log" >> "$report/target-stack.log"
     node "$check" package
     ;;
   host|static)
@@ -108,12 +111,19 @@ case "${1:-}" in
     npm run build 2>&1 | tee "$report/web-build.log"
     test -f docs/FIRMWARE-SAFETY.md
     ;;
+  recovery-lab)
+    fetch joakimeriksson/fm1-emu "$(node "$check" pin emulatorSource)" "$deps/fm1-emu-source"
+    fetch Quixotic7/MvaveFM1Unbricker "$(node "$check" pin unbrickerSource)" "$deps/FM1Unbricker"
+    fetch charlesvestal/fm1-base "$(node "$check" pin lz4Source)" "$deps/fm1-base-source"
+    bash scripts/firmware/recovery-lab.sh "$deps/fm1-emu-source" "$deps/FM1Unbricker" "$deps/fm1-base-source" "$candidate" "$report" 2>&1 | tee "$report/recovery-lab.log"
+    ;;
   recovery)
-    echo "NOT VERIFIED: full emulator Flash power-loss and OTA/ROM recovery workloads are still required." >&2
+    bash "$0" recovery-lab
+    echo "NOT VERIFIED: exhaustive application-write cuts, SPL handoff and real ROM boot remain unverified." >&2
     exit 1
     ;;
   *)
-    echo "Usage: safety.sh build|static|host|prepare-fm1kit|package|prepare-emulator|emulator|installer|recovery" >&2
+    echo "Usage: safety.sh build|static|host|prepare-fm1kit|package|prepare-emulator|emulator|installer|recovery-lab|recovery" >&2
     exit 2
     ;;
 esac

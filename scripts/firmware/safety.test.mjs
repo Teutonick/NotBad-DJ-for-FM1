@@ -111,6 +111,7 @@ test("gate fails closed when any required evidence is missing or fails", () => {
     host: success,
     fm1kit: success,
     installer: success,
+    recovery_lab: success,
     emulator_puya: success,
     emulator_uc25hq80: success,
   };
