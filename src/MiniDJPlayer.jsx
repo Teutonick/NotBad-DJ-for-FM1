@@ -81,12 +81,14 @@ export default function MiniDJMixer() {
   // Espejo en ref del estado de reproducción: lo consulta el guardián de
   // carga sin que cambie la identidad de onLoadToDeck (TrackList es memo)
   const playingRef = useRef(playing);
-  useEffect(() => {
-    playingRef.current = playing;
-  }, [playing]);
 
   // Deck activo: recibe los atajos de teclado
-  const [activeDeck, setActiveDeck] = useState("A");
+  const [activeDeck, setActiveDeckState] = useState("A");
+  const activeDeckRef = useRef(activeDeck);
+  const setActiveDeck = useCallback((side) => {
+    activeDeckRef.current = side;
+    setActiveDeckState(side);
+  }, []);
   const deckRefs = useRef({ A: null, B: null });
   const setDeckRefA = useCallback((api) => {
     deckRefs.current.A = api;
@@ -295,6 +297,7 @@ export default function MiniDJMixer() {
   }, []);
 
   const onPlayingChange = useCallback((side, isPlaying) => {
+    playingRef.current = { ...playingRef.current, [side]: isPlaying };
     setPlaying((prev) =>
       prev[side] === isPlaying ? prev : { ...prev, [side]: isPlaying },
     );
@@ -432,13 +435,18 @@ export default function MiniDJMixer() {
   // Guardián de carga: con el bloqueo puesto, un deck que está sonando no
   // admite otra pista. Los botones ya salen deshabilitados, pero esto cierra
   // la puerta también a atajos y a cualquier vía futura.
-  const onLoadToDeck = useCallback((side, track) => {
-    if (lockLoadRef.current && playingRef.current[side]) return;
-    setDeckTracks((prev) => ({
-      ...prev,
-      [side]: { ...track, loadToken: (prev[side]?.loadToken || 0) + 1 },
-    }));
-  }, []);
+  const onLoadToDeck = useCallback(
+    (side, track) => {
+      if (!track?.file || (lockLoadRef.current && playingRef.current[side]))
+        return;
+      setActiveDeck(side);
+      setDeckTracks((prev) => ({
+        ...prev,
+        [side]: { ...track, loadToken: (prev[side]?.loadToken || 0) + 1 },
+      }));
+    },
+    [setActiveDeck],
+  );
 
   // === Atajos de teclado (actúan sobre el deck activo) ===
   // Con ⚙ abierto no: Espacio tiene que activar la pestaña con el foco, no
@@ -498,11 +506,18 @@ export default function MiniDJMixer() {
     B: { on: false, amount: 0.35 },
   });
   const [selectedTrack, setSelectedTrack] = useState("");
+  const selectedTrackRef = useRef("");
   const playlists = usePlaylists(config, setConfig);
   const controllerTracks = playlists.active
     ? tracks.filter((track) => playlists.active.ids.includes(track.id))
     : tracks;
-  const controls = useRef({ shift: false, layer: false, turns: new Map() });
+  const controls = useRef({
+    shift: false,
+    panelShift: false,
+    layer: false,
+    turns: new Map(),
+    nudges: new Map(),
+  });
   const onFilt = (side, value) => {
     setFilt((prev) => ({ ...prev, [side]: value }));
     engine.setDeckFilter(side, value);
@@ -517,6 +532,8 @@ export default function MiniDJMixer() {
     const hardware = controls.current;
     if (status === undefined) {
       hardware.shift = false;
+      hardware.panelShift = false;
+      hardware.nudges.clear();
       hardware.turns.clear();
       for (const deck of Object.values(deckRefs.current)) deck?.nudgeEnd();
       return;
@@ -527,7 +544,9 @@ export default function MiniDJMixer() {
     const bounded = (v, min = 0, max = 1) => Math.max(min, Math.min(max, v));
     const selected = Math.max(
       0,
-      controllerTracks.findIndex((track) => track.id === selectedTrack),
+      controllerTracks.findIndex(
+        (track) => track.id === selectedTrackRef.current,
+      ),
     );
     if (kind === 0xb0 && number >= 16 && number <= 22) {
       const now = performance.now();
@@ -535,15 +554,17 @@ export default function MiniDJMixer() {
       hardware.turns.set(number, now);
       const delta = value < 64 ? value : value - 128;
       const step = delta * (elapsed < 55 ? 3 : elapsed < 100 ? 2 : 1);
-      const side = activeDeck;
-      if (number === 16 || number === 18)
-        setSelectedTrack(
+      const side = activeDeckRef.current;
+      if (number === 16 || number === 18) {
+        const track =
           controllerTracks[
             bounded(selected + delta, 0, controllerTracks.length - 1)
-          ]?.id || "",
-        );
-      else if (number === 17) setCross((prev) => bounded(prev + step * 0.0125));
-      else if (hardware.shift || hardware.layer) {
+          ];
+        selectedTrackRef.current = track?.id || "";
+        setSelectedTrack(selectedTrackRef.current);
+      } else if (number === 17)
+        setCross((prev) => bounded(prev + step * 0.0125));
+      else if (hardware.shift || hardware.panelShift || hardware.layer) {
         if (number === 19)
           onFilt(
             side,
@@ -574,6 +595,66 @@ export default function MiniDJMixer() {
       return;
     }
     if (kind !== 0x80 && kind !== 0x90) return;
+    const sideNow = activeDeckRef.current;
+    if (number === 91) {
+      hardware.panelShift = down; // EDIT
+      return;
+    }
+    if (number === 99 || number === 100) {
+      if (down && !hardware.nudges.has(number)) {
+        hardware.nudges.set(number, sideNow);
+        deckRefs.current[sideNow]?.nudgeStart(number === 99 ? -1 : 1);
+      } else if (!down) {
+        const side = hardware.nudges.get(number);
+        hardware.nudges.delete(number);
+        if (side && ![...hardware.nudges.values()].includes(side))
+          deckRefs.current[side]?.nudgeEnd();
+      }
+      return;
+    }
+    if (number >= 88 && number <= 103) {
+      if (!down) return;
+      const deck = deckRefs.current[sideNow];
+      switch (number) {
+        case 88:
+          deck?.playPause();
+          break;
+        case 89:
+          deck?.cueStop();
+          break;
+        case 90:
+          changeFx(sideNow, { on: !fx[sideNow].on });
+          break;
+        case 92:
+          if (canSyncFor(sideNow)) onSync(sideNow);
+          break;
+        case 93:
+          cueRef.current?.toggle(sideNow);
+          break;
+        case 94:
+          deck?.loopBeats();
+          break;
+        case 95:
+          deck?.loopResize(0.5);
+          break;
+        case 96:
+          deck?.loopResize(2);
+          break;
+        case 97:
+          deck?.loopSave();
+          break;
+        case 98:
+          if (hardware.panelShift) deck?.loopOut();
+          else deck?.loopIn();
+          break;
+        case 101:
+        case 102:
+        case 103:
+          deck?.hotCue(number - 101);
+          break;
+      }
+      return;
+    }
     number = config.noteMap?.[number] ?? number;
     if (number === 65) hardware.shift = down;
     if (down && number === 66) hardware.layer = !hardware.layer;
@@ -581,7 +662,7 @@ export default function MiniDJMixer() {
     if (down && number === 85) setActiveDeck("A");
     if (down && number === 86) setActiveDeck("B");
     if (down && number === 87 && controllerTracks[selected])
-      onLoadToDeck(activeDeck, controllerTracks[selected]);
+      onLoadToDeck(sideNow, controllerTracks[selected]);
     const side = number < 65 ? "A" : "B";
     const command = number - (side === "A" ? 53 : 68);
     if (command < 0 || command > 11) return;
@@ -606,7 +687,11 @@ export default function MiniDJMixer() {
   const getPacket = () => [
     unit(cross),
     activeDeck === "A" ? 0 : 1,
-    Number(controls.current.layer || controls.current.shift),
+    Number(
+      controls.current.layer ||
+        controls.current.shift ||
+        controls.current.panelShift,
+    ),
     ...["A", "B"].flatMap((side) => {
       const el = audioElsRef.current[side];
       const api = deckRefs.current[side];

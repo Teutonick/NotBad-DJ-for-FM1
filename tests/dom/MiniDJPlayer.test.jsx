@@ -26,6 +26,7 @@ const { renders, props, doble } = vi.hoisted(() => {
 vi.mock("../../src/components/CentralMeters", doble("CentralMeters"));
 vi.mock("../../src/components/TrackList", doble("TrackList"));
 vi.mock("../../src/components/Mixer", doble("Mixer"));
+vi.mock("../../src/fm1/Hardware", doble("Hardware"));
 vi.mock("../../src/components/ConfigDialog", doble("ConfigDialog"));
 vi.mock("../../src/components/HeadphoneCue", () => ({ default: () => null }));
 vi.mock("../../src/components/UpdateToast", () => ({ default: () => null }));
@@ -70,6 +71,31 @@ beforeEach(() => {
 const moverVolumen = (v) => act(() => props.Mixer.onVolChange("A", v));
 
 describe("MiniDJPlayer", () => {
+  it("loads B from the track list and routes panel PLAY to the same deck", () => {
+    renderWithI18n(<MiniDJPlayer />);
+    const playA = vi.fn();
+    const playB = vi.fn();
+    act(() => {
+      props.DeckA.ref({ playPause: playA });
+      props.DeckB.ref({ playPause: playB });
+      props.TrackList.onLoadToDeck("B", {
+        id: "track-b",
+        file: new File(["b"], "b.mp3"),
+      });
+      props.Hardware.onMidi([0x90, 88, 100]);
+    });
+    expect(props.DeckB.externalTrack.id).toBe("track-b");
+    expect(props.DeckB.isActive).toBe(true);
+    expect(playB).toHaveBeenCalledOnce();
+    expect(playA).not.toHaveBeenCalled();
+
+    act(() => {
+      props.Hardware.onMidi([0x90, 85, 100]);
+      props.Hardware.onMidi([0x90, 88, 100]);
+    });
+    expect(playA).toHaveBeenCalledOnce();
+    expect(props.DeckB.externalTrack.id).toBe("track-b");
+  });
   it("mover un fader no vuelve a pintar la cabecera ni la lista (memo)", () => {
     renderWithI18n(<MiniDJPlayer />);
     const cab = renders.CentralMeters;

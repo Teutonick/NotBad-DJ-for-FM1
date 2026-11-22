@@ -30,7 +30,8 @@ const payload = [
 const state = packet(1, 1, payload);
 const hex = (bytes) =>
   bytes.map((byte) => byte.toString(16).padStart(2, "0")).join(" ");
-const broken = packet(1, 2, payload);
+const renewed = packet(1, 2, payload);
+const broken = packet(1, 3, payload);
 broken[broken.length - 2] ^= 1;
 const wrongVersion = packet(1, 3, payload);
 wrongVersion[4] += 1;
@@ -65,20 +66,43 @@ writeFileSync(
     "wait 130",
     "expect usb_play_gain 0",
     `sysex ${hex(packet(0, 0, []))}`,
-    "expect_sysex F0 7D 46 44 01 02 00 00 01 00 75 F7",
+    "expect_sysex F0 7D 46 44 01 02 00 00 01 01 74 F7",
     `sysex ${hex(state)}`,
     "wait 130",
     "expect usb_play_gain 3072",
+    ...[
+      ["OCT-", 85],
+      ["OCT+", 86],
+      ["SEL", 87],
+      ["PLAY", 88],
+      ["HOME", 89],
+      ["FX", 90],
+      ["GLO", 92],
+      ["ENV", 93],
+      ["ARP", 94],
+      ["LFO", 95],
+      ["SEQ", 96],
+      ["SAVE", 97],
+      ["REC", 98],
+    ].flatMap(([name, note]) => [
+      `tap ${name}`,
+      `expect_out USB 90 ${note.toString(16)} 64`,
+    ]),
+    "press EDIT",
+    "expect_out USB 90 5B 64",
+    "release EDIT",
+    "expect_out USB 80 5B 00",
     "tapkey 0",
-    "expect_out USB 90 35 64",
-    "expect_out USB 80 35 00",
+    "expect_out USB 90 63 64",
+    "expect_out USB 80 63 00",
     "spin ALGO -1",
     "expect_out USB B0 11 7F",
     "shot panel.png",
+    `sysex ${hex(renewed)}`,
     "wait 1100",
-    `sysex ${hex(state)}`,
+    `sysex ${hex(renewed)}`,
     `sysex ${hex(broken)}`,
-    "wait 350",
+    "wait 450",
     "expect usb_play_gain 0",
     "usb unplug",
     "usb plug",

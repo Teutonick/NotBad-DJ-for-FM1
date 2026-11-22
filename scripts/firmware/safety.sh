@@ -80,7 +80,9 @@ case "${1:-}" in
     curl --fail --silent --show-error --location \
       "https://github.com/Teutonick/NotBad-DJ-for-FM1/releases/download/v$baseline/fm1-dj-$baseline.fwsc" --output "$old"
     node "$check" baseline "$old"
-    "$probe" diff "$old" "$candidate" --json > "$report/fm1kit-diff.json"
+    diff_status=0
+    "$probe" diff "$old" "$candidate" --json > "$report/fm1kit-diff.json" || diff_status=$?
+    node "$check" fm1kit-diff "$diff_status" "$report/fm1kit-diff.json"
     ;;
   prepare-emulator)
     [[ "$(uname -s)/$(uname -m)" == Linux/x86_64 ]] || { echo "Pinned emulator download requires Linux x86-64."; exit 1; }

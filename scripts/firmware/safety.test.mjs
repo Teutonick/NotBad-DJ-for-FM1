@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createHash } from "node:crypto";
 import {
+  checkFM1KitDiff,
   inspectPackage,
   inspectReleaseManifest,
   releaseDecision,
@@ -173,5 +174,23 @@ test("valid packages with a different release digest remain diagnostic only", ()
       releaseManifest: "FAIL",
       manifestMismatches: ["sha256"],
     },
+  );
+});
+
+test("FM1Kit comparison accepts changed packages but rejects errors and inconsistent results", () => {
+  const diff = {
+    format: "fm1probe-diff-1",
+    kind: "package",
+    same: false,
+    fields: [],
+    parts: [],
+  };
+  assert.doesNotThrow(() => checkFM1KitDiff(1, diff));
+  assert.doesNotThrow(() => checkFM1KitDiff(0, { ...diff, same: true }));
+  assert.throws(() => checkFM1KitDiff(2, diff), /failed/);
+  assert.throws(() => checkFM1KitDiff(0, diff), /Inconsistent/);
+  assert.throws(
+    () => checkFM1KitDiff(1, { ...diff, kind: "flashBackup" }),
+    /package diff/,
   );
 });

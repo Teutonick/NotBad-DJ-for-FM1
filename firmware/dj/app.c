@@ -33,7 +33,7 @@ int app_sysex(const uint8_t *p, uint32_t n)
     for (unsigned i = 0; i < n; ++i) checksum += p[i];
     if (checksum & 127u) return 1;
     if (p[4] == 0 && n == 7) {
-        static const uint8_t version[] = {0xf0, 0x7d, 0x46, 0x44, 1, 2, 0, 0, 1, 0, 0x75, 0xf7};
+        static const uint8_t version[] = {0xf0, 0x7d, 0x46, 0x44, 1, 2, 0, 0, 1, 1, 0x74, 0xf7};
         fresh = 0;
         plat_sysex_send(version, sizeof version);
         return 1;
@@ -63,7 +63,8 @@ void app_input_only(void)
 {
     const uint32_t keys = plat_keys(), buttons = plat_buttons();
     const uint32_t changed = keys ^ last_keys;
-    const uint32_t pressed = buttons & ~last_buttons;
+    const uint32_t previous_buttons = last_buttons;
+    const uint32_t pressed = buttons & ~previous_buttons;
     const uint32_t link = plat_usb_session();
     if (link != last_link) {
         last_link = link;
@@ -73,15 +74,32 @@ void app_input_only(void)
     last_buttons = buttons;
     online = current_session();
     plat_usb_play_gain(online ? 3072 : 0);
-    for (unsigned k = 0; k < NKEYS && online; ++k)
-        if ((changed >> k) & 1u) {
-            unsigned down = (keys >> k) & 1u;
-            send_midi(down ? 0x90 : 0x80, 53 + k, down ? 100 : 0);
-        }
     if (online) {
-        if (pressed & (1u << B_OCTDN)) send_midi(0x90, 85, 100);
-        if (pressed & (1u << B_OCTUP)) send_midi(0x90, 86, 100);
-        if (pressed & (1u << B_SEL)) send_midi(0x90, 87, 100);
+        static const uint8_t panel_notes[NB] = {
+            [B_OCTDN] = 85, [B_OCTUP] = 86, [B_SEL] = 87,
+            [B_PLAY] = 88, [B_HOME] = 89, [B_FX] = 90, [B_EDIT] = 91,
+            [B_GLO] = 92, [B_ENV] = 93, [B_ARP] = 94, [B_LFO] = 95,
+            [B_SEQ] = 96, [B_SAVE] = 97, [B_REC] = 98
+        };
+        /* Process deck selection and EDIT before commands using them. */
+        if (pressed & (1u << B_OCTDN)) send_midi(0x90, panel_notes[B_OCTDN], 100);
+        if (pressed & (1u << B_OCTUP)) send_midi(0x90, panel_notes[B_OCTUP], 100);
+        if ((buttons ^ previous_buttons) & (1u << B_EDIT)) {
+            unsigned down = (buttons >> B_EDIT) & 1u;
+            send_midi(down ? 0x90 : 0x80, panel_notes[B_EDIT], down ? 100 : 0);
+        }
+        for (unsigned b = 0; b < NB; ++b) {
+            if (b == B_OCTDN || b == B_OCTUP || b == B_EDIT) continue;
+            if (panel_notes[b] && (pressed & (1u << b)))
+                send_midi(0x90, panel_notes[b], 100);
+        }
+        /* The five leftmost piano keys are Nudge ± and Hot Cue 1–3. */
+        for (unsigned k = 0; k < 5; ++k) {
+            if ((changed >> k) & 1u) {
+                unsigned down = (keys >> k) & 1u;
+                send_midi(down ? 0x90 : 0x80, 99 + k, down ? 100 : 0);
+            }
+        }
     }
     for (int i = 0; i < NE; ++i) {
         int32_t delta = plat_enc(i);
@@ -174,8 +192,16 @@ void app_frame(void)
     if (now - last_frame < 125u) return;
     last_frame = now;
     if (!online) memset(state, 0, sizeof state);
-    const uint32_t key_leds = last_keys | ((state[3] & 1u) ? 1u : 0u)
-        | ((state[3 + DECK_BYTES] & 1u) ? 1u << 15 : 0u);
-    plat_leds(last_buttons, key_leds);
+    uint32_t button_leds = last_buttons;
+    if (online) {
+        const unsigned active = state[1] & 1u;
+        const uint8_t flags = state[3 + active * DECK_BYTES];
+        button_leds |= 1u << (active ? B_OCTUP : B_OCTDN);
+        if (flags & 1u) button_leds |= 1u << B_PLAY;
+        if (flags & 2u) button_leds |= 1u << B_GLO;
+        if (flags & 4u) button_leds |= 1u << B_ENV;
+        if (flags & 8u) button_leds |= 1u << B_FX;
+    }
+    plat_leds(button_leds, online ? last_keys & 0x1fu : 0u);
     draw();
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { waitFor } from "@testing-library/react";
+import { act, waitFor } from "@testing-library/react";
 import Deck from "../../src/components/Deck";
 import {
   computeOnsetEnvelope,
@@ -174,6 +174,35 @@ describe("carga de pista: un solo decode y una copia por deck", () => {
     await new Promise((r) => setTimeout(r, 30));
     expect(creados).toHaveLength(1); // no se ha cargado nada nuevo
     expect(decodeAudioData).toHaveBeenCalledTimes(1);
+  });
+
+  it("loads B when the previous play attempt is pending and ignores its late completion", async () => {
+    const onPlayingChange = vi.fn();
+    const ref = { current: null };
+    const { cargarOtra } = montarDeck("B", pista(), { ref, onPlayingChange });
+    await waitFor(() => expect(creados).toHaveLength(1));
+
+    let completePlay;
+    HTMLMediaElement.prototype.play.mockImplementationOnce(() => {
+      sonando = true;
+      return new Promise((resolve) => {
+        completePlay = resolve;
+      });
+    });
+    HTMLMediaElement.prototype.pause.mockImplementationOnce(() => {
+      sonando = false;
+    });
+    act(() => {
+      void ref.current.playPause();
+    });
+    cargarOtra(new File(["next"], "next.mp3", { type: "audio/mpeg" }));
+    await waitFor(() => expect(creados).toHaveLength(2));
+    await act(async () => {
+      completePlay();
+    });
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledOnce();
+    expect(onPlayingChange).not.toHaveBeenCalledWith("B", true);
+    expect(ref.current.getTitle()).toBe("next.mp3");
   });
 
   it("sin el bloqueo, un deck sonando sí acepta otra pista", async () => {

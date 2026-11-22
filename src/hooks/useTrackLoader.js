@@ -185,7 +185,8 @@ export function useTrackLoader({
   const loadTrack = (f, cached) => {
     if (!f) return;
     const playingNow = audioRef.current && !audioRef.current.paused;
-    if (lockLoadRef.current && playingNow) return;
+    if (lockLoadRef.current && playingNow && !events.current.hasPendingPlay?.())
+      return;
     keyIdleRef.current?.();
     keyIdleRef.current = null;
     cachedKeyRef.current = cached?.musicalKey || null;
@@ -202,6 +203,7 @@ export function useTrackLoader({
     envelopeRef.current = null;
     setBufferDuration(0);
 
+    setObjectUrl("");
     setFileName(f.name);
     setLoadError("");
     setWaveData(null);

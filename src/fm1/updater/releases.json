@@ -15,5 +15,16 @@
         "evidence": "user-reported"
       }
     ]
+  },
+  "0.1.1": {
+    "product": "FM-1_82000101",
+    "sha256": "33fd680dbbd86b5edd4299f8ca0ed3da0b37a14eb58b2d777be212ee54548cc3",
+    "baseCommit": "b0c384b21b095fb4f940025ce6ce7348625b4dda",
+    "bspCommit": "7b77bfbce8e0d185461a79d164c893551492ded1",
+    "knownFlash": {
+      "856014": "Puya P25Q80H",
+      "B36014": "UCUN UC25HQ80"
+    },
+    "verifiedConfigurations": []
   }
 }

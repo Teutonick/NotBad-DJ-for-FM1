@@ -84,6 +84,25 @@ function gitRevision(path) {
   return result.stdout.trim();
 }
 
+export function checkFM1KitDiff(status, report) {
+  // fm1probe follows diff(1): 1 is a successful comparison with differences.
+  assert.ok(
+    status === 0 || status === 1,
+    `FM1Kit diff failed (exit ${status})`,
+  );
+  assert.equal(
+    report.format,
+    "fm1probe-diff-1",
+    "Unexpected FM1Kit diff format",
+  );
+  assert.equal(report.kind, "package", "Expected a firmware package diff");
+  assert.equal(report.same, status === 0, "Inconsistent FM1Kit diff result");
+  assert.ok(
+    Array.isArray(report.fields) && Array.isArray(report.parts),
+    "Incomplete FM1Kit diff",
+  );
+}
+
 export function inspectReleaseManifest(actual, expected) {
   if (!expected)
     return { releaseManifest: "NOT VERIFIED", manifestMismatches: [] };
@@ -257,6 +276,11 @@ if (
   if (command === "package") checkCandidate();
   else if (command === "baseline")
     inspectPackage(readFileSync(argument), releases[tools.baseline]);
+  else if (command === "fm1kit-diff")
+    checkFM1KitDiff(
+      Number(argument),
+      JSON.parse(readFileSync(process.argv[4], "utf8")),
+    );
   else if (command === "publish-check") {
     const release = releases[version];
     assert.ok(release, "Missing release manifest");
@@ -290,6 +314,6 @@ if (
   else if (command === "version") console.log(version);
   else
     throw new Error(
-      "Usage: safety.mjs package | baseline FILE | publish-check | report | pin KEY | version",
+      "Usage: safety.mjs package | baseline FILE | fm1kit-diff CODE FILE | publish-check | report | pin KEY | version",
     );
 }

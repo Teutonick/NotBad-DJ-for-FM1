@@ -69,7 +69,7 @@ suite("flujos de la aplicación en el navegador", () => {
     );
 
   it("serves the NotBad favicon and keeps tab rows free of vertical scrolling", async () => {
-    await page.waitForSelector('select[aria-label]');
+    await page.waitForSelector("select[aria-label]");
     await page.select("select[aria-label]", "ru");
     await page.waitForFunction(() => document.documentElement.lang === "ru");
     expect(await page.title()).toMatch(/^NotBad DJ for FM1/);
@@ -94,16 +94,18 @@ suite("flujos de la aplicación en el navegador", () => {
     await page.select("select[aria-label]", "en");
     await abrirAjustes("Firmware");
     const dialog = await page.waitForSelector('[role="dialog"]');
-    expect(await dialog.$eval('input[type="file"]', (file) => file.accept)).toBe(
-      ".fwsc",
-    );
     expect(
-      await dialog.$$eval("button", (buttons) =>
-        buttons.find(
-          (button) => button.textContent.trim() === "Install FM-1 DJ 0.1.0",
-        )?.disabled,
+      await dialog.$eval('input[type="file"]', (file) => file.accept),
+    ).toBe(".fwsc");
+    expect(
+      await dialog.$$eval(
+        "button",
+        (buttons) =>
+          buttons.find(
+            (button) => button.textContent.trim() === "Install FM-1 DJ 0.1.0",
+          )?.disabled,
       ),
-    ).toBe(true);
+    ).toBeUndefined();
     await cerrarAjustes();
   });
 
@@ -243,7 +245,10 @@ suite("flujos de la aplicación en el navegador", () => {
           open.onerror = () => resolve(false);
           open.onsuccess = () => {
             const db = open.result;
-            const read = db.transaction("tracks").objectStore("tracks").getAll();
+            const read = db
+              .transaction("tracks")
+              .objectStore("tracks")
+              .getAll();
             read.onsuccess = () => {
               const names = new Set(read.result.map((track) => track.name));
               resolve(
@@ -268,4 +273,77 @@ suite("flujos de la aplicación en el navegador", () => {
     ).toBe(true);
   });
 
+  it("loads a track with → B while MIDI is connected and shares transport between page and panel", async () => {
+    await page.evaluate(() => {
+      const input = Object.assign(new EventTarget(), {
+        id: "fm1-in",
+        name: "FM-1 DJ",
+        state: "connected",
+      });
+      const midi = (bytes) =>
+        input.dispatchEvent(
+          Object.assign(new Event("midimessage"), {
+            data: Uint8Array.from(bytes),
+          }),
+        );
+      const output = {
+        id: "fm1-out",
+        name: "FM-1 DJ",
+        state: "connected",
+        send(bytes) {
+          if (bytes[5] === 0)
+            queueMicrotask(() =>
+              midi([0xf0, 0x7d, 0x46, 0x44, 1, 2, 0, 0, 1, 1, 0x74, 0xf7]),
+            );
+        },
+      };
+      const access = Object.assign(new EventTarget(), {
+        inputs: new Map([[input.id, input]]),
+        outputs: new Map([[output.id, output]]),
+      });
+      Object.defineProperty(navigator, "requestMIDIAccess", {
+        value: async () => access,
+      });
+      window.testPanel = (note) => midi([0x90, note, 100]);
+    });
+    await pulsar("Connect FM-1", 0, true);
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll("button")].some(
+        (button) => button.textContent.trim() === "MIDI connected",
+      ),
+    );
+    const deck = '[data-testid="deck"][data-side="B"]';
+    const audio = deck + " audio";
+    await page.evaluate(() => {
+      window.testPanel(86);
+      window.testPanel(88);
+    });
+    expect(await page.$eval(audio, (element) => element.paused)).toBe(true);
+    await pulsar("→ B", 0, true);
+    await page.waitForFunction(
+      (selector) => document.querySelector(selector)?.src.startsWith("blob:"),
+      {},
+      audio,
+    );
+    await page.evaluate(() => window.testPanel(88));
+    await page.waitForFunction(
+      (selector) => document.querySelector(selector)?.currentTime > 0.25,
+      {},
+      audio,
+    );
+    await page.click(deck + ' [data-testid="deck-transport"]');
+    expect(await page.$eval(audio, (element) => element.paused)).toBe(true);
+    await page.click(deck + ' [data-testid="deck-transport"]');
+    await page.waitForFunction(
+      (selector) => !document.querySelector(selector)?.paused,
+      {},
+      audio,
+    );
+    await page.evaluate(() => window.testPanel(89));
+    await page.waitForFunction(
+      (selector) => document.querySelector(selector)?.paused,
+      {},
+      audio,
+    );
+  });
 });

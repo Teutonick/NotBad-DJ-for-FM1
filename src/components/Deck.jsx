@@ -103,6 +103,7 @@ function Deck({
 }) {
   const { t } = useI18n();
   const audioRef = useRef(null);
+  const playAttempt = useRef(null);
   const fileInputRef = useRef(null);
 
   // === Pista cargada y su análisis ===
@@ -329,6 +330,7 @@ function Deck({
     const onTimeUpdate = () => setCurrent(el.currentTime || 0);
     const onLoadedMetadata = () => setDuration(el.duration || 0);
     const onEnded = () => {
+      playAttempt.current = null;
       setIsPlaying(false);
       onPlayingChangeRef.current?.(side, false);
     };
@@ -362,9 +364,14 @@ function Deck({
     onAutoGainComputed,
     onTrackMeta,
     onLocalLoad,
+    hasPendingPlay: () => playAttempt.current !== null,
     // Al cargar: rejilla, cues y loops de ESTA pista (o nada). Son del
     // usuario: se restauran tal cual y el análisis no los pisa.
     onReset: (cached, { manualGrid }) => {
+      if (playAttempt.current) {
+        playAttempt.current = null;
+        audioRef.current?.pause();
+      }
       restoreStructure(sanitizeStructure(cached?.structure));
       applyGrid(
         manualGrid ? cached.bpm : null,
@@ -400,22 +407,29 @@ function Deck({
 
   const play = async () => {
     const el = audioRef.current;
-    if (!el) return;
+    if (!el || !objectUrl || playAttempt.current) return;
+    const attempt = {};
+    playAttempt.current = attempt;
     try {
       alignBeforePlay?.(side);
       const resume = engine?.resume();
       await Promise.all([resume, el.play()]);
+      if (playAttempt.current !== attempt || el.paused) return;
       setIsPlaying(true);
       onPlayingChange?.(side, true);
       if (typeof onPlayed === "function") onPlayed(side);
     } catch (e) {
-      logError(ERRORS.AUDIO_PLAY, e, { deck: side, file: fileName });
+      if (playAttempt.current === attempt)
+        logError(ERRORS.AUDIO_PLAY, e, { deck: side, file: fileName });
+    } finally {
+      if (playAttempt.current === attempt) playAttempt.current = null;
     }
   };
 
   const pause = () => {
     const el = audioRef.current;
     if (!el) return;
+    playAttempt.current = null;
     el.pause();
     setIsPlaying(false);
     onPlayingChange?.(side, false);
@@ -425,6 +439,7 @@ function Deck({
   const stop = () => {
     const el = audioRef.current;
     if (!el) return;
+    playAttempt.current = null;
     el.pause();
     el.currentTime = cuePoint;
     setCurrent(cuePoint);
@@ -640,9 +655,11 @@ function Deck({
     side,
   ]);
 
+  const playPause = () => (isPlaying || playAttempt.current ? pause() : play());
+
   // API imperativa para atajos de teclado (MiniDJPlayer)
   useImperativeHandle(ref, () => ({
-    playPause: () => (isPlaying ? pause() : play()),
+    playPause,
     cueStop: stop,
     hotCue: triggerHotCue,
     hotCueClear: clearHotCue,
@@ -984,7 +1001,7 @@ function Deck({
             skin="none"
             contentClass="grid place-items-center w-full"
             data-testid="deck-transport"
-            onClick={isPlaying ? pause : play}
+            onClick={playPause}
             disabled={!objectUrl && !isPlaying}
             className={`min-w-24 text-sm text-black bg-gradient-to-b ${
               isPlaying

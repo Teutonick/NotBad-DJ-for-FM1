@@ -20,10 +20,13 @@ rmSync(flash, { force: true });
 const hello = Buffer.from(packet(0, 0, [])).toString("hex");
 const state = (sequence) =>
   Buffer.from(packet(1, sequence, Array(113).fill(0))).toString("hex");
+const legacy = version === "0.1.0";
 const env = {
   ...process.env,
   FM1_USB_SEND: `1500:${hello};1550:${state(1)};2250:${state(2)};3000:${hello};3050:${state(3)}`,
-  FM1_BENCH_KEYS: "1700:C4@100,1800:C4^,1900:e1:-1",
+  FM1_BENCH_KEYS: legacy
+    ? "1700:C4@100,1800:C4^,1900:e1:-1"
+    : "1700:PLAY,1800:PLAY^,1900:e1:-1",
 };
 delete env.FM1_STRICT;
 delete env.FM1_FLASH_CUT;
@@ -71,7 +74,7 @@ function boot(mode, flashPath, strict = false) {
   );
   assert.ok(
     incoming.some(
-      (bytes) => bytes[0] === 0x90 && bytes[1] >= 53 && bytes[1] <= 84,
+      (bytes) => bytes[0] === 0x90 && bytes[1] === (legacy ? 60 : 88),
     ),
     `${chip} ${mode} did not emit a key press over USB MIDI`,
   );

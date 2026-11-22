@@ -27,7 +27,7 @@
 
 ### Сборка прошивки
 
-Исходники находятся в [firmware/dj](firmware/dj). `firmware/build.sh --host` собирает симулятор. Для сборки пакета используйте Linux x86-64 или macOS с Docker или Podman, Python 3.12 и Pillow с Raqm. После первой host-сборки выполните `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk`, затем `firmware/build.sh --release 0.1.0`. Пакет сохраняется в `firmware/dj/build`. Те же шаги выполняет workflow **Firmware Safety Gate** ([docs](docs/FIRMWARE-SAFETY-GATE.md)).
+Исходники находятся в [firmware/dj](firmware/dj). `firmware/build.sh --host` собирает симулятор. Для сборки пакета используйте Linux x86-64 или macOS с Docker или Podman, Python 3.12 и Pillow с Raqm. После первой host-сборки выполните `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk`, затем `firmware/build.sh --release 0.1.1`. Пакет сохраняется в `firmware/dj/build`. Те же шаги выполняет workflow **Firmware Safety Gate** ([docs](docs/FIRMWARE-SAFETY-GATE.md)).
 
 ## Лицензия и отказ от ответственности
 

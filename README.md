@@ -27,7 +27,7 @@ Release 0.1.0 is available for inspection in [Settings → Firmware](docs/FIRMWA
 
 ### Build the firmware
 
-The source is in [firmware/dj](firmware/dj). Run `firmware/build.sh --host` for the simulator. The device build uses Linux x86-64 or macOS with Docker or Podman, Python 3.12 and Pillow with Raqm. After the first host build, run `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk` and then `firmware/build.sh --release 0.1.0`. The installer package appears under `firmware/dj/build`. The **Firmware Safety Gate** ([docs](docs/FIRMWARE-SAFETY-GATE.md)) workflow uses the same process.
+The source is in [firmware/dj](firmware/dj). Run `firmware/build.sh --host` for the simulator. The device build uses Linux x86-64 or macOS with Docker or Podman, Python 3.12 and Pillow with Raqm. After the first host build, run `firmware/base/tools/setup_toolchain.sh --only jieli,ac79-sdk` and then `firmware/build.sh --release 0.1.1`. The installer package appears under `firmware/dj/build`. The **Firmware Safety Gate** ([docs](docs/FIRMWARE-SAFETY-GATE.md)) workflow uses the same process.
 
 ## License and disclaimer
 
