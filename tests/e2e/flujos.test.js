@@ -187,6 +187,26 @@ suite("flujos de la aplicación en el navegador", () => {
     await page.waitForFunction(() =>
       document.body.textContent.includes("Afterglow-128.wav"),
     );
+    // The tracks appear in the UI before the IndexedDB writes finish.
+    await page.waitForFunction(
+      () =>
+        new Promise((resolve) => {
+          const open = indexedDB.open("mini-dj");
+          open.onerror = () => resolve(false);
+          open.onsuccess = () => {
+            const db = open.result;
+            const read = db.transaction("tracks").objectStore("tracks").getAll();
+            read.onsuccess = () => {
+              const names = new Set(read.result.map((track) => track.name));
+              resolve(
+                names.has("Beacon-124.wav") && names.has("Afterglow-128.wav"),
+              );
+            };
+            read.onerror = () => resolve(false);
+            db.close();
+          };
+        }),
+    );
     await page.reload({ waitUntil: "networkidle0" });
     await page.waitForFunction(() =>
       document.body.textContent.includes("Beacon-124.wav"),

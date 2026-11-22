@@ -19,9 +19,9 @@ export default defineConfig([
     files: ["src/**/*.{js,jsx}"],
     extends: [
       js.configs.recommended,
-      reactHooks.configs["recommended-latest"],
       reactRefresh.configs.vite,
     ],
+    plugins: { "react-hooks": reactHooks },
     languageOptions: {
       ecmaVersion: 2020,
       // __APP_VERSION__ lo sustituye vite.config.js en tiempo de build
@@ -33,6 +33,8 @@ export default defineConfig([
       },
     },
     rules: {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
       "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]" }],
     },
   },

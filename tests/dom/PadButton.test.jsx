@@ -35,7 +35,7 @@ describe("PadButton", () => {
     expect(led(boton)).toHaveStyle({ backgroundColor: "#38bdf8" });
     // Encendido: el botón coge el color y se enciende con halo
     expect(boton.style.borderColor).toBe("rgb(56, 189, 248)");
-    expect(boton.style.boxShadow).toContain("#38bdf8");
+    expect(boton.style.boxShadow).toContain("rgba(56, 189, 248, 0.4)");
   });
 
   it("la segunda línea se reserva aunque venga vacía, para que nada baile", () => {

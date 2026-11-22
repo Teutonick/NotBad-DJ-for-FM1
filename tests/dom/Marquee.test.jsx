@@ -42,7 +42,10 @@ describe("Marquee", () => {
     const inner = c.firstChild.firstChild;
     // Una vuelta son los 400 px del texto más los 30 del hueco entre copias,
     // a 40 px/s
-    expect(inner.style.animation).toBe("minidj-marquee 10.75s linear infinite");
+    expect(inner.style.animationName).toBe("minidj-marquee");
+    expect(inner.style.animationDuration).toBe("10.75s");
+    expect(inner.style.animationTimingFunction).toBe("linear");
+    expect(inner.style.animationIterationCount).toBe("infinite");
     expect(screen.getAllByText("Un titulazo larguísimo")).toHaveLength(2);
   });
 
