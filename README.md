@@ -6,9 +6,9 @@
 
 NotBad DJ turns the FM‑1 into a two-deck DJ controller. Use its buttons and knobs to load tracks, cue the next deck, and bring it into the mix. The FM‑1 display shows both decks, their waveforms and BPM, and the crossfader position. The browser plays and mixes local tracks, sends deck status over USB MIDI, and routes headphone cue audio to the FM‑1 over USB Audio.
 
-![FM‑1 LCD showing both decks playing at 124 BPM, with Sync and Cue active on deck B](docs/screenshots/fm1-lcd-mixing.png)
+![M‑VAVE FM‑1 showing both decks playing at 124 BPM, with Sync and Cue active on deck B](docs/screenshots/fm1-controller-mixing.png)
 
-*FM‑1 display captured from firmware 0.1.1 running in the emulator with the two demo tracks in a simulated mix.*
+*The controller image incorporates a [close-up of the LCD](docs/screenshots/fm1-lcd-mixing.png) captured from firmware 0.1.1 during a simulated mix.*
 
 ## Mixing in the browser
 
